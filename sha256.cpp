@@ -8,10 +8,11 @@
 
 #include "pch.h"
 
-// big endian architectures need #define __BYTE_ORDER __BIG_ENDIAN
+// big endian architectures need //#define __BYTE_ORDER __BIG_ENDIAN
 #ifndef _MSC_VER
 
-#include <endian.h>
+//TODO: Learn about this crap endian.h
+//#include <endian.h>
 
 #endif
 

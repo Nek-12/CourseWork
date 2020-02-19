@@ -11,14 +11,17 @@
 #include <thread>
 #include "sha256.h"
 #include <conio.h>
+#include <fstream>
+#include <sstream>
 
 typedef unsigned nat;
+
 
 void sleep(const int &);
 
 std::string read(std::string input, int type);
 
-void bgProc();
+void bgProc(std::string);
 
 class Book
 {
@@ -26,13 +29,14 @@ private:
     std::string isbn = "";
     std::string name = "";
     std::string author = "";
-    std::string created = "";
+    std::string date = "";
 
 public:
     friend class Data;
 
-    void printInfo(); //TODO: Implement
+    void printInfo();
 };
+
 
 class Data
 {
@@ -40,9 +44,9 @@ private:
     Data() = default;
 
     //Actual Data
-    std::map<std::string, Book> books;
-    std::map<std::string, std::string> user;
-    std::map<std::string, std::string> admin;
+    std::vector<Book> vbooks;
+    std::map<std::string, std::string> muser;
+    std::map<std::string, std::string> madmin;
 
 public:
     friend class Book;
@@ -57,7 +61,14 @@ public:
 
     bool upass(std::string &l, std::string &p);
 
+    bool uinit(const std::string &path);
 
+    bool bookinit(const std::string &path);
+
+    bool adminit(const std::string &path);
+
+
+    void printbooks();
 };
 
 
