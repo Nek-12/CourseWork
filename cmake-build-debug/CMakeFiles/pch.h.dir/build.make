@@ -69,22 +69,9 @@ CMakeFiles/pch.h.dir/func.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/pch.h.dir/func.cpp.s"
 	C:\msys64\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\ender\Archive\Coding\CourseWork\func.cpp -o CMakeFiles\pch.h.dir\func.cpp.s
 
-CMakeFiles/pch.h.dir/sha256.cpp.obj: CMakeFiles/pch.h.dir/flags.make
-CMakeFiles/pch.h.dir/sha256.cpp.obj: ../sha256.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\ender\Archive\Coding\CourseWork\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/pch.h.dir/sha256.cpp.obj"
-	C:\msys64\mingw64\bin\g++.exe  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles\pch.h.dir\sha256.cpp.obj -c C:\Users\ender\Archive\Coding\CourseWork\sha256.cpp
-
-CMakeFiles/pch.h.dir/sha256.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/pch.h.dir/sha256.cpp.i"
-	C:\msys64\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\ender\Archive\Coding\CourseWork\sha256.cpp > CMakeFiles\pch.h.dir\sha256.cpp.i
-
-CMakeFiles/pch.h.dir/sha256.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/pch.h.dir/sha256.cpp.s"
-	C:\msys64\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\ender\Archive\Coding\CourseWork\sha256.cpp -o CMakeFiles\pch.h.dir\sha256.cpp.s
-
 CMakeFiles/pch.h.dir/bgproc.cpp.obj: CMakeFiles/pch.h.dir/flags.make
 CMakeFiles/pch.h.dir/bgproc.cpp.obj: ../bgproc.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\ender\Archive\Coding\CourseWork\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/pch.h.dir/bgproc.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\ender\Archive\Coding\CourseWork\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/pch.h.dir/bgproc.cpp.obj"
 	C:\msys64\mingw64\bin\g++.exe  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles\pch.h.dir\bgproc.cpp.obj -c C:\Users\ender\Archive\Coding\CourseWork\bgproc.cpp
 
 CMakeFiles/pch.h.dir/bgproc.cpp.i: cmake_force
@@ -97,7 +84,7 @@ CMakeFiles/pch.h.dir/bgproc.cpp.s: cmake_force
 
 CMakeFiles/pch.h.dir/pch.cpp.obj: CMakeFiles/pch.h.dir/flags.make
 CMakeFiles/pch.h.dir/pch.cpp.obj: ../pch.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\ender\Archive\Coding\CourseWork\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/pch.h.dir/pch.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\ender\Archive\Coding\CourseWork\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/pch.h.dir/pch.cpp.obj"
 	C:\msys64\mingw64\bin\g++.exe  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles\pch.h.dir\pch.cpp.obj -c C:\Users\ender\Archive\Coding\CourseWork\pch.cpp
 
 CMakeFiles/pch.h.dir/pch.cpp.i: cmake_force
@@ -108,20 +95,33 @@ CMakeFiles/pch.h.dir/pch.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/pch.h.dir/pch.cpp.s"
 	C:\msys64\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\ender\Archive\Coding\CourseWork\pch.cpp -o CMakeFiles\pch.h.dir\pch.cpp.s
 
+CMakeFiles/pch.h.dir/sha256.cpp.obj: CMakeFiles/pch.h.dir/flags.make
+CMakeFiles/pch.h.dir/sha256.cpp.obj: ../sha256.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\ender\Archive\Coding\CourseWork\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/pch.h.dir/sha256.cpp.obj"
+	C:\msys64\mingw64\bin\g++.exe  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles\pch.h.dir\sha256.cpp.obj -c C:\Users\ender\Archive\Coding\CourseWork\sha256.cpp
+
+CMakeFiles/pch.h.dir/sha256.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/pch.h.dir/sha256.cpp.i"
+	C:\msys64\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\ender\Archive\Coding\CourseWork\sha256.cpp > CMakeFiles\pch.h.dir\sha256.cpp.i
+
+CMakeFiles/pch.h.dir/sha256.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/pch.h.dir/sha256.cpp.s"
+	C:\msys64\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\ender\Archive\Coding\CourseWork\sha256.cpp -o CMakeFiles\pch.h.dir\sha256.cpp.s
+
 # Object files for target pch.h
 pch_h_OBJECTS = \
 "CMakeFiles/pch.h.dir/func.cpp.obj" \
-"CMakeFiles/pch.h.dir/sha256.cpp.obj" \
 "CMakeFiles/pch.h.dir/bgproc.cpp.obj" \
-"CMakeFiles/pch.h.dir/pch.cpp.obj"
+"CMakeFiles/pch.h.dir/pch.cpp.obj" \
+"CMakeFiles/pch.h.dir/sha256.cpp.obj"
 
 # External object files for target pch.h
 pch_h_EXTERNAL_OBJECTS =
 
 pch.h.exe: CMakeFiles/pch.h.dir/func.cpp.obj
-pch.h.exe: CMakeFiles/pch.h.dir/sha256.cpp.obj
 pch.h.exe: CMakeFiles/pch.h.dir/bgproc.cpp.obj
 pch.h.exe: CMakeFiles/pch.h.dir/pch.cpp.obj
+pch.h.exe: CMakeFiles/pch.h.dir/sha256.cpp.obj
 pch.h.exe: CMakeFiles/pch.h.dir/build.make
 pch.h.exe: CMakeFiles/pch.h.dir/linklibs.rsp
 pch.h.exe: CMakeFiles/pch.h.dir/objects1.rsp

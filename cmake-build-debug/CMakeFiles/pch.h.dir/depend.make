@@ -13,7 +13,6 @@ CMakeFiles/pch.h.dir/pch.cpp.obj: ../pch.cpp
 CMakeFiles/pch.h.dir/pch.cpp.obj: ../pch.h
 CMakeFiles/pch.h.dir/pch.cpp.obj: ../sha256.h
 
-CMakeFiles/pch.h.dir/sha256.cpp.obj: ../pch.h
 CMakeFiles/pch.h.dir/sha256.cpp.obj: ../sha256.cpp
 CMakeFiles/pch.h.dir/sha256.cpp.obj: ../sha256.h
 

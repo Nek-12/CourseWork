@@ -6,4 +6,4 @@ set(CMAKE_CXX_STANDARD 20)
 set(GCC_COVERAGE_COMPILE_FLAGS "-static")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS}")
 
-add_executable(pch.h func.cpp sha256.cpp sha256.h bgproc.cpp pch.cpp)
+add_executable(pch.h func.cpp bgproc.cpp pch.cpp sha256.h sha256.cpp)

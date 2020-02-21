@@ -9,19 +9,20 @@
 #include <algorithm>
 #include <map>
 #include <thread>
-#include "sha256.h"
 #include <conio.h>
 #include <fstream>
 #include <sstream>
-
+#include <filesystem>
+#include "sha256.h"
 typedef unsigned nat;
 
 
 void sleep(const int &);
+std::string hash(const std::string& s);
+bool readString(std::istream& is,  std::string& s,char mode);
+// 's' for strings with spaces, 'n' for normal, 'd' for date
 
-std::string read(std::string input, int type);
-
-void bgProc(std::string);
+void bgProc(const std::string& );
 
 class Book
 {
@@ -33,7 +34,6 @@ private:
 
 public:
     friend class Data;
-
     void printInfo();
 };
 
@@ -46,7 +46,7 @@ private:
     //Actual Data
     std::vector<Book> vbooks;
     std::map<std::string, std::string> muser;
-    std::map<std::string, std::string> madmin;
+    std::map<std::string, std::string> madm;
 
 public:
     friend class Book;
@@ -57,18 +57,16 @@ public:
         return Instance;
     }
 
-    bool ulogin(std::string &s);
-
-    bool upass(std::string &l, std::string &p);
-
+    bool loginCheck(std::string &s, bool isadmin);
+    bool passCheck(std::string &l, std::string &p, bool isadmin); //1 for admin, 0 for user
     bool uinit(const std::string &path);
-
     bool bookinit(const std::string &path);
-
     bool adminit(const std::string &path);
-
-
     void printbooks();
+    std::map<std::string, std::string>& getmuser() { return muser; }
+    std::map<std::string, std::string>& getmadm() { return madm; }
+    void printCredentials(char which); // 'a' for admin, 'u' for user;
+
 };
 
 
