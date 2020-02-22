@@ -6,6 +6,10 @@
 
 #IncludeRegexTransform: 
 
+C:/Users/ender/Archive/Coding/CourseWork/bgproc.cpp
+pch.h
+C:/Users/ender/Archive/Coding/CourseWork/pch.h
+
 C:/Users/ender/Archive/Coding/CourseWork/func.cpp
 pch.h
 C:/Users/ender/Archive/Coding/CourseWork/pch.h
@@ -48,6 +52,16 @@ C:/Users/ender/Archive/Coding/CourseWork/sha256.h
 string
 -
 stdint.h
+-
+
+C:/Users/ender/Archive/Coding/CourseWork/table_printer.cpp
+table_printer.h
+C:/Users/ender/Archive/Coding/CourseWork/table_printer.h
+stdexcept
+-
+iomanip
+-
+stdexcept
 -
 
 C:/Users/ender/Archive/Coding/CourseWork/table_printer.h
