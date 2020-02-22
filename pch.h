@@ -16,13 +16,14 @@
 #include "sha256.h"
 #include <iomanip>
 #include "table_printer.h"
+#include <condition_variable>
 
 using tprinter::TablePrinter;
 
 typedef unsigned nat;
 
 extern std::string path;
-
+extern bool isExiting;
 void sleep(const int&);
 
 std::string hash(const std::string& s);

@@ -13,13 +13,8 @@ std::string hash(const std::string& s)
 
 bool readString(std::istream& is, std::string& s, char mode)// 's' for strings with spaces, 'n' for normal, 'd' for date
 {
-#ifdef DEBUG
-    if(std::getline(is, s).eof())
-    {
-        std::cerr << "Could not read the input stream. " << std::endl;
-        return false;
-    }
-#endif
+    std::getline(is, s);
+
     if (s.empty() || s.length() < 4)
     {
         std::cerr << "The data is too short, use more than 3 characters.Try again: " << std::endl;
@@ -141,8 +136,8 @@ void Data::printbooks()
     tp.setPadding(1);
     tp.setDashedRawsStyle();
     tp.addMergedColumn("Book Database");
-    tp.addColumn("Title", 40);
-    tp.addColumn("Author", 40);
+    tp.addColumn("Title", 42);
+    tp.addColumn("Author", 42);
     tp.addColumn("ISBN", 16);
     tp.addColumn("Date", 10);
     for (const auto& el : this->vbooks)
@@ -244,10 +239,11 @@ void Data::save()
     if (!fadm.good()) std::cerr << "Fadm BAD\n"; else std::cerr << "Fadm OK\n";
     if (!fbook.good()) std::cerr << "Fbook BAD\n"; else std::cerr << " Fbook OK\n";
     if (!fuser.good()) std::cerr << "Fuser BAD\n"; else std::cerr << " Fuser OK\n";
-#endif
     printbooks();
     printCredentials('a');
     printCredentials('u');
+#endif
+
     for (auto& el: this->madm())
     {
         //std::cout << el.first << "\n" << el.second << std::endl;
@@ -267,7 +263,6 @@ void Data::save()
     fadm.close();
     fuser.close();
     fbook.close();
-    system("pause");
 }
 
 //TODO: Check if functions throw when the work was disrupted and return false when okay

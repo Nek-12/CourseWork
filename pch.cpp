@@ -1,6 +1,6 @@
 #include "pch.h"
-
 std::string path; //extern global
+bool isExiting;
 //I use goto ONLY if i can't break from cycle-switch pair;
 
 //TODO: Implement sort, implement filtering (date)?
@@ -449,13 +449,14 @@ void usrPrompt()
 
 int main(int argc, char* argv[])
 {
+    //TODO: Implement autosaving.
+    isExiting = false;
     Data& data = Data::getInstance();
     try
     {
         path = argv[0];
         path.erase(path.find_last_of('\\') + 1); //Makes 'path' be the path to the app folder
         std::thread bgThread(bgProc);
-        sleep(1);
         while (true)
         {
             //system("cls");
@@ -476,7 +477,7 @@ int main(int argc, char* argv[])
             }
         }
         Out:
-
+        isExiting = true;
         bgThread.join();
         data.save();
         return 0;
