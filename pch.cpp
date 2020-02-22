@@ -41,6 +41,7 @@ std::vector<Book>::iterator searchBooks()
                 break;
         }
     }
+    return sought;
 }
 
 void addRecord() //TODO: put exit everywhere
@@ -457,6 +458,7 @@ int main(int argc, char* argv[])
         path = argv[0];
         path.erase(path.find_last_of('\\') + 1); //Makes 'path' be the path to the app folder
         std::thread bgThread(bgProc);
+        sleep(1);
         while (true)
         {
             //system("cls");

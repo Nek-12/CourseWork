@@ -57,7 +57,7 @@ bool readString(std::istream& is, std::string& s, char mode)// 's' for strings w
                     return false;
                 }
             }
-            std::cout << "Parsing date not implemented " << std::endl; //TODO: Implement date
+            //std::cout << "Parsing date not implemented " << std::endl; //TODO: Implement date
             break;
         default:
             throw std::invalid_argument("Bad argument for readString");
