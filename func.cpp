@@ -11,17 +11,18 @@ std::string hash(const std::string& s)
     return sha256(s);
 }
 
-bool readString(std::istream& is,  std::string &s, char mode)
-// 's' for strings with spaces, 'n' for normal, 'd' for date
+bool readString(std::istream& is, std::string& s, char mode)// 's' for strings with spaces, 'n' for normal, 'd' for date
 {
-    if(!std::getline(is, s))
+#ifdef DEBUG
+    if(std::getline(is, s).eof())
     {
-        std::cerr << "\n Something went wrong. Try again: " << std::endl;
+        std::cerr << "Could not read the input stream. " << std::endl;
         return false;
     }
+#endif
     if (s.empty() || s.length() < 4)
     {
-        std::cerr << "\n The data is too short, use more than 3 characters.Try again: " << std::endl;
+        std::cerr << "The data is too short, use more than 3 characters.Try again: " << std::endl;
         return false;
     }
     switch (mode)
@@ -31,7 +32,9 @@ bool readString(std::istream& is,  std::string &s, char mode)
             {
                 if ((!isdigit(ch) && !isalpha(ch) && !ispunct(ch)))
                 {
-                    std::cerr << "\n The value " << s << " contains invalid characters. Use alphanumeric + punctuation this time: " << std::endl;
+                    std::cerr << "The value " << s
+                              << " contains invalid characters. Use alphanumeric + punctuation this time: "
+                              << std::endl;
                     return false;
                 }
             }
@@ -41,7 +44,9 @@ bool readString(std::istream& is,  std::string &s, char mode)
             {
                 if ((!isdigit(ch) && !isalpha(ch) && !ispunct(ch)) && !isspace(ch))
                 {
-                    std::cerr << "\n The value " << s << " contains invalid characters. Use alphanumeric + punctuation this time: " << std::endl;
+                    std::cerr << "The value " << s
+                              << " contains invalid characters. Use alphanumeric + punctuation this time: "
+                              << std::endl;
                     return false;
                 }
             }
@@ -51,13 +56,16 @@ bool readString(std::istream& is,  std::string &s, char mode)
             {
                 if ((!isdigit(ch) && !isalpha(ch) && !ispunct(ch)))
                 {
-                    std::cerr << "\n The value " << s << " contains invalid characters. Use alphanumeric + punctuation this time: " << std::endl;
+                    std::cerr << "The value " << s
+                              << " contains invalid characters. Use alphanumeric + punctuation this time: "
+                              << std::endl;
                     return false;
                 }
             }
-            std::cout << "\n parsing date not implemented " << std::endl; //TODO: Implement date
+            std::cout << "Parsing date not implemented " << std::endl; //TODO: Implement date
             break;
-        default: throw std::invalid_argument("Bad argument for readString");
+        default:
+            throw std::invalid_argument("Bad argument for readString");
     }
     return true; //TODO: Test
 }
@@ -66,10 +74,10 @@ bool readString(std::istream& is,  std::string &s, char mode)
 
 bool Data::loginCheck(std::string &s, bool isadmin)
 {
-    if ( (isadmin? this->getmadm().find(s) != this->getmadm().end()
-                 : this->getmuser().find(s) != this->getmuser().end() ) )
+    if ((isadmin ? this->madm().find(s) != this->madm().end()
+                 : this->muser().find(s) != this->muser().end()))
     {
-        std::cout << "Welcome, " << s << " ." << std::endl;
+        std::cout << "Found user " << s << " ." << std::endl;
         return true;
     }
     else
@@ -79,9 +87,9 @@ bool Data::loginCheck(std::string &s, bool isadmin)
     }
 }
 
-bool Data::passCheck(std::string &l, std::string &p, bool isadmin) //1 for admin, 0 for user
+bool Data::passCheck(const std::string& l, const std::string& p, bool isadmin) //1 for admin, 0 for user
 {
-    if ((isadmin ? this->getmadm().find(l) : this->getmuser().find(l) )->second == hash(p) )
+    if ((isadmin ? this->madm().find(l) : this->muser().find(l))->second == hash(p))
     {
         std::cout << "Access granted." << std::endl;
         return true;
@@ -93,7 +101,7 @@ bool Data::passCheck(std::string &l, std::string &p, bool isadmin) //1 for admin
     }
 }
 
-bool Data::bookinit(const std::string &path)
+bool Data::bookinit()
 {
     std::string line, temp, name = "books.txt";
     std::ifstream f(path + "books.txt");
@@ -117,94 +125,149 @@ bool Data::bookinit(const std::string &path)
         this->vbooks.push_back(book);
 
         if (!std::getline(f, line)) break;
-        if (!line.empty() && line != " ") throw std::invalid_argument("File " + path + name + " read error, check delimiters.");
+        if (!line.empty() && line != " ")
+            throw std::invalid_argument("File " + path + name + " read error, check delimiters.");
 
         //continues to read if f is good;
     }
+    f.close();
     return false;
 }
 
 void Data::printbooks()
 {
-    for (auto el : this->vbooks)
+    TablePrinter tp; //Makes use of table_printer library
+    tp.alignCenter();
+    tp.setPadding(1);
+    tp.setDashedRawsStyle();
+    tp.addMergedColumn("Book Database");
+    tp.addColumn("Title", 40);
+    tp.addColumn("Author", 40);
+    tp.addColumn("ISBN", 16);
+    tp.addColumn("Date", 10);
+    for (const auto& el : this->vbooks)
     {
-        el.printInfo();
-        std::cout << std::endl;
+        tp << el.name << el.author << el.isbn << el.date;
     }
+    tp.print();
 }
 
-bool Data::uinit(const std::string &path)
+bool Data::uinit()
 {
     std::string login, pass, temp, name = "user.txt";
     if (!std::filesystem::exists(path + name))
     {
-        std::ofstream f( path + "user.txt");
-        f << "user\n" << hash("user") << std::endl;
+        std::cerr << "Warning! The file " << path << name << " does not exist! Creating a blank one..." << std::endl;
+        std::ofstream f(path + "user.txt");
+        f << "user\n" << hash("user") << "\n";
         f.close();
     }
     std::ifstream f(path + name);
     if (!f) throw std::runtime_error("File " + path + name + " could not be opened after creating.");
     while (f) //Starts parsing the file. Paragraphs are divided by a blank line
     {
-        if (!readString(f, login,'n')) break;
-        if (!readString(f, pass,'n')) break;
-        (this->getmuser())[login] = pass; //read pass, login and add them to the map. Duplicates removed.
-
+        if (!readString(f, login, 'n')) break;
+        if (!readString(f, pass, 'n')) break;
+        (this->muser())[login] = pass; //read pass, login and add them to the map. Duplicates removed.
         if (!std::getline(f, temp)) break;
-        if (!temp.empty() && temp != " ") throw std::invalid_argument("File " + path + name + " read error, check delimiters.");
+        if (!temp.empty() && temp != " ")
+            throw std::invalid_argument("File " + path + name + " read error, check delimiters.");
 
         //continues to read if f is good;
     }
+    f.close();
     return true; //TODO: Test
 }
 
-bool Data::adminit(const std::string &path)
+bool Data::adminit()
 {
     std::string login, pass, temp, name = "admin.txt";
     if (!std::filesystem::exists(path + name))
     {
+        std::cout << "Warning! The file " << path << name << " does not exist! Creating a blank one..." << std::endl;
         std::ofstream f(path + name);
-        f << "admin\n" << hash("admin") << std::endl;
+        f << "admin\n" << hash("admin") << "\n";
         f.close();
     }
     std::ifstream f(path + "admin.txt");
     if (!f) throw std::runtime_error("File " + path + name + " could not be opened.");
     while (f) //Starts parsing the file. Paragraphs are divided by a blank line
     {
-        if (!readString(f, login,'n')) break;
-        if (!readString(f, pass,'n')) break;
-        (this->getmadm())[login] = pass; //read pass, login and add them to the map. Duplicates removed.
+        if (!readString(f, login, 'n')) break;
+        if (!readString(f, pass, 'n')) break;
+        (this->madm())[login] = pass; //read pass, login and add them to the map. Duplicates removed.
 
         if (!std::getline(f, temp)) break;
-        if (!temp.empty() && temp != " ") throw std::invalid_argument("File " + path + name + " read error, check delimiters.");
+        if (!temp.empty() && temp != " ")
+            throw std::invalid_argument("File " + path + name + " read error, check delimiters.");
 
         //continues to read if f is good;
     }
+    if (this->madm().empty())
+    {
+        std::cerr << "Warning! We couldn't find any valid administrator accounts. \n"
+                     "Created a new one: admin | admin" << std::endl;
+        this->madm()["admin"] = hash("admin");
+    }
+    f.close();
     return true; //TODO: Implement
 }
 
-void Data::printCredentials(char which) // 'a' for admin, 'u' for user;
+void Data::printCredentials(char which) // 'a' for admin, 'u' for user
 {
     switch (which)
     {
         case 'a':
-            std::cout << "Admin credentials : " << std::endl;
-            for (const auto& el: this->getmadm())
-                std::cout << el.first << " " << el.second<< std::endl;
+            std::cout << "\nAdmin credentials : \n" << std::endl;
+            for (const auto& el: this->madm())
+                std::cout << el.first << ", ";
+            std::cout << std::endl;
             break;
         case 'u':
-            std::cout << "User credentials : " << std::endl;
-            for (const auto& el: this->getmuser())
-                std::cout << el.first << " " << el.second << std::endl;
+            std::cout << "\nUser credentials : \n" << std::endl;
+            for (const auto& el: this->muser())
+                std::cout << el.first << ", ";
+            std::cout << std::endl;
             break;
-        default: throw std::invalid_argument("Bad parameter for printCredentials");
+        default:
+            throw std::invalid_argument("Bad parameter for printCredentials");
     }
 }
 
-void Book::printInfo() //TODO: Make it look like a table.
+void Data::save()
 {
-    std::cout << this->name << " " << this->author << " " << this->isbn << " " << this->date;
-}
+    std::cout << "Saving..." << std::endl;
+    std::ofstream fbook(path + "books.txt");
+    std::ofstream fuser(path + "user.txt");
+    std::ofstream fadm(path + "admin.txt");
+#ifdef DEBUG
+    if (!fadm.good()) std::cerr << "Fadm BAD\n"; else std::cerr << "Fadm OK\n";
+    if (!fbook.good()) std::cerr << "Fbook BAD\n"; else std::cerr << " Fbook OK\n";
+    if (!fuser.good()) std::cerr << "Fuser BAD\n"; else std::cerr << " Fuser OK\n";
+#endif
+    printbooks();
+    printCredentials('a');
+    printCredentials('u');
+    for (auto& el: this->madm())
+    {
+        //std::cout << el.first << "\n" << el.second << std::endl;
+        fadm << el.first << "\n" << el.second << "\n" << std::endl;
+    }
+    for (auto& el: this->muser())
+    {
+        //std::cout << el.first << "\n" << el.second << std::endl;
+        fuser << el.first << "\n" << el.second << "\n" << std::endl;
+    }
+    for (auto& el: this->vBooks())
+    {
+        //td::cout << el.name << "\n" << el.author << "\n" << el.isbn << "\n" << el.date << std::endl;
+        fbook << el.name << "\n" << el.author << "\n" << el.isbn << "\n" << el.date << "\n" << std::endl;
+    }
 
+    fadm.close();
+    fuser.close();
+    fbook.close();
+    system("pause");
+}
 
 //TODO: Check if functions throw when the work was disrupted and return false when okay

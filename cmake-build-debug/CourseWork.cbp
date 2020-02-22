@@ -100,6 +100,12 @@
 		<Unit filename="C:/Users/ender/Archive/Coding/CourseWork/sha256.h">
 			<Option target="pch.h"/>
 		</Unit>
+		<Unit filename="C:/Users/ender/Archive/Coding/CourseWork/table_printer.cpp">
+			<Option target="pch.h"/>
+		</Unit>
+		<Unit filename="C:/Users/ender/Archive/Coding/CourseWork/table_printer.h">
+			<Option target="pch.h"/>
+		</Unit>
 		<Unit filename="C:/Users/ender/Archive/Coding/CourseWork/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
 		</Unit>

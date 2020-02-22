@@ -230,6 +230,33 @@ sha256.cpp.s:
 	$(MAKE) -f CMakeFiles\pch.h.dir\build.make CMakeFiles/pch.h.dir/sha256.cpp.s
 .PHONY : sha256.cpp.s
 
+table_printer.obj: table_printer.cpp.obj
+
+.PHONY : table_printer.obj
+
+# target to build an object file
+table_printer.cpp.obj:
+	$(MAKE) -f CMakeFiles\pch.h.dir\build.make CMakeFiles/pch.h.dir/table_printer.cpp.obj
+.PHONY : table_printer.cpp.obj
+
+table_printer.i: table_printer.cpp.i
+
+.PHONY : table_printer.i
+
+# target to preprocess a source file
+table_printer.cpp.i:
+	$(MAKE) -f CMakeFiles\pch.h.dir\build.make CMakeFiles/pch.h.dir/table_printer.cpp.i
+.PHONY : table_printer.cpp.i
+
+table_printer.s: table_printer.cpp.s
+
+.PHONY : table_printer.s
+
+# target to generate assembly for a file
+table_printer.cpp.s:
+	$(MAKE) -f CMakeFiles\pch.h.dir\build.make CMakeFiles/pch.h.dir/table_printer.cpp.s
+.PHONY : table_printer.cpp.s
+
 # Help Target
 help:
 	@echo The following are some of the valid targets for this Makefile:
@@ -251,6 +278,9 @@ help:
 	@echo ... sha256.obj
 	@echo ... sha256.i
 	@echo ... sha256.s
+	@echo ... table_printer.obj
+	@echo ... table_printer.i
+	@echo ... table_printer.s
 .PHONY : help
 
 

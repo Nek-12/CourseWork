@@ -3,6 +3,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/pch.h.dir/func.cpp.obj"
   "CMakeFiles/pch.h.dir/pch.cpp.obj"
   "CMakeFiles/pch.h.dir/sha256.cpp.obj"
+  "CMakeFiles/pch.h.dir/table_printer.cpp.obj"
   "libpch.h.dll.a"
   "pch.h.exe"
   "pch.h.exe.manifest"

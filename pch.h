@@ -1,4 +1,4 @@
-
+///#define DEBUG
 #ifndef LAB5_HEADER_H
 #define LAB5_HEADER_H
 
@@ -14,57 +14,92 @@
 #include <sstream>
 #include <filesystem>
 #include "sha256.h"
+#include <iomanip>
+#include "table_printer.h"
+
+using tprinter::TablePrinter;
+
 typedef unsigned nat;
 
+extern std::string path;
 
-void sleep(const int &);
+void sleep(const int&);
+
 std::string hash(const std::string& s);
-bool readString(std::istream& is,  std::string& s,char mode);
+
+bool readString(std::istream& is, std::string& s, char mode);
 // 's' for strings with spaces, 'n' for normal, 'd' for date
 
-void bgProc(const std::string& );
+void bgProc();
 
-class Book
+struct Book
 {
-private:
-    std::string isbn = "";
-    std::string name = "";
-    std::string author = "";
-    std::string date = "";
+    std::string isbn;
+    std::string name;
+    std::string author;
+    std::string date;
 
-public:
-    friend class Data;
-    void printInfo();
+    void printBook()
+    { std::cout << this->name << "\n" << this->author << "\n" << this->isbn << "\n" << this->date << std::endl; }
+
+    bool empty()
+    { return (name.empty() && author.empty() && isbn.empty() && date.empty()); }
 };
-
 
 class Data
 {
 private:
-    Data() = default;
+    Data()
+    {
+#ifdef DEBUG
+        std::cout << "Constructed Data" << std::endl;
+#endif
+    };
+
 
     //Actual Data
     std::vector<Book> vbooks;
-    std::map<std::string, std::string> muser;
-    std::map<std::string, std::string> madm;
+    std::map<std::string, std::string> mapuser;
+    std::map<std::string, std::string> mapadm;
 
 public:
-    friend class Book;
+    Data(Data const&) = delete;
 
-    static Data &getInstance()
+    void operator=(Data const&) = delete;
+
+    friend struct Book;
+
+    static Data& getInstance()
     {
         static Data Instance;
+#ifdef DEBUG
+        std::cout << "Got instance of data" << std::endl;
+#endif
         return Instance;
     }
 
-    bool loginCheck(std::string &s, bool isadmin);
-    bool passCheck(std::string &l, std::string &p, bool isadmin); //1 for admin, 0 for user
-    bool uinit(const std::string &path);
-    bool bookinit(const std::string &path);
-    bool adminit(const std::string &path);
+    void save();
+
+    bool loginCheck(std::string& s, bool isadmin);
+
+    bool passCheck(const std::string& l, const std::string& p, bool isadmin); //1 for admin, 0 for user
+    bool uinit();
+
+    bool bookinit();
+
+    bool adminit();
+
     void printbooks();
-    std::map<std::string, std::string>& getmuser() { return muser; }
-    std::map<std::string, std::string>& getmadm() { return madm; }
+
+    std::map<std::string, std::string>& muser()
+    { return mapuser; }
+
+    std::map<std::string, std::string>& madm()
+    { return mapadm; }
+
+    std::vector<Book>& vBooks()
+    { return vbooks; }
+
     void printCredentials(char which); // 'a' for admin, 'u' for user;
 
 };

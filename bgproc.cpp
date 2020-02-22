@@ -4,20 +4,23 @@
 
 #include "pch.h"
 
-void bgProc(const std::string& path)
+void bgProc()
 {
     try
     {
-        Data &data = Data::getInstance();
-        data.bookinit(path);
+        Data& data = Data::getInstance();
+        data.bookinit();
+        data.adminit();
+        data.uinit();
+#ifdef DEBUG
         data.printbooks();
         std::cout << std::endl;
-        data.adminit(path);
-        data.printCredentials('a');
-        std::cout << std::endl;
-        data.uinit(path);
+        std::cout << path << std::endl;
         data.printCredentials('u');
         std::cout << std::endl;
+        data.printCredentials('a');
+        std::cout << std::endl;
+#endif
     }
     catch (std::runtime_error &msg)
     {

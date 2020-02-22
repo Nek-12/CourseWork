@@ -73,12 +73,12 @@ preinstall:
 CMakeFiles/pch.h.dir/all:
 	$(MAKE) -f CMakeFiles\pch.h.dir\build.make CMakeFiles/pch.h.dir/depend
 	$(MAKE) -f CMakeFiles\pch.h.dir\build.make CMakeFiles/pch.h.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=C:\Users\ender\Archive\Coding\CourseWork\cmake-build-debug\CMakeFiles --progress-num=1,2,3,4,5 "Built target pch.h"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=C:\Users\ender\Archive\Coding\CourseWork\cmake-build-debug\CMakeFiles --progress-num=1,2,3,4,5,6 "Built target pch.h"
 .PHONY : CMakeFiles/pch.h.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/pch.h.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\ender\Archive\Coding\CourseWork\cmake-build-debug\CMakeFiles 5
+	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\ender\Archive\Coding\CourseWork\cmake-build-debug\CMakeFiles 6
 	$(MAKE) -f CMakeFiles\Makefile2 CMakeFiles/pch.h.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\ender\Archive\Coding\CourseWork\cmake-build-debug\CMakeFiles 0
 .PHONY : CMakeFiles/pch.h.dir/rule
