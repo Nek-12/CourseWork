@@ -22,19 +22,19 @@ void bgProc()
     {
         std::cerr << msg.what() << std::endl;
         getch();
-        return;
+        exit(EXIT_FAILURE);
     }
     catch (std::invalid_argument &msg)
     {
         std::cerr << msg.what() << std::endl;
         getch();
-        return;
+        exit(EXIT_FAILURE);
     }
     catch (...)
     {
         std::cerr << "Processing failed." << std::endl;
         getch();
-        return;
+        exit(EXIT_FAILURE); //TODO: HACK
     }
 
 }

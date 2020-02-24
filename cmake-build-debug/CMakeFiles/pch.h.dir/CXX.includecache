@@ -6,7 +6,11 @@
 
 #IncludeRegexTransform: 
 
-C:/Users/ender/Archive/Coding/CourseWork/pch.cpp
+C:/Users/ender/Archive/Coding/CourseWork/bgproc.cpp
+pch.h
+C:/Users/ender/Archive/Coding/CourseWork/pch.h
+
+C:/Users/ender/Archive/Coding/CourseWork/func.cpp
 pch.h
 C:/Users/ender/Archive/Coding/CourseWork/pch.h
 

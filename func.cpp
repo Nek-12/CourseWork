@@ -99,8 +99,13 @@ bool Data::passCheck(const std::string& l, const std::string& p, bool isadmin) /
 bool Data::bookinit()
 {
     std::string line, temp, name = "books.txt";
-    std::ifstream f(path + "books.txt");
-    if (!f) throw std::runtime_error("File " + path + name + " not found.");
+    if (!std::filesystem::exists(path + name))
+    {
+        std::cerr << "Warning! The file " << path << name << " does not exist! Creating a blank one..." << std::endl;
+        std::ofstream f(path + name);
+        f.close();
+    }
+    std::ifstream f(path + name);
     while (f) //Starts parsing the file. Paragraphs are divided by a blank line
     {
         //TODO: Implement behaviour for a fresh file
@@ -108,7 +113,7 @@ bool Data::bookinit()
         if (!readString(f, line, 's')) break;
         book.name = line;
 
-        if (!readString(f, line,'s')) break;
+        if (!readString(f, line, 's')) break;
         book.author = line;
 
         if (!readString(f, line,'n')) break; //TODO: Implement datacheck
@@ -153,7 +158,7 @@ bool Data::uinit()
     if (!std::filesystem::exists(path + name))
     {
         std::cerr << "Warning! The file " << path << name << " does not exist! Creating a blank one..." << std::endl;
-        std::ofstream f(path + "user.txt");
+        std::ofstream f(path + name);
         f << "user\n" << hash("user") << "\n";
         f.close();
     }
@@ -184,7 +189,7 @@ bool Data::adminit()
         f << "admin\n" << hash("admin") << "\n";
         f.close();
     }
-    std::ifstream f(path + "admin.txt");
+    std::ifstream f(path + name);
     if (!f) throw std::runtime_error("File " + path + name + " could not be opened.");
     while (f) //Starts parsing the file. Paragraphs are divided by a blank line
     {

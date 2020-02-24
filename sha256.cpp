@@ -1,5 +1,3 @@
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "hicpp-signed-bitwise"
 // //////////////////////////////////////////////////////////
 // sha256.cpp
 // Copyright (c) 2014,2015 Stephan Brumme. All rights reserved.
@@ -411,5 +409,3 @@ std::string SHA256::operator()(const std::string& text)
   add(text.c_str(), text.size());
   return getHash();
 }
-
-#pragma clang diagnostic pop

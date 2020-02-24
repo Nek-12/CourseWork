@@ -64,11 +64,9 @@ private:
     std::map<std::string, std::string> mapadm;
 
 public:
-    Data(Data const&) = delete;
-
-    void operator=(Data const&) = delete;
-
     friend struct Book;
+    Data(Data const&) = delete;
+    void operator=(Data const&) = delete;
 
     static Data& getInstance()
     {

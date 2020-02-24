@@ -1,4 +1,0 @@
-"C:\Program Files\JetBrains\CLion 2019.3.3\bin\cmake\win\bin\cmake.exe" -E remove -f CMakeFiles\pch.cpp.dir/objects.a
-C:\msys64\mingw64\bin\ar.exe cr CMakeFiles\pch.cpp.dir/objects.a @CMakeFiles\pch.cpp.dir\objects1.rsp
-C:\msys64\mingw64\bin\g++.exe  -static
--Wall -Wextra -Wfloat-equal -Wundef -Wcast-align -Wwrite-strings -Wlogical-op -Wmissing-declarations -Wredundant-decls -Wshadow -Woverloaded-virtual -g   -Wl,--whole-archive CMakeFiles\pch.cpp.dir/objects.a -Wl,--no-whole-archive  -o pch.cpp.exe -Wl,--out-implib,libpch.cpp.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\pch.cpp.dir\linklibs.rsp

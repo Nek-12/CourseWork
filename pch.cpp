@@ -459,6 +459,9 @@ int main(int argc, char* argv[])
         path.erase(path.find_last_of('\\') + 1); //Makes 'path' be the path to the app folder
         std::thread bgThread(bgProc);
         sleep(1);
+#ifdef DEBUF
+        system("cls");
+#endif
         while (true)
         {
             //system("cls");
