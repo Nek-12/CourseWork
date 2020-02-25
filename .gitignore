@@ -1,0 +1,6 @@
+**/.idea/*
+**/CMakeFiles/*
+**/Makefile
+**/CmakeCache.txt
+**/cmake_install.cmake
+**/CourseWork.cbp

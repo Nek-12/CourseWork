@@ -50,12 +50,7 @@ struct Book
 class Data
 {
 private:
-    Data()
-    {
-#ifdef DEBUG
-        std::cout << "Constructed Data" << std::endl;
-#endif
-    };
+    Data();
 
 
     //Actual Data

@@ -270,4 +270,14 @@ void Data::save()
     fbook.close();
 }
 
+Data::Data()
+{
+#ifdef DEBUG
+    std::cout << "Constructed Data" << std::endl;
+#endif
+    this->bookinit();
+    this->adminit();
+    this->uinit();
+}
+
 //TODO: Check if functions throw when the work was disrupted and return false when okay

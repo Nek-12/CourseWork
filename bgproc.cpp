@@ -5,9 +5,6 @@ void bgProc()
     try
     {
         Data& data = Data::getInstance();
-        data.bookinit();
-        data.adminit();
-        data.uinit();
 #ifdef DEBUG
         data.printbooks();
         std::cout << std::endl;

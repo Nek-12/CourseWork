@@ -1,3 +1,0 @@
-C:/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/CMakeFiles/pch.h.dir
-C:/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/CMakeFiles/rebuild_cache.dir

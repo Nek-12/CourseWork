@@ -452,12 +452,12 @@ int main(int argc, char* argv[])
 {
     //TODO: Implement autosaving.
     isExiting = false;
+    std::thread bgThread(bgProc);
     Data& data = Data::getInstance();
     try
     {
         path = argv[0];
         path.erase(path.find_last_of('\\') + 1); //Makes 'path' be the path to the app folder
-        std::thread bgThread(bgProc);
         sleep(1);
 #ifdef DEBUF
         system("cls");
