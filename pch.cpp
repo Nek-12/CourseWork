@@ -1,10 +1,26 @@
 #include "pch.h"
 std::string path; //extern global
-bool isExiting;
 //I use goto ONLY if i can't break from cycle-switch pair;
 
 //TODO: Implement sort, implement filtering (date)?
 //TODO: Implement date parsing
+bool yesNo(bool arg, std::string msg)
+{
+    while (arg)
+    {
+        std::cout << msg << std::endl;
+        switch (getch())
+        {
+            case 'y':
+                return true;
+            case 'n':
+                return false;
+            default :
+                std::cerr << "Wrong input. Try again." << std::endl;
+                break;
+        }
+    }
+}
 
 std::vector<Book>::iterator searchBooks()
 {

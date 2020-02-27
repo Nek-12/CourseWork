@@ -84,14 +84,14 @@ bool Data::loginCheck(std::string &s, bool isadmin)
 
 bool Data::passCheck(const std::string& l, const std::string& p, bool isadmin) //1 for admin, 0 for user
 {
-    if ((isadmin ? this->madm().find(l) : this->muser().find(l))->second == hash(p))
+    if ( (isadmin ? this->madm().find(l) : this->muser().find(l) )->second == hash(p))
     {
         std::cout << "Access granted." << std::endl;
         return true;
     }
     else
     {
-        std::cerr << "Access denied. " << std::endl;
+        std::cerr << "Access denied." << std::endl;
         return false;
     }
 }
@@ -159,9 +159,10 @@ bool Data::uinit()
     {
         std::cerr << "Warning! The file " << path << name << " does not exist! Creating a blank one..." << std::endl;
         std::ofstream f(path + name);
-        f << "user\n" << hash("user") << "\n";
+        //f << "user\n" << hash("user") << "\n";
         f.close();
     }
+
     std::ifstream f(path + name);
     if (!f) throw std::runtime_error("File " + path + name + " could not be opened after creating.");
     while (f) //Starts parsing the file. Paragraphs are divided by a blank line
@@ -186,7 +187,7 @@ bool Data::adminit()
     {
         std::cout << "Warning! The file " << path << name << " does not exist! Creating a blank one..." << std::endl;
         std::ofstream f(path + name);
-        f << "admin\n" << hash("admin") << "\n";
+        //f << "admin\n" << hash("admin") << "\n";
         f.close();
     }
     std::ifstream f(path + name);
@@ -220,13 +221,13 @@ void Data::printCredentials(char which) // 'a' for admin, 'u' for user
         case 'a':
             std::cout << "\nAdmin credentials : \n" << std::endl;
             for (const auto& el: this->madm())
-                std::cout << el.first << ", ";
+                std::cout << el.first << " ";
             std::cout << std::endl;
             break;
         case 'u':
             std::cout << "\nUser credentials : \n" << std::endl;
             for (const auto& el: this->muser())
-                std::cout << el.first << ", ";
+                std::cout << el.first << " ";
             std::cout << std::endl;
             break;
         default:

@@ -15,6 +15,7 @@
 #include "sha256.h"
 #include <iomanip>
 #include "table_printer.h"
+#include <thread>
 
 using tprinter::TablePrinter;
 typedef unsigned nat;
