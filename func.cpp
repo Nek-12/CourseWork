@@ -214,24 +214,21 @@ bool Data::adminit()
     return true; //TODO: Implement
 }
 
-void Data::printCredentials(char which) // 'a' for admin, 'u' for user
+void Data::printCredentials(bool isAdmin)
 {
-    switch (which)
+    if (isAdmin)
     {
-        case 'a':
-            std::cout << "\nAdmin credentials : \n" << std::endl;
-            for (const auto& el: this->madm())
-                std::cout << el.first << " ";
-            std::cout << std::endl;
-            break;
-        case 'u':
-            std::cout << "\nUser credentials : \n" << std::endl;
-            for (const auto& el: this->muser())
-                std::cout << el.first << " ";
-            std::cout << std::endl;
-            break;
-        default:
-            throw std::invalid_argument("Bad parameter for printCredentials");
+        std::cout << "\nAdmin credentials : \n" << std::endl;
+        for (const auto& el: this->madm())
+            std::cout << el.first << " ";
+        std::cout << std::endl;
+    }
+    else
+    {
+        std::cout << "\nUser credentials : \n" << std::endl;
+        for (const auto& el: this->muser())
+            std::cout << el.first << " ";
+        std::cout << std::endl;
     }
 }
 

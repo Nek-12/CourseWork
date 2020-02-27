@@ -72,7 +72,7 @@ public:
     bool bookinit();
     bool adminit();
     void printbooks();
-    void printCredentials(char which); // 'a' for admin, 'u' for user;
+    void printCredentials(bool isAdmin); // 'a' for admin, 'u' for user;
 
     std::map<std::string, std::string>& muser()
     { return mapuser; }
