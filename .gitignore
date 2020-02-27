@@ -1,10 +1,5 @@
-<<<<<<< Updated upstream
-**/.idea/*
-**/CMakeFiles/*
-=======
 .idea
 **/CMakeFiles/**
->>>>>>> Stashed changes
 **/Makefile
 **/CmakeCache.txt
 **/cmake_install.cmake
