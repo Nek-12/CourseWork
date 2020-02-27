@@ -451,9 +451,16 @@ void usrPrompt()
 int main(int argc, char* argv[])
 {
     //TODO: Implement autosaving.
-    isExiting = false;
-    std::thread bgThread(bgProc);
-    Data& data = Data::getInstance();
+    Data& data = Data::getInstance(); //TODO: Test constructor loading
+#ifdef DEBUG
+    data.printbooks();
+    std::cout << std::endl;
+    std::cout << path << std::endl;
+    data.printCredentials('u');
+    std::cout << std::endl;
+    data.printCredentials('a');
+    std::cout << std::endl;
+#endif
     try
     {
         path = argv[0];
@@ -482,16 +489,19 @@ int main(int argc, char* argv[])
             }
         }
         Out:
-        isExiting = true;
-        bgThread.join();
         data.save();
         return 0;
-
     }
     catch (std::invalid_argument& msg)
     {
         std::cerr << "Error: " << msg.what();
         system("pause");
+        return (-3);
+    }
+    catch (std::runtime_error &msg)
+    {
+        std::cerr << msg.what() << std::endl;
+        getch();
         return (-2);
     }
     catch (...)
