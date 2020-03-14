@@ -4,3 +4,5 @@
 **/CmakeCache.txt
 **/cmake_install.cmake
 **/CourseWork.cbp
+cmake-build-debug/admin.txt
+cmake-build-debug/books.txt
