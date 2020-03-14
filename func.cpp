@@ -84,27 +84,24 @@ bool checkDate(const std::string& s)
 
 bool checkString(const std::string& s, char mode)
 {
-    auto msgFalse = [& s]() { std::cerr << "The value " << s << " is invalid." << std::endl; return false; };
-    if (s.empty() || s.length() < 2)
-    {
-        std::cerr << "The data is too short, use more than 2 characters. Try again: " << std::endl;
+    auto msgFalse = [& s](const std::string& msg) { std::cerr << "The value " << s << " is invalid: " << msg << std::endl; return false; };
+    if (s.empty() )
         return false;
-    }
+
     switch (mode)
     {
         case 'p':
-            for (auto ch: s)
-                if (!(isalnum(ch) ) )
-                    msgFalse();
         case 'n':
+            if (s.size() < 3 ) msgFalse("The value should be longer than 3 characters.");
             for (auto ch: s)
                 if (!(isalnum(ch) || ch == '.' || ch == '-' || ch == '_' || ch == '\''))
-                    msgFalse();
+                    msgFalse("The data contains invalid characters");
             break;
         case 's':
+            if (s.size() < 3 ) msgFalse("The value should be longer than 3 characters.");
             for (auto ch: s)
                 if (!(isalnum(ch) || ispunct(ch) || ch == ' '))
-                    msgFalse();
+                    msgFalse("The data contains invalid characters");
             break;
         case 'd':
             return (checkDate(s));
@@ -114,53 +111,11 @@ bool checkString(const std::string& s, char mode)
     return true;
 }
 
-//void readPassConsole(std::string& s) //Crutch
-//{
-//    std::cout << "Keyboard layout: ENG (US)" << std::endl << std::unitbuf; //No buffering to erase chars properly
-//    std::string pass;
-//    FlushConsoleInputBuffer( GetStdHandle( STD_INPUT_HANDLE ) );
-//    sleep(100);
-//        while (!(GetAsyncKeyState(VK_RETURN) & 1) )
-//        {
-//            for (int i = 0x30; i <= 0x69; i++)
-//            {
-//                if (GetAsyncKeyState(i) & 1)
-//                {
-//                    if (i >= 0x41 && i <= 0x5A &&
-//                        ((GetKeyState(VK_CAPITAL) & 1) == 0 || GetAsyncKeyState(VK_SHIFT) & 1))
-//                        pass += ((char) (i + 32));
-//                    else if (i >= 0x41 && i <= 0x5A)
-//                        pass += (char) i;
-//                    else if (i >= 0x60 && i <= 0x69)
-//                        pass += (char) (i - 48);
-//                    else continue;
-//                    std::cout << "*";
-//                    sleep(25);
-//                }
-//                else if (GetAsyncKeyState(VK_BACK) & 1)
-//                {
-//                    if (!pass.empty())
-//                    {
-//                        pass.erase(pass.size() - 1);
-//                        std::cout << "\b \b";  //Cursor moves 1 position backwards
-//                        sleep(50);
-//                    }
-//                }
-//            }
-//        }
-//    std::cout << std::nounitbuf << std::endl;
-//    s = pass;
-//}
-//
-//
 bool readString(std::istream& is, std::string& ret, char mode = 'n')
  // 's' for strings with spaces, 'n' for normal, 'd' for date, 'p' for password
 {
     std::string s;
-    //if (mode == 'p')
-        //readPassConsole(s);
-    //else
-        std::getline(is, s);
+    std::getline(is, s);
 
     if (checkString(s, mode))
     {
@@ -169,7 +124,3 @@ bool readString(std::istream& is, std::string& ret, char mode = 'n')
     }
     else return false;
 }
-
-
-
-//TODO: Check if functions throw when the work was disrupted and return false when okay

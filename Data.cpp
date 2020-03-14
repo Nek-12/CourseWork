@@ -216,8 +216,5 @@ void Data::save()
 
 Data::Data()
 {
-#ifndef NDEBUG
-    std::cout << "Constructed Data" << std::endl;
-#endif
 }
 
