@@ -1,6 +1,5 @@
 #include "header.h"
 
-
 bool Data::loginCheck(std::string& s, bool isadmin)
 {
     if ((isadmin ? this->madm().find(s) != this->madm().end()

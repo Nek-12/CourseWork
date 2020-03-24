@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <string>
+#include <utility>
 #include <vector>
 #include <cstdlib>
 #include <algorithm>
@@ -17,30 +18,110 @@
 #include "table_printer.h"
 #include <thread>
 #include <regex>
-//#include <windows.h>
+#include <unordered_set>
 
-using tprinter::TablePrinter; //allows to use tableprinter namespace
+//TODO: Update comments
+
+using tprinter::TablePrinter; //allows to use the tableprinter namespace
 typedef unsigned long nat;
 
-extern std::string path; //Path to the program folder, see pch.cpp -> int main()
+extern std::string path; //Path to the program folder, see main.cpp -> int main()
 
-void sleep(const nat&); // const int - seconds to sleep_s uses std::this_thread::sleep_for
+void sleep(const nat& ); // const nat - milliseconds to sleep, uses std::this_thread::sleep_for
 std::string hash(const std::string& s); //uses sha256.cpp and sha256.h for encrypting passwords, outputs hashed string
 bool readString(std::istream& is, std::string& s, char mode); //allows for reading a line from the iostream object with input check (foolproofing)
-// 's' for strings with spaces, 'n' for normal, 'd' for date
+// 's' for strings with spaces, 'n' for normal, 'd' for date, 'p' for passwords
 
-struct Book //contains data about books entries
+
+class Genre;
+class Author;
+
+class Book //contains data about books entries
 {
-    std::string isbn; //unique book number
-    std::string title; //I mean title
-    std::string author; //Author's name
+    friend class Author;
+    friend class Genre;
+public:
+    Book() = delete;
+    explicit Book(const nat& n, std::string  t, std::string d): id(n), title(std::move(t)), date(std::move(d)) {};
+    Book& operator=(const Book& rhs);
+    ~Book();
+
+    void addAuthor(Author& );
+    void addGenre(Genre& );
+    void remAuthor(Author& );
+    void remGenre(Genre& );
+    void print();
+
+private:
+    void addToGenres(const Book& );
+    void addToAuthors(const Book& );
+    void remFromGenres();
+    void remFromAuthors();
+
+    nat id; //unique book number
+    std::string title;
     std::string date; //The date the book was CREATED
+    std::unordered_set<Author*> authors;
+    std::unordered_set<Genre*> genres;
+};
 
-    inline void printBook() //prints all the members in a single line to console
-    { std::cout << this->title << "\n" << this->author << "\n" << this->isbn << "\n" << this->date << std::endl; }
+class Author
+{
+    friend class Book;
+    friend class Genre;
+public:
+    Author() = delete;
+    explicit Author(const nat& id, std::string n, std::string c, std::string d): id(id), name(std::move(n)),country(std::move(c)),date(std::move(d)) {};
+    Author& operator=(const Author& rhs);
+    ~Author();
 
-    inline bool empty() //returns 1 if the entry is empty (default-initialized)
-    { return (title.empty() && author.empty() && isbn.empty() && date.empty()); }
+    void addGenre(Genre& );
+    void addBook(Book& );
+    void remGenre(Genre& );
+    void remBook(Book& );
+    void print();
+
+private:
+    void addToBooks(const Author& );
+    void addToGenres(const Author& );
+    void remFromBooks();
+    void remFromGenres();
+
+    nat id;
+    std::string name;
+    std::string country;
+    std::string date;
+    std::unordered_set<Book*> books;
+    std::unordered_set<Genre*> genres;
+
+};
+
+class Genre
+{
+    friend class Author;
+    friend class Book;
+public:
+    Genre() = delete;
+    explicit Genre(const nat& id, std::string n): id(id), name(std::move(n)) {};
+    Genre& operator=(const Genre& rhs);
+    ~Genre();
+
+    void addAuthor(Author& );
+    void addBook(Book& );
+    void remAuthor(Author& );
+    void remBook(Book& );
+    void print();
+
+private:
+    void addToBooks(const Genre& );
+    void addToAuthors(const Genre& );
+    void remFromBooks();
+    void remFromAuthors();
+
+    nat id;
+    std::string name;
+    std::unordered_set<Book*> books;
+    std::unordered_set<Author*> authors;
 };
 
 class Data // SINGLETON for storing all the nested structures
@@ -54,7 +135,7 @@ private:
     std::map<std::string, std::string> mapadm; //same
 
 public:
-    friend struct Book; //to use Books in functions
+    friend class Book; //to use Books in functions
     Data(Data const&) = delete; //Deleted because it's a singleton. We use & instead
     void operator=(Data const&) = delete; //No copying!
 

@@ -85,20 +85,20 @@ bool checkDate(const std::string& s)
 bool checkString(const std::string& s, char mode)
 {
     auto msgFalse = [& s](const std::string& msg) { std::cerr << "The value " << s << " is invalid: " << msg << std::endl; return false; };
-    if (s.empty() )
+    if (s.empty() || s.size() < 3 )
+    {
+        msgFalse("The value should be longer than 3 characters.");
         return false;
-
+    }
     switch (mode)
     {
         case 'p':
         case 'n':
-            if (s.size() < 3 ) msgFalse("The value should be longer than 3 characters.");
             for (auto ch: s)
                 if (!(isalnum(ch) || ch == '.' || ch == '-' || ch == '_' || ch == '\''))
                     msgFalse("The data contains invalid characters");
             break;
         case 's':
-            if (s.size() < 3 ) msgFalse("The value should be longer than 3 characters.");
             for (auto ch: s)
                 if (!(isalnum(ch) || ispunct(ch) || ch == ' '))
                     msgFalse("The data contains invalid characters");
