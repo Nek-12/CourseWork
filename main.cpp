@@ -37,7 +37,7 @@ std::vector<Book>::iterator searchBooks()
             if (it->title == title)
             {
                 std::cout << "Found this book: " << std::endl << std::endl;
-                it->printBook();
+                it->print();
                 std::cout << std::endl;
                 found = true;
                 sought = it;

@@ -23,14 +23,14 @@
 //TODO: Update comments
 
 using tprinter::TablePrinter; //allows to use the tableprinter namespace
-typedef unsigned long long ull;
 
 extern std::string path; //Path to the program folder, see main.cpp -> int main()
 
 std::string lowercase(const std::string& );
 void sleep(const unsigned& ); // const unsigned - milliseconds to sleep, uses std::this_thread::sleep_for
 std::string hash(const std::string& s); //uses sha256.cpp and sha256.h for encrypting passwords, outputs hashed string
-bool readString(std::istream& is, std::string& s, char mode); //allows for reading a line from the iostream object with input check (foolproofing)
+bool readString(std::istream& is, std::string& s, char mode);
+//allows for reading a line from the iostream object with input check (foolproofing)
 // 's' for strings with spaces, 'n' for normal, 'd' for date, 'p' for passwords
 
 
@@ -44,7 +44,7 @@ class Book //contains data about book entries
     friend class Data;
 public:
     Book() = delete;
-    explicit Book(std::string id, std::string  t, std::string d): id(std::move(id)), title(std::move(t)), date(std::move(d)) {};
+    explicit Book(std::string id, std::string  t, unsigned y): id(std::move(id)), title(std::move(t)), year(y) {};
     Book& operator=(const Book& rhs);
     ~Book();
 
@@ -62,7 +62,7 @@ private:
 
     std::string id; //unique book number
     std::string title;
-    std::string date; //The date the book was CREATED
+    unsigned year = 0;
     std::unordered_set<Author*> authors;
     std::unordered_set<Genre*> genres;
 };
@@ -134,7 +134,7 @@ class Data // SINGLETON for storing all the nested structures
     friend class Genre;
     friend class Author;
 private:
-    Data();
+    Data() = default;
 
     //Actual Data
     std::vector<Genre> vgenres;
@@ -144,7 +144,6 @@ private:
     std::map<std::string, std::string> mapadm; //same
 
 public:
-    friend class Book; //to use Books in functions
     Data(Data const&) = delete; //Deleted because it's a singleton. We use & instead
     void operator=(Data const&) = delete; //No copying!
 

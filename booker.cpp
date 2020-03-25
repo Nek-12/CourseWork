@@ -9,7 +9,7 @@ Book& Book::operator=(const Book& rhs)
     //Handles self-assignment by removing pointers first
     id = rhs.id;
     title = rhs.title;
-    date = rhs.date;
+    year = rhs.year;
     authors = rhs.authors;
     genres = rhs.genres;
 
@@ -45,7 +45,7 @@ void Book::remGenre(Genre& g)
 }
 void Book::print()
 {
-    std::cout << id << ", " << date << ", " << title << "\n Authors: \n";
+    std::cout << id << ", " << year << ", " << title << "\n Authors: \n";
     for (const auto& a: authors)
     {
         std::cout << a->name << ", ";

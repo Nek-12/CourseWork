@@ -50,7 +50,7 @@ void Data::printbooks()
         for (auto a: book.authors)
             authors+= a->name + ", ";
 
-        tp << book.title << authors << genres << book.id << book.date;
+        tp << book.title << authors << genres << book.id << book.year;
     }
     tp.print();
 }
@@ -66,9 +66,7 @@ void doesFileExist(const std::string& f)
     }
 }
 
-std::string readline(const std::istream& is, )
-
-void Data::bookinit()
+void Data::bookinit() //TODO: Optimize
 {
     std::string bfname = "books.txt", gfname = "genres.txt", afname = "authors.txt";
     doesFileExist(bfname);
@@ -78,38 +76,41 @@ void Data::bookinit()
     std::ifstream gf(path + gfname);
     std::ifstream af(path + afname);
 
-    while(gf)
+    while(gf) //Genres
     {
         std::string id, name;
-        if (!readString(gf, id, 'n')) throw std::runtime_error("Error reading genre: " + id);
-        if (!readString(gf, name, 's')) throw std::runtime_error("Error reading genre: " + name);
-
+        if (!readString(gf, id, 'i')) continue;
+        if (!readString(gf, name, 's')) continue;
+        this->vGenres().emplace_back(id,name);
+        getline(gf,name); //Ignores 1 line. TODO:Test
+    }
+    while(af) //Authors
+    {
+        std::string id, name,date,country;
+        if (!readString(gf, id, 'i')) continue;
+        if (!readString(gf, name, 's')) continue;
+        if (!readString(gf, date, 'd')) continue;
+        if (!readString(gf, country, 's')) continue;
+        this->vAuthors().emplace_back(id,name,date,country);
+        getline(gf,name); //Ignores 1 line. TODO:Test
     }
 
-    while (f)
+    while (bf)
     {
-        std::string id, genre, name, title, date, country;
-        if (!readString(f, line, 's')) throw std::runtime_error("Error reading title: " + line);
-        book.title = line;
+        std::string id, title, year, temp, entry;
+        if (!readString(gf, id, 'i')) continue;
+        if (!readString(gf, title, 's')) continue;
+        if (!readString(gf, year, 'y')) continue;
+        this->vBooks().emplace_back(id,title,stoi(year)); //Okay we can add genres now
 
-        if (!readString(fb, line, 's')) throw std::runtime_error("Error reading author: " + line);
-        book.author = line;
+        if (!readString(gf, temp, 's')) continue;
+        std::stringstream ss(temp);
+        while(getline(ss, entry, ','))
+        {
 
-        if (!readString(fb, line, 'n'))
-            throw std::runtime_error("Error reading isbn: " + line); //TODO: Implement datacheck
-        book.isbn = line;
+        }
 
-        if (!readString(fb, line, 'd'))
-            throw std::runtime_error("Error reading date: " + line);
-        book.date = line;
-
-        this->vbooks.push_back(book);
-
-        if (!getline(f, line)) throw std::runtime_error("Error in separator, found this: " + line);
-        if (!line.empty() && line != " ")
-            throw std::invalid_argument("File " + path + name + " read error, check delimiters.");
-
-        //continues to read if f is good;
+        getline(gf,temp); //Ignores 1 line. TODO:Test
     }
 }
 
@@ -181,6 +182,15 @@ void Data::save()
     printCredentials(true);
     printCredentials(false);
 #endif
+
+    //TODO: Insert commas BEFORE each entry except the first
+//    std::string delim = "";
+//    for( auto item : vec )
+//    {
+//        std::cout << delim << item;
+//        delim = ",";
+//    }
+
 
     for (auto& el: this->madm())
     {

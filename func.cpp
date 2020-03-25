@@ -82,29 +82,46 @@ bool checkDate(const std::string& s)
     return false;
 }
 
+bool checkYear(const std::string& s)
+{
+    int year = 0;
+    time_t t = time(nullptr); //TODO: Optimize for less objects;
+    tm* now_tm = localtime(&t);
+    for (auto ch: s)
+        if(!isdigit(ch) || s.size() > 4)
+            return false;
+    year = std::stoi(s);
+    return (year < now_tm->tm_year + 1900 && year > 200 ); //The first book appeared certainly later
+}
+
 bool checkString(const std::string& s, char mode)
 {
-    auto msgFalse = [& s](const std::string& msg) { std::cerr << "The value " << s << " is invalid: " << msg << std::endl; return false; };
-    if (s.empty() || s.size() < 3 )
-    {
+    auto msgFalse = [& s](const std::string& msg) { std::cerr << "The value " << s << " is invalid: \n" << msg << std::endl; return false; };
+    if (s.size() < 3 )
         msgFalse("The value should be longer than 3 characters.");
-        return false;
-    }
     switch (mode)
     {
         case 'p':
         case 'n':
             for (auto ch: s)
                 if (!(isalnum(ch) || ch == '.' || ch == '-' || ch == '_' || ch == '\''))
-                    msgFalse("The data contains invalid characters");
+                    msgFalse("invalid characters");
             break;
         case 's':
             for (auto ch: s)
                 if (!(isalnum(ch) || ispunct(ch) || ch == ' '))
-                    msgFalse("The data contains invalid characters");
+                    msgFalse("invalid characters");
             break;
         case 'd':
             return (checkDate(s));
+        case 'i':
+            for (auto ch: s)
+                if(!isdigit(ch))
+                    msgFalse("invalid characters");
+            break;
+        case 'y':
+            if (!checkYear(s)) msgFalse("invalid year");
+            break;
         default:
             throw std::invalid_argument("Bad argument for checkString");
     }
@@ -132,3 +149,4 @@ std::string lowercase(const std::string& s)
         ch = tolower(ch);
     return ret;
 }
+
