@@ -1,4 +1,4 @@
-#define NDEBUG
+//#define NDEBUG
 #ifndef LAB5_HEADER_H
 #define LAB5_HEADER_H
 
@@ -23,11 +23,12 @@
 //TODO: Update comments
 
 using tprinter::TablePrinter; //allows to use the tableprinter namespace
-typedef unsigned long nat;
+typedef unsigned long long ull;
 
 extern std::string path; //Path to the program folder, see main.cpp -> int main()
 
-void sleep(const nat& ); // const nat - milliseconds to sleep, uses std::this_thread::sleep_for
+std::string lowercase(const std::string& );
+void sleep(const unsigned& ); // const unsigned - milliseconds to sleep, uses std::this_thread::sleep_for
 std::string hash(const std::string& s); //uses sha256.cpp and sha256.h for encrypting passwords, outputs hashed string
 bool readString(std::istream& is, std::string& s, char mode); //allows for reading a line from the iostream object with input check (foolproofing)
 // 's' for strings with spaces, 'n' for normal, 'd' for date, 'p' for passwords
@@ -36,13 +37,14 @@ bool readString(std::istream& is, std::string& s, char mode); //allows for readi
 class Genre;
 class Author;
 
-class Book //contains data about books entries
+class Book //contains data about book entries
 {
     friend class Author;
     friend class Genre;
+    friend class Data;
 public:
     Book() = delete;
-    explicit Book(const nat& n, std::string  t, std::string d): id(n), title(std::move(t)), date(std::move(d)) {};
+    explicit Book(std::string id, std::string  t, std::string d): id(std::move(id)), title(std::move(t)), date(std::move(d)) {};
     Book& operator=(const Book& rhs);
     ~Book();
 
@@ -58,7 +60,7 @@ private:
     void remFromGenres();
     void remFromAuthors();
 
-    nat id; //unique book number
+    std::string id; //unique book number
     std::string title;
     std::string date; //The date the book was CREATED
     std::unordered_set<Author*> authors;
@@ -69,9 +71,10 @@ class Author
 {
     friend class Book;
     friend class Genre;
+    friend class Data;
 public:
     Author() = delete;
-    explicit Author(const nat& id, std::string n, std::string c, std::string d): id(id), name(std::move(n)),country(std::move(c)),date(std::move(d)) {};
+    explicit Author(std::string& id, std::string n, std::string d, std::string c): id(std::move(id)), name(std::move(n)),country(std::move(c)),date(std::move(d)) {};
     Author& operator=(const Author& rhs);
     ~Author();
 
@@ -87,7 +90,7 @@ private:
     void remFromBooks();
     void remFromGenres();
 
-    nat id;
+    std::string id;
     std::string name;
     std::string country;
     std::string date;
@@ -100,9 +103,10 @@ class Genre
 {
     friend class Author;
     friend class Book;
+    friend class Data;
 public:
     Genre() = delete;
-    explicit Genre(const nat& id, std::string n): id(id), name(std::move(n)) {};
+    explicit Genre(std::string  id, std::string n): id(std::move(id)), name(std::move(n)) {};
     Genre& operator=(const Genre& rhs);
     ~Genre();
 
@@ -118,7 +122,7 @@ private:
     void remFromBooks();
     void remFromAuthors();
 
-    nat id;
+    std::string id;
     std::string name;
     std::unordered_set<Book*> books;
     std::unordered_set<Author*> authors;
@@ -126,10 +130,15 @@ private:
 
 class Data // SINGLETON for storing all the nested structures
 {
+    friend class Book;
+    friend class Genre;
+    friend class Author;
 private:
     Data();
 
     //Actual Data
+    std::vector<Genre> vgenres;
+    std::vector<Author> vauthors;
     std::vector<Book> vbooks; //Contains all the Books in the database
     std::map<std::string, std::string> mapuser; // holds <login, password> (hashed)
     std::map<std::string, std::string> mapadm; //same
@@ -142,9 +151,6 @@ public:
     static Data& getInstance() //Returns a reference to the single static instance of Data.
     {
         static Data Instance;
-#ifdef DEBUG
-        std::cout << "Got instance of data" << std::endl; //for debugging
-#endif
         return Instance;
     }
 
@@ -152,22 +158,18 @@ public:
     bool loginCheck(std::string& s, bool isadmin); //Checks if the login of the string s matches its (hashed) password
     bool passCheck(const std::string& l, const std::string& p, bool isadmin); //same as loginCheck, but for password
     //1 for admin, 0 for user - bool isAdmin
-    bool uinit(); //Reads the data from "user.txt" and puts it into the Data::mapuser
-    bool bookinit(); //Reads the data from "books.txt" and puts it into the Data::vBooks
-    bool adminit(); //Reads the data from "admin.txt" and puts it into the Data::mapadm
+    void uinit(); //Reads the data from "user.txt" and puts it into the Data::mapuser
+    void bookinit(); //Reads the data from "books.txt" and puts it into the Data::vBooks
+    void adminit(); //Reads the data from "admin.txt" and puts it into the Data::mapadm
     void printbooks();
     void printCredentials(bool isAdmin); //Just prints all the USERNAMES in the mapuser or mapadm
 
-    std::map<std::string, std::string>& muser() //We should not allow access to our data members - they are private,
-                                                //but these functions are public. Data abstraction, that is.
-    { return mapuser; }
+    std::map<std::string, std::string>& muser() { return mapuser; }
+    std::map<std::string, std::string>& madm() { return mapadm; }
+    std::vector<Book>& vBooks() { return vbooks; }
+    std::vector<Genre>& vGenres() { return vgenres; }
+    std::vector<Author>& vAuthors() { return vauthors; }
 
-    std::map<std::string, std::string>& madm()
-    { return mapadm; }
-
-    std::vector<Book>& vBooks()
-    { return vbooks; }
 };
-
 
 #endif //LAB5_HEADER_H

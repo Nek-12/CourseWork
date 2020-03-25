@@ -33,7 +33,7 @@ namespace tprinter
 
         TablePrinter();
 
-        TablePrinter(const std::string& separator);
+        explicit TablePrinter(const std::string& separator);
 
         int getNumColumns() const
         { return column_headers_.size(); }

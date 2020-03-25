@@ -1,4 +1,5 @@
 #include "header.h"
+//TODO: Remove output from class functions maybe
 
 bool Data::loginCheck(std::string& s, bool isadmin)
 {
@@ -36,81 +37,87 @@ void Data::printbooks()
     tp.setPadding(1);
     tp.setDashedRawsStyle();
     tp.addMergedColumn("Book Database");
-    tp.addColumn("Title", 42);
-    tp.addColumn("Author", 42);
-    tp.addColumn("ISBN", 16);
+    tp.addColumn("Title", 30);
+    tp.addColumn("Authors", 40);
+    tp.addColumn("Genres",40);
+    tp.addColumn("ID", 9);
     tp.addColumn("Date", 10);
-    for (const auto& el : this->vbooks)
+    for (const auto& book: this->vbooks)
     {
-        tp << el.title << el.author << el.isbn << el.date;
+        std::string authors, genres;
+        for (auto g: book.genres)
+            genres+= g->name + ", ";
+        for (auto a: book.authors)
+            authors+= a->name + ", ";
+
+        tp << book.title << authors << genres << book.id << book.date;
     }
     tp.print();
 }
 
-
-bool Data::bookinit() //TODO: Refactor
+void doesFileExist(const std::string& f)
 {
-    std::string line, temp, name = "books.txt";
-    try
+    if (!std::filesystem::exists(path + f))
     {
-        if (!std::filesystem::exists(path + name))
-        {
-            std::cerr << "Warning! The file " << path << name << " does not exist! Creating a blank one..."
-                      << std::endl;
-            std::ofstream f(path + name);
-            f.close();
-        }
-        std::ifstream f(path + name);
-        if (!f) return false;
-        do //Starts parsing the file. Paragraphs are divided by a blank line
-        {
-            //TODO: Implement behaviour for a fresh file
-            Book book;
-            if (!readString(f, line, 's')) throw std::runtime_error("Error reading title: " + line);
-            book.title = line;
-
-            if (!readString(f, line, 's')) throw std::runtime_error("Error reading author: " + line);
-            book.author = line;
-
-            if (!readString(f, line, 'n'))
-                throw std::runtime_error("Error reading isbn: " + line); //TODO: Implement datacheck
-            book.isbn = line;
-
-            if (!readString(f, line, 'd'))
-                throw std::runtime_error("Error reading date: " + line);
-            book.date = line;
-
-            this->vbooks.push_back(book);
-
-            if (!getline(f, line)) throw std::runtime_error("Error in separator, found this: " + line);
-            if (!line.empty() && line != " ")
-                throw std::invalid_argument("File " + path + name + " read error, check delimiters.");
-
-            //continues to read if f is good;
-        } while (f);
-        f.close();
-        return true;
+        std::cerr << "Warning! The file " << path << f << " does not exist! Creating a blank one..."
+                  << std::endl;
+        std::ofstream file(path + f);
+        file.close();
     }
-    catch (std::runtime_error& e)
+}
+
+std::string readline(const std::istream& is, )
+
+void Data::bookinit()
+{
+    std::string bfname = "books.txt", gfname = "genres.txt", afname = "authors.txt";
+    doesFileExist(bfname);
+    doesFileExist(gfname);
+    doesFileExist(afname);
+    std::ifstream bf(path + bfname);
+    std::ifstream gf(path + gfname);
+    std::ifstream af(path + afname);
+
+    while(gf)
     {
-        std::cerr << "Encountered file " << name << " parsing error: " << e.what();
-        return false;
+        std::string id, name;
+        if (!readString(gf, id, 'n')) throw std::runtime_error("Error reading genre: " + id);
+        if (!readString(gf, name, 's')) throw std::runtime_error("Error reading genre: " + name);
+
     }
 
+    while (f)
+    {
+        std::string id, genre, name, title, date, country;
+        if (!readString(f, line, 's')) throw std::runtime_error("Error reading title: " + line);
+        book.title = line;
+
+        if (!readString(fb, line, 's')) throw std::runtime_error("Error reading author: " + line);
+        book.author = line;
+
+        if (!readString(fb, line, 'n'))
+            throw std::runtime_error("Error reading isbn: " + line); //TODO: Implement datacheck
+        book.isbn = line;
+
+        if (!readString(fb, line, 'd'))
+            throw std::runtime_error("Error reading date: " + line);
+        book.date = line;
+
+        this->vbooks.push_back(book);
+
+        if (!getline(f, line)) throw std::runtime_error("Error in separator, found this: " + line);
+        if (!line.empty() && line != " ")
+            throw std::invalid_argument("File " + path + name + " read error, check delimiters.");
+
+        //continues to read if f is good;
+    }
 }
 
 
-bool Data::uinit()
+void Data::uinit()
 {
     std::string login, pass, temp, name = "user.txt";
-    if (!std::filesystem::exists(path + name))
-    {
-        std::cerr << "Warning! The file " << path << name << " does not exist! Creating a blank one..." << std::endl;
-        std::ofstream f(path + name);
-        //f << "user\n" << hash("user") << "\n";
-        f.close();
-    }
-
+    doesFileExist(name);
     std::ifstream f(path + name);
     if (!f) throw std::runtime_error("File " + path + name + " could not be opened after creating.");
     while (f) //Starts parsing the file. Paragraphs are divided by a blank line
@@ -124,20 +131,12 @@ bool Data::uinit()
 
         //continues to read if f is good;
     }
-    f.close();
-    return true; //TODO: Test
 }
 
-bool Data::adminit()
+void Data::adminit()
 {
     std::string login, pass, temp, name = "admin.txt";
-    if (!std::filesystem::exists(path + name))
-    {
-        std::cout << "Warning! The file " << path << name << " does not exist! Creating a blank one..." << std::endl;
-        std::ofstream f(path + name);
-        //f << "admin\n" << hash("admin") << "\n";
-        f.close();
-    }
+    doesFileExist(name);
     std::ifstream f(path + name);
     if (!f) throw std::runtime_error("File " + path + name + " could not be opened.");
     while (f) //Starts parsing the file. Paragraphs are divided by a blank line
@@ -158,26 +157,14 @@ bool Data::adminit()
                      "Created a new one: admin | admin" << std::endl;
         this->madm()["admin"] = hash("admin");
     }
-    f.close();
-    return true; //TODO: Implement
 }
 
 void Data::printCredentials(bool isAdmin)
 {
-    if (isAdmin)
-    {
-        std::cout << "\nAdmin credentials : \n" << std::endl;
-        for (const auto& el: this->madm())
+        std::cout << (isAdmin ? "Admin" : "User") << " credentials: " << std::endl;
+        for (const auto& el: ( isAdmin ? this->madm() : this->muser() ) )
             std::cout << el.first << "\n";
         std::cout << std::endl;
-    }
-    else
-    {
-        std::cout << "\nUser credentials : \n" << std::endl;
-        for (const auto& el: this->muser())
-            std::cout << el.first << "\n";
-        std::cout << std::endl;
-    }
 }
 
 void Data::save()
@@ -211,9 +198,5 @@ void Data::save()
         fbook << el.title << "\n" << el.author << "\n" << el.isbn << "\n" << el.date << "\n" << std::endl;
     }
     //The destructor will close the files for me
-}
-
-Data::Data()
-{
 }
 

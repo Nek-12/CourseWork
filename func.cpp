@@ -1,6 +1,6 @@
 #include "header.h"
 
-void sleep(const nat& ms)
+void sleep(const unsigned& ms)
 {
     std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 }
@@ -115,7 +115,7 @@ bool readString(std::istream& is, std::string& ret, char mode = 'n')
  // 's' for strings with spaces, 'n' for normal, 'd' for date, 'p' for password
 {
     std::string s;
-    std::getline(is, s);
+    if (!std::getline(is, s)) throw std::runtime_error("Critical read failure");
 
     if (checkString(s, mode))
     {
@@ -123,4 +123,12 @@ bool readString(std::istream& is, std::string& ret, char mode = 'n')
         return true;
     }
     else return false;
+}
+
+std::string lowercase(const std::string& s)
+{
+    std::string ret = s;
+    for (auto ch: ret)
+        ch = tolower(ch);
+    return ret;
 }
