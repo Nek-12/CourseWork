@@ -1,6 +1,11 @@
 #include "header.h"
+#include <iostream>
+#include <conio.h>
+
+
 std::string path; //extern global
 
+inline void cls() {system("cls");}
 
 //TODO: Implement sort, implement filtering (date)?
 //TODO: Make the book table be displayed only by request
@@ -17,16 +22,36 @@ bool yesNo(const std::string& msg)
             case 'n':
                 return false;
             default :
-                //std::cerr << "Wrong input. Try again." << std::endl;
                 break;
         }
     }
 }
 
+bool passConfirm (std::string& p)
+{
+    Data& data = Data::getInstance();
+    std::string tempA, tempB;
+    while (true)
+    {
+        cls();
+        std::cout << data.passprompt << std::endl;
+        while (!readString(std::cin, tempA, 'p'));
+        if (tempA == "exit") return false;
+
+        std::cout << data.passconfirm << std::endl;
+        while (!readString(std::cin, tempB, 'p'));
+        if (tempB == "exit") return false;
+        if (tempA == tempB)
+            break;
+        std::cerr << "Your passwords don't match." << std::endl;
+    }
+    p = tempA;
+    return true;
+}
+
 std::vector<Book>::iterator searchBooks()
 {
     Data& data = Data::getInstance();
-    auto sought = data.vBooks().end();
     while(true)
     {
         bool found = false;
@@ -34,7 +59,7 @@ std::vector<Book>::iterator searchBooks()
         std::cout << "Enter the title of the book to search: " << std::endl;
         while (!readString(std::cin, title, 's'));
         for (auto it = data.vBooks().begin(); it != data.vBooks().end(); ++it)
-            if (it->title == title)
+            if (it->name == title)
             {
                 std::cout << "Found this book: " << std::endl << std::endl;
                 it->print();
@@ -60,7 +85,7 @@ void addRecord() //TODO: put exit everywhere
     {
         Book book;
         std::cout << "Enter the title of the book" << std::endl;
-        while (!readString(std::cin, book.title, 's'));
+        while (!readString(std::cin, book.name, 's'));
         std::cout << "Enter the author's name and surname" << std::endl;
         while (!readString(std::cin, book.author, 's'));
         std::cout << "Enter the ISBN of the book" << std::endl;
@@ -80,14 +105,14 @@ void manageRecord()
     std::string temp;
     auto result = searchBooks();
     if (result == data.vBooks().end()) return;
-    system("cls");
+    cls();
     std::cout << std::endl;
     result->printBook();
 
     if (data.vBooks().empty())
     {
         std::cout << "There are no books in the database. Add one first." << std::endl;
-        sleep(2000);
+        sleep(WAIT_TIME_LONG);
         return;
     }
     while (true)
@@ -119,7 +144,7 @@ void manageRecord()
                         case '1':
                             std::cout << "Enter the new title of the book: " << std::endl;
                             while (!readString(std::cin, temp, 's'));
-                            result->title = temp;
+                            result->name = temp;
                             std::cout << "Changed successfully." << std::endl;
                             break;
                         case '2':
@@ -150,27 +175,26 @@ void manageRecord()
             case 'q':
                 return;
             default :
-                //std::cerr << "Wrong input. Try again." << std::endl;
                 break;
         }
     }
 }
-
+//TODO: Left Here. (From bottom to up)
 void manageBooks(bool isadmin)
 {
     Data& data = Data::getInstance();
-    system("cls");
-    data.printbooks();
-    std::cout << ":ADMIN:" << std::endl;
-    std::cout << "Select an option: "
-              << "\n1 to add a new record "
-              << "\n2 to manage a record "
-              << "\n3 to search "
-              << "\nq to go back" << std::endl;
     if (isadmin)
     {
         while (true)
         {
+            cls();
+            data.printbooks();
+            std::cout << ":ADMIN:" << std::endl;
+            std::cout << "Select an option: "
+                      << "\n1 to add a new record "
+                      << "\n2 to manage a record "
+                      << "\n3 to search "
+                      << "\nq to go back" << std::endl;
             switch (getch())
             {
                 case 'q':
@@ -185,18 +209,16 @@ void manageBooks(bool isadmin)
                     searchBooks();
                     break;
                 default:
-                    //std::cout << std::endl << "Invalid input. Try again:" << std::endl;
                     break;
             }
         }
     }
     else
     {
-        system("cls");
-        data.printbooks();
-
         while (true)
         {
+            cls();
+            data.printbooks();
             std::cout << ":USER:" << std::endl;
             std::cout << "Select an option: "
                       << "\n1 to search"
@@ -209,121 +231,99 @@ void manageBooks(bool isadmin)
                 case 'q':
                     return;
                 default:
-                    //std::cout << std::endl << "Invalid input. Try again:" << std::endl;
                     break;
             }
         }
     }
 }
 
-bool passChange(const std::string& l, const bool& isAdmin)
+bool passChange(const std::string& l, const bool& isadmin)
 {
     Data& data = Data::getInstance();
-    while(true) //TODO: Make this a function (code duplication)
-    {
-        std::string tempA, tempB;
-        std::cout << "Enter your new password or \"exit\" to exit: " << std::endl;
-        while (!readString(std::cin, tempA, 'p'));
-        if (tempA == "exit") return false;
-        std::cout << "Confirm the password or \"exit\" to exit: " << std::endl;
-        while (!readString(std::cin, tempB, 'p'));
-        if (tempB == "exit") return false;
-        if(tempA != tempB)
-        {
-            std::cerr << "Your passwords don't match." << std::endl;
-            continue;
-        }
-        (isAdmin ? data.madm() : data.muser() )[l] = hash(tempA);
-        std::cout << "Your password was changed successfully." << std::endl;
-        sleep(2000);
-        return true;
-    }
+    std::string p;
+    if (!passConfirm(p)) return false;
+    data.changePass(l, p, isadmin);
+    std::cout << "Your password was changed successfully." << std::endl;
+    sleep(WAIT_TIME_LONG);
+    return true;
 }
 
 void manageUsr()
 {
     Data& data = Data::getInstance();
     std::string l, p;
-    data.printCredentials(false);
     while (true)
     {
-        std::cout << "Type which account you want to delete or \"exit\" to exit" << std::endl;
-        do
+        cls();
+        data.printCredentials(false);
+        std::cout << data.loginprompt << std::endl;
+        while(true)
         {
             while (!readString(std::cin, l, 'n'));
             if (l == "exit") return;
-        } while (!data.loginCheck(l, false));
-        data.muser().erase(data.muser().find(l));
+            if(data.loginCheck(l, false)) break;
+            else
+                std::cout << "User not found." << std::endl;
+        }
+        data.delAccount(l,false);
         std::cout << "Deleted account " << l << std::endl;
 
-        if (data.muser().empty()) return;
+        if (data.enumAccounts(false) == 0) return;
         if (yesNo("Delete another one?")) continue;
         else return;
     }
 }
 
-void createAcc(bool isAdmin)
+void createAccPrompt(bool isadmin)
 {
     Data& data = Data::getInstance();
     std::string l, p, temp;
-    data.printCredentials(isAdmin);
-
-    std::cout << "Enter the username for the new account or \"exit\" to exit" << std::endl;
+    cls();
+#ifndef NDEBUG
+    data.printCredentials(isadmin);
+#endif
+    std::cout << "New account: " << data.loginprompt << std::endl;
     while (!readString(std::cin, l, 'n'));
     if (l == "exit") return;
 
-    if (isAdmin ? data.madm().find(l) != data.madm().end()
-                : data.muser().find(l) != data.muser().end())
+    if(data.loginCheck(l,isadmin))
     {
         std::cerr << "Such account already exists!" << std::endl;
-        sleep(2000);
+        sleep(WAIT_TIME_LONG);
         return;
     }
-    while(true)
-    {
-        std::cout << "Enter the password for " << l << " or \"exit\" to exit: " << std::endl;
-        while (!readString(std::cin, p, 'p'));
-        if (p == "exit") return;
-
-        std::cout << "Confirm the password or enter \"exit\" to exit: " << std::endl;
-        while (!readString(std::cin, temp, 'p'));
-        if (temp == "exit") return;
-
-        if (temp != p)
-        {
-            std::cerr << "Your passwords don't match." << std::endl;
-            continue;
-        }
-        break;
-    }
-    (isAdmin ? data.madm() : data.muser())[l] = hash(p);
+    if (!passConfirm(p)) return;
+    data.createAccount(l, p, isadmin);
     std::cout << "Successfully created account " << l << " ! Going back...";
+#ifndef NDEBUG
     data.printCredentials(false);
-    sleep(2000);
+#endif
+    sleep(WAIT_TIME_LONG);
 }
 
-bool deleteAcc(const std::string& l, bool isAdmin)
+bool delDialog(const std::string& l, bool isadmin)
 {
     Data& data = Data::getInstance();
     std::string p;
-    if (isAdmin && data.madm().size() < 2)
+    while (true)
     {
-        std::cerr << "You can't delete the last account!";
-        sleep(2000);
-        return false;
-    }
-    std::cout << "THIS WILL DELETE YOUR ACCOUNT AND YOU WILL BE LOGGED OFF."
-              << " \nTYPE YOUR PASSWORD, " << l << ", TO PROCEED OR \"exit\" TO CANCEL." << std::endl;
-    do
-    {
+        cls();
+        std::cout << "THIS WILL DELETE YOUR ACCOUNT AND YOU WILL BE LOGGED OFF."
+                  << " \nTYPE YOUR PASSWORD, " << l << ", TO PROCEED OR \"exit\" TO CANCEL." << std::endl;
         while (!readString(std::cin, p, 'p'));
         if (p == "exit") return false;
-    } while (!data.passCheck(l, p, isAdmin));
-
-    std::cout << "Deleting... " << std::endl;
-    isAdmin? data.madm().erase(data.madm().find(l))
-            :data.muser().erase(data.muser().find(l));
-    sleep(1000);
+        if (data.passCheck(l, p, isadmin))
+            break;
+        else
+            std::cerr << "Wrong password." << std::endl;
+    }
+    if (!data.delAccount(l, isadmin))
+    {
+        std::cerr << "You can't delete the last account!" << std::endl;
+        return false;
+    }
+    std::cout << "Deleted account  " << l << std::endl;
+    sleep(WAIT_TIME_NORMAL);
     return true; //Was deleted
 }
 
@@ -331,7 +331,7 @@ void admConsole(std::string& adm, std::string& pass)
 {
     while (true)
     {
-        system("cls");
+        cls();
         std::cout << ":ADMIN:" << std::endl;
         std::cout << "Select an option: "
                   << "\n1 for managing book data "
@@ -349,19 +349,18 @@ void admConsole(std::string& adm, std::string& pass)
                 manageUsr();
                 break;
             case '3':
-                createAcc(true);
+                createAccPrompt(true);
                 break;
             case '4':
-                passChange(adm, true); //'u' for user
+                passChange(adm, true);
                 break;
             case '0':
-                if (deleteAcc(adm, true)) return;
+                if (delDialog(adm, true)) return;
                 else break;
             case 'q':
                 return;
             default:
-                //std::cout << std::endl << "Invalid input. Try again:" << std::endl;
-                continue; //TODO: TEST
+                continue;
         }
     }
 }
@@ -370,23 +369,34 @@ void admLogin()
 {
     Data& data = Data::getInstance();
     std::string adm, pass;
-    system("cls");
-    do
+
+    while(true)
     {
-        std::cout << ":ADMIN: \n Enter login or \"exit\" to exit:" << std::endl;
+        cls();
+        std::cout << data.loginprompt << std::endl;
         while (!readString(std::cin, adm, 'n'));
         if (adm == "exit") return;
-    } while (!data.loginCheck(adm, true));
+        if (data.loginCheck(adm, true))
+            break;
+        else
+            std::cout << "User not found." << std::endl;
+        sleep(WAIT_TIME_NORMAL);
+    }
 
-    do
+    while(true)
     {
-        std::cout << "Enter your password or \"exit\" to exit:" << std::endl;
+        cls();
+        std::cout << data.passprompt << std::endl;
         while (!readString(std::cin, pass, 'p'));
         if (pass == "exit") return;
-    } while (!data.passCheck(adm, pass, true));
+        if (data.passCheck(adm, pass, true)) break;
+        else
+            std::cout << "Wrong password." << std::endl;
+        sleep(WAIT_TIME_NORMAL);
+    }
 
     std::cout << "Success. Redirecting..." << std::endl;
-    sleep(1000);
+    sleep(WAIT_TIME_NORMAL);
     admConsole(adm, pass);
 }
 
@@ -396,12 +406,12 @@ void usrConsole(const std::string& usr, const std::string& pass)
 {
     while (true)
     {
-        system("cls");
+        cls();
         std::cout << ":USER:"
                   << "\nSelect an option: "
                   << "\n1 for managing book data "
-                  << "\n2 for changing your password" //TODO:Implement
-                  << "\n0 to delete your account (careful!)" //TODO: Implement
+                  << "\n2 for changing your password"
+                  << "\n0 to delete your account"
                   << "\nq to sign off" << std::endl;
         switch (getch())
         {
@@ -414,9 +424,8 @@ void usrConsole(const std::string& usr, const std::string& pass)
                 passChange(usr,false);
                 break;
             case '0':
-                if (deleteAcc(usr,false)) return; else break;
+                if (delDialog(usr, false)) return; else break;
             default:
-                //std::cout << std::endl << "Invalid input. Try again:" << std::endl;
                 break;
         }
     }
@@ -426,88 +435,95 @@ void usrLogin()
 {
     Data& data = Data::getInstance();
     std::string usr, pass;
-    system("cls");
-    do
+
+    while(true)
     {
-        std::cout << ":USER: \n Enter login or \"exit\" to exit:" << std::endl;
+        cls();
+        std::cout << data.loginprompt << std::endl;
         while (!readString(std::cin, usr, 'n'));
         if (usr == "exit") return;
-    } while (!data.loginCheck(usr, false));
-
-    do
+        if (data.loginCheck(usr, false))
+            break;
+        else
+            std::cout << "User not found." << std::endl;
+        sleep(WAIT_TIME_MID);
+    }
+    while (true)
     {
-        std::cout << "Enter your password or \"exit\" to exit:" << std::endl;
+        cls();
+        std::cout << data.passprompt << std::endl;
         while (!readString(std::cin, pass, 'p'));
         if (pass == "exit") return;
-    } while (!data.passCheck(usr, pass, false));
-
+        if (data.passCheck(usr, pass, false))
+            break;
+        else
+            std::cout << "Wrong password." <<std::endl;
+        sleep(WAIT_TIME_MID);
+    }
     std::cout << "Success. Redirecting..." << std::endl;
-    sleep(1000);
+    sleep(WAIT_TIME_NORMAL);
     usrConsole(usr, pass);
 }
 
-
-int main(int argc, char* argv[])
+int main(int argc, char* argv[]) try
 {
-    //TODO: Implement autosaving.
+//TODO: Implement autosaving.
     Data& data = Data::getInstance();
-    data.adminit();
     data.uinit();
-    data.bookinit() ;
-    try
-    {
-        path = argv[0];
-        path.erase(path.find_last_of('\\') + 1); //Makes 'path' be the path to the app folder
-#ifdef DEBUG
-        data.printbooks();
-        std::cout << std::endl;
-        std::cout << path << std::endl;
-        data.printCredentials(false);
-        std::cout << std::endl;
-        data.printCredentials(true);
-        std::cout << std::endl;
-        getch();
-#endif
+    data.adminit();
+    data.bookinit();
 
-    while (true)
+    path = argv[0];
+    path.erase(path.find_last_of('\\') + 1); //Makes 'path' be the path to the app folder
+#ifndef NDEBUG
+    data.printbooks();
+    std::cout << std::endl;
+    std::cout << path << std::endl;
+    data.printCredentials(false);
+    std::cout << std::endl;
+    data.printCredentials(true);
+    std::cout << std::endl;
+    getch();
+#endif
+    bool workin = true;
+    while (workin)
+    {
+        cls();
+        std::cout << "\nWelcome. Enter \n 1 for user sign in \n 2 for admin sign in \n q to exit" << std::endl;
+        switch (tolower(getch()))
         {
-            system("cls");
-            std::cout << "\nWelcome. Enter \n 1 for user sign in \n 2 for admin sign in \n q to exit" << std::endl;
-            switch (getch())
-            {
-                case 'q':
-                    goto Out;
-                case '1':
-                    if (yesNo("Have you got an account?")) usrLogin(); else createAcc(false);
-                    break;
-                case '2':
-                    admLogin();
-                    break;
-                default:
-                    //std::cout << std::endl << "Invalid input. Try again:" << std::endl;
-                    break;
-            }
+            case 'q':
+                workin = false;
+                break;
+            case '1':
+                if (yesNo("Have you got an account?")) usrLogin();
+                else createAccPrompt(false);
+                break;
+            case '2':
+                admLogin();
+                break;
+            default:
+                break;
         }
-        Out:
-        data.save();
-        return 0;
     }
-    catch (std::invalid_argument& msg)
-    {
-        std::cerr << "Error: " << msg.what();
-        system("pause");
-        return (-3);
-    }
-    catch (std::runtime_error &msg)
-    {
-        std::cerr << msg.what() << std::endl;
-        getch();
-        return (-2);
-    }
-    catch (...)
-    {
-        std::cerr << "Undefined Error";
-        system("pause");
-        return (-1);
-    }
+    data.save();
+    return 0;
+}
+catch (std::invalid_argument& msg)
+{
+    std::cerr << "Error: " << msg.what();
+    getch();
+    return (-3);
+}
+catch (std::runtime_error& msg)
+{
+    std::cerr << msg.what() << std::endl;
+    getch();
+    return (-2);
+}
+catch (...)
+{
+    std::cerr << "Undefined Error";
+    getch();
+    return (-1);
 }

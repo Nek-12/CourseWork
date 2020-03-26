@@ -1,4 +1,5 @@
 #include "header.h"
+#include <iostream>
 
 //BOOK
 
@@ -8,7 +9,7 @@ Book& Book::operator=(const Book& rhs)
     remFromGenres();
     //Handles self-assignment by removing pointers first
     id = rhs.id;
-    title = rhs.title;
+    name = rhs.name;
     year = rhs.year;
     authors = rhs.authors;
     genres = rhs.genres;
@@ -45,7 +46,7 @@ void Book::remGenre(Genre& g)
 }
 void Book::print()
 {
-    std::cout << id << ", " << year << ", " << title << "\n Authors: \n";
+    std::cout << id << ", " << year << ", " << name << "\n Authors: \n";
     for (const auto& a: authors)
     {
         std::cout << a->name << ", ";
@@ -153,7 +154,7 @@ void Genre::print()
     std::cout << "\n Books: \n";
     for (const auto& b: books)
     {
-        std::cout << b->title << ", ";
+        std::cout << b->name << ", ";
     }
     std::cout << std::endl;
 }
@@ -227,7 +228,7 @@ void Author::print()
     std::cout << id << ", " << name << ", " << country << ", " << date << "\n Books: \n";
     for (const auto& b: books)
     {
-        std::cout << b->title << ", ";
+        std::cout << b->name << ", ";
     }
     std::cout << "\n Genres: \n";
     for (const auto& g: genres)

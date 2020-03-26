@@ -1,14 +1,25 @@
 #include "header.h"
-
+#include <iostream>
+#include "sha256.h"
+#include <thread>
+#include <regex>
 void sleep(const unsigned& ms)
 {
     std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 }
 
+
 std::string hash(const std::string& s)
 {
     SHA256 sha256;
     return sha256(s);
+}
+
+unsigned getCurYear()
+{
+    time_t t = time(nullptr);
+    tm* nowTm = localtime(&t);
+    return nowTm->tm_year + 1900;
 }
 
 bool checkDate(const std::string& s)
@@ -24,15 +35,15 @@ bool checkDate(const std::string& s)
     if (std::regex_match(s, res, reg))
     {
         time_t t = time(nullptr);
-        tm* now_tm = localtime(&t);
+        tm* nowTm = localtime(&t);
         int day = std::stoi(res.str(1));
         int month = std::stoi(res.str(3));
         int year = std::stoi(res.str(5));
         if (res.str(2) != res.str(4)) msgFalse("Divisors don't match:" + res.str(2) + " < =/= > " + res.str(4));
 
-        if (year > (now_tm->tm_year + 1900))
+        if (year > (nowTm->tm_year + 1900))
             msgFalse("The book was created in the future year: " + std::to_string(year));
-        else if ((year == now_tm->tm_year + 1900) && month > now_tm->tm_mon + 1)
+        else if ((year == nowTm->tm_year + 1900) && month > nowTm->tm_mon + 1)
             msgFalse("The book was created in the future month: " + std::to_string(month));
 
         if (month > 12)
@@ -84,19 +95,16 @@ bool checkDate(const std::string& s)
 
 bool checkYear(const std::string& s)
 {
-    int year = 0;
-    time_t t = time(nullptr); //TODO: Optimize for less objects;
-    tm* now_tm = localtime(&t);
     for (auto ch: s)
         if(!isdigit(ch) || s.size() > 4)
             return false;
-    year = std::stoi(s);
-    return (year < now_tm->tm_year + 1900 && year > 200 ); //The first book appeared certainly later
+    return (std::stoul(s) < getCurYear() );
 }
 
 bool checkString(const std::string& s, char mode)
 {
-    auto msgFalse = [& s](const std::string& msg) { std::cerr << "The value " << s << " is invalid: \n" << msg << std::endl; return false; };
+    auto msgFalse = [& s](const std::string& msg)
+            { std::cerr << "The value " << s << " is invalid: \n" << msg << std::endl; return false; };
     if (s.size() < 3 )
         msgFalse("The value should be longer than 3 characters.");
     switch (mode)
