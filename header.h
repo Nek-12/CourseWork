@@ -1,25 +1,9 @@
 //#define NDEBUG
 #pragma once
-
-//#include <iostream>
-//#include <string>
-//#include <utility>
-//#include <vector>
-//#include <cstdlib>
-//#include <algorithm>
 #include <map>
-//#include <conio.h>
-//#include <fstream>
-//#include <sstream>
-//#include <filesystem>
-//#include "sha256.h"
-//#include <iomanip>
 #include "table_printer.h"
-//#include <thread>
-//#include <regex>
 #include <unordered_set>
-//#include <random>
-//#include <ctime>
+#include <vector>
 
 enum
 {
@@ -35,6 +19,11 @@ using tprinter::TablePrinter; //allows to use the tableprinter namespace
 
 extern std::string path; //Path to the program folder, see main.cpp -> int main()
 
+class Genre;
+class Author;
+class Data;
+class Book;
+void cls();
 std::string lowercase(const std::string& );
 void sleep(const unsigned& ); // const unsigned - milliseconds to sleep, uses std::this_thread::sleep_for
 std::string hash(const std::string& s); //uses sha256.cpp and sha256.h for encrypting passwords, outputs hashed string
@@ -42,30 +31,23 @@ bool readString(std::istream& is, std::string& s, char mode);
 //allows for reading a line from the iostream object with input check (foolproofing)
 // 's' for strings with spaces, 'n' for normal, 'd' for date, 'p' for passwords
 
-
-class Genre;
-class Author;
-class Data;
-class Book;
-
 template<typename T>
-typename std::vector<T>::iterator findName(std::vector<T>& vec, const std::string& title)
-{
-    for (auto it = vec.begin(); it != vec.end(); ++it)
-    {
-        if (it->name == title ) return it;
-    }
-    return vec.end();
-}
+typename std::vector<T>::iterator findName(std::vector<T>& vec, const std::string& title);
+
+
 
 class Book //contains data about book entries
 {
     friend class Author;
     friend class Genre;
     friend class Data;
+    friend typename std::vector<Book>::iterator findName<Book>(std::vector<Book>&, const std::string&);
+    friend void manageBook();
+    friend std::ostream &operator<<(std::ostream &, const Book&);
 public:
     Book() = delete;
-    explicit Book(std::string id, std::string  t, unsigned y = 0): id(std::move(id)), name(std::move(t)), year(y) {};
+    Book(const Book& b): id(b.id), name(b.name),year(b.year) {addToGenres(b); addToAuthors(b);} ;
+    explicit Book(std::string n, std::string  t, unsigned y = 0): id(std::move(n)), name(std::move(t)), year(y) {};
     Book& operator=(const Book& rhs);
     ~Book();
 
@@ -73,7 +55,7 @@ public:
     void addGenre(Genre& );
     void remAuthor(Author& );
     void remGenre(Genre& );
-    void print();
+
     bool check(const std::string& s);
 
 private:
@@ -95,10 +77,15 @@ class Author
     friend class Book;
     friend class Genre;
     friend class Data;
+    friend std::vector<Author>::iterator findName<Author>(std::vector<Author>&, const std::string&);
+    friend std::ostream &operator<<(std::ostream &, const Book& );
+    friend std::ostream& operator<<(std::ostream &os, const Author& a);
+    friend void editBookAuthor(Book* );
 public:
     Author() = delete;
-    explicit Author(std::string id, std::string n, std::string d = "Unknown", std::string c = "Unknown"):
-    id(std::move(id)), name(std::move(n)),country(std::move(c)),date(std::move(d)) {};
+    Author(const Author& a): id(a.id), country(a.country), date(a.date) { addToGenres(a), addToBooks(a);};
+    explicit Author(std::string no, std::string n, std::string d = "Unknown", std::string c = "Unknown"):
+    id(std::move(no)), name(std::move(n)),country(std::move(c)),date(std::move(d)) {};
     Author& operator=(const Author& rhs);
     ~Author();
 
@@ -106,7 +93,7 @@ public:
     void addBook(Book& );
     void remGenre(Genre& );
     void remBook(Book& );
-    void print();
+    bool check(const std::string& s);
 
 private:
     void addToBooks(const Author& );
@@ -120,8 +107,6 @@ private:
     std::string date;
     std::unordered_set<Book*> books;
     std::unordered_set<Genre*> genres;
-
-    bool check(const std::string& s);
 };
 
 class Genre
@@ -129,9 +114,13 @@ class Genre
     friend class Author;
     friend class Book;
     friend class Data;
+    friend std::vector<Genre>::iterator findName<Genre>(std::vector<Genre>&, const std::string&);
+    friend std::ostream &operator<<(std::ostream&, const Book& );
+    friend std::ostream &operator<<(std::ostream&, const Genre& );
 public:
     Genre() = delete;
-    explicit Genre(std::string  id, std::string n): id(std::move(id)), name(std::move(n)) {};
+    Genre(const Genre& g): id(g.id), name(g.name) {addToBooks(g), addToAuthors(g);};
+    explicit Genre(std::string  no, std::string n): id(std::move(no)), name(std::move(n)) {};
     Genre& operator=(const Genre& rhs);
     ~Genre();
 
@@ -139,7 +128,7 @@ public:
     void addBook(Book& );
     void remAuthor(Author& );
     void remBook(Book& );
-    void print();
+    bool check(const std::string& s);
 
 private:
     void addToBooks(const Genre& );
@@ -151,7 +140,7 @@ private:
     std::string name;
     std::unordered_set<Book*> books;
     std::unordered_set<Author*> authors;
-    bool check(const std::string& s);
+
 };
 
 class Data // SINGLETON for storing all the nested structures
@@ -159,6 +148,9 @@ class Data // SINGLETON for storing all the nested structures
     friend class Book;
     friend class Genre;
     friend class Author;
+    friend Book* newBook();
+    friend void manageBook();
+    friend void editBookAuthor(Book* );
 public:
     Data(Data const&) = delete; //Deleted because it's a singleton. We use & instead
     void operator=(Data const&) = delete; //No copying!
@@ -173,7 +165,7 @@ public:
     void printbooks();
     void printCredentials(bool isadmin); //Just prints all the USERNAMES in the muser or madm
     static std::string genId();
-    bool delAccount(std::string l, const bool& isadmin);
+    bool delAccount(const std::string& l, const bool& isadmin);
     void uinit(); //Reads the data from "user.txt" and puts it into the Data::muser
     void bookinit(); //Reads the data from "books.txt" and puts it into the Data::vBooks
     void adminit(); //Reads the data from "admin.txt" and puts it into the Data::madm
@@ -182,7 +174,7 @@ public:
     void createAccount(const std::string& l, const std::string& p, const bool& isadmin);
     size_t enumAccounts(bool isadmin);
     void changePass(const std::string& l, const std::string& p, const bool& isadmin);
-    const Book* searchBook(const std::string& s);
+    std::vector<Book*> searchBook(const std::string& s);
 
     const std::string loginprompt = "\n Enter the login or \"exit\" to exit:";
     const std::string passprompt = "Enter the password or \"exit\" to exit:";
@@ -199,3 +191,17 @@ private:
     std::map<std::string, std::string> madm; //same
 
 };
+
+template<typename T>
+typename std::vector<T>::iterator findName(std::vector<T>& vec, const std::string& title)
+{
+    for (auto it = vec.begin(); it != vec.end(); ++it)
+    {
+        if (it->name == title ) return it;
+    }
+    return vec.end();
+}
+
+template std::vector<Author>::iterator findName(std::vector<Author>&, const std::string&);
+template std::vector<Genre>::iterator findName(std::vector<Genre>&, const std::string&);
+template std::vector<Book>::iterator findName(std::vector<Book>&, const std::string&);

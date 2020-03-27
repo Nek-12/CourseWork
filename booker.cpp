@@ -45,19 +45,24 @@ void Book::remGenre(Genre& g)
     genres.erase(&g);
     g.remBook(*this);
 }
-void Book::print()
+std::ostream &operator<<(std::ostream &os, const Book& b)
 {
-    std::cout << id << ", " << year << ", " << name << "\n Authors: \n";
-    for (const auto& a: authors)
+    os << b.id << "\n" << b.name << "\n" << std::setfill('0') << std::setw(4) << b.year << "\n";
+    std::string delim;
+    for (auto& g: b.genres)
     {
-        std::cout << a->name << ", ";
+        os << delim << g->name;
+        delim = ',';
     }
-    std::cout << "\n Genres: \n";
-    for (const auto& g: genres)
+    os << "\n";
+    delim.clear();
+    for (auto& a: b.authors)
     {
-        std::cout << g->name << ", ";
+        os << delim << a->name;
+        delim = ',';
     }
-    std::cout << std::endl;
+    os << "\n" << std::setfill(' ') << std::endl;
+    return os;
 }
 
 void Book::addToGenres(const Book& b)
@@ -82,11 +87,11 @@ void Book::remFromAuthors()
 }
 bool Book::check(const std::string& s)
 {
-    if (s == name || s == std::to_string(year) || s == id ) return true;
+    if (name.find(s) != std::string::npos || s == std::to_string(year) || s == id ) return true;
     for (auto el: genres)
-        if (el->name == s) return true;
+        if (el->name.find(s) != std::string::npos) return true;
     for (auto el: authors)
-        if (el->name == s) return true;
+        if (el->name.find(s) != std::string::npos) return true;
     return false;
 }
 
@@ -155,23 +160,20 @@ void Genre::remBook(Book& b)
     books.erase(&b);
     b.remGenre(*this);
 }
-void Genre::print()
+std::ostream& operator<<(std::ostream &os, const Genre& g)
 {
-    std::cout << id << ", " << name << "\n Authors: \n";
-    for (const auto& a: authors)
-    {
-        std::cout << a->name << ", ";
-    }
-    std::cout << "\n Books: \n";
-    for (const auto& b: books)
-    {
-        std::cout << b->name << ", ";
-    }
-    std::cout << std::endl;
+    os << g.id << "\n" << g.name << "\n";
+    return os;
 }
+
 bool Genre::check(const std::string& s)
 {
-    return (s == name || s == id );
+    if (name.find(s) != std::string::npos || s == id ) return true;
+    for (auto el: books)
+        if (el->name.find(s) != std::string::npos) return true;
+    for (auto el: authors)
+        if (el->name.find(s) != std::string::npos) return true;
+    return false;
 }
 
 //AUTHOR
@@ -238,19 +240,10 @@ void Author::remBook(Book& b)
     books.erase(&b);
     b.remAuthor(*this);
 }
-void Author::print()
+std::ostream& operator<<(std::ostream &os, const Author& a)
 {
-    std::cout << id << ", " << name << ", " << country << ", " << date << "\n Books: \n";
-    for (const auto& b: books)
-    {
-        std::cout << b->name << ", ";
-    }
-    std::cout << "\n Genres: \n";
-    for (const auto& g: genres)
-    {
-        std::cout << g->name << ", ";
-    }
-    std::cout << std::endl;
+    os << a.id << "\n" << a.name << "\n" << a.date << "\n" << a.country << "\n";
+    return os;
 }
 bool Author::check(const std::string& s)
 {

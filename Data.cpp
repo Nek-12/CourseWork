@@ -5,7 +5,6 @@
 #include <fstream>
 #include <filesystem>
 
-//TODO: Remove output from class functions maybe
 
 std::string Data::genId()
 {
@@ -16,7 +15,7 @@ std::string Data::genId()
 
 void Data::printbooks()
 {
-    TablePrinter tp; //Makes use of table_printer library
+    TablePrinter tp;
     tp.alignCenter();
     tp.setPadding(1);
     tp.setDashedRawsStyle();
@@ -39,7 +38,7 @@ void Data::printbooks()
     tp.print();
 }
 
-bool Data::delAccount(std::string l, const bool& isadmin)
+bool Data::delAccount(const std::string& l, const bool& isadmin)
 {
     if (isadmin)
     {
@@ -53,6 +52,7 @@ bool Data::delAccount(std::string l, const bool& isadmin)
         if (sought == muser.end()) return false;
         muser.erase(sought);
     }
+    return true;
 }
 
 void Data::printCredentials(bool isAdmin)
@@ -63,18 +63,19 @@ void Data::printCredentials(bool isAdmin)
     std::cout << std::endl;
 }
 
-inline bool Data::passCheck(const std::string& l, const std::string& p, const bool& isadmin)
+bool Data::passCheck(const std::string& l, const std::string& p, const bool& isadmin)
 { return ((isadmin ? madm.find(l) : muser.find(l))->second == hash(p)); }
 
-inline bool Data::loginCheck(std::string& s, bool isadmin)
+bool Data::loginCheck(std::string& s, bool isadmin)
 { return (isadmin ? madm.find(s) != madm.end() : madm.find(s) != muser.end()); }
 
-inline void Data::createAccount(const std::string& l, const std::string& p, const bool& isadmin)
+void Data::createAccount(const std::string& l, const std::string& p, const bool& isadmin)
 { (isadmin ? madm : muser)[l] = hash(p); }
 
-inline size_t Data::enumAccounts(bool isadmin)
+size_t Data::enumAccounts(bool isadmin)
 { return (isadmin? madm.size() : muser.size()); }
-inline void Data::changePass(const std::string& l, const std::string& p, const bool& isadmin)
+
+void Data::changePass(const std::string& l, const std::string& p, const bool& isadmin)
 { (isadmin ? madm : muser )[l] = hash(p); }
 
 void Data::ensureFileExists(const std::string& f)
@@ -88,11 +89,12 @@ void Data::ensureFileExists(const std::string& f)
     }
 }
 
-const Book* Data::searchBook(const std::string& s)
+std::vector<Book*> Data::searchBook(const std::string& s)
 {
-    for (auto it = vbooks.begin(); it != vbooks.end(); ++it)
-        if ( it->check(s)) return &(*it);
-    return nullptr;
+    std::vector<Book*> vret;
+    for (auto book : vbooks)
+        if (book.check(s)) vret.push_back(&book);
+    return vret;
 }
 
 void Data::bookinit() //TODO: Optimize
@@ -104,7 +106,6 @@ void Data::bookinit() //TODO: Optimize
     std::ifstream bf(path + bfname);
     std::ifstream gf(path + gfname);
     std::ifstream af(path + afname);
-//TODO: Possible problems with case sensitivity;
     while (gf) //Genres
     {
         std::string id, name;
@@ -112,7 +113,13 @@ void Data::bookinit() //TODO: Optimize
         if (!readString(gf, name, 's')) continue;
         vgenres.emplace_back(id, name);
         getline(gf, name); //Ignores 1 line. TODO:Test
+        std::cout << "Read genre" << std::endl;
+
     }
+#ifndef NDEBUG
+    std::cout << "Successfully read genres"<< std::endl;
+    system("pause");
+#endif
     while (af) //Authors
     {
         std::string id, name, date, country;
@@ -122,8 +129,12 @@ void Data::bookinit() //TODO: Optimize
         if (!readString(gf, country, 's')) continue;
         vauthors.emplace_back(id, name, date, country);
         getline(gf, name); //Ignores 1 line. TODO:Test
+        std::cout << "Read author" << std::endl;
     }
-
+#ifndef NDEBUG
+    std::cout << "Successfully read authors"<< std::endl;
+    system("pause");
+#endif
     while (bf)
     {
         std::string id, title, year, temp, entry;
@@ -131,7 +142,7 @@ void Data::bookinit() //TODO: Optimize
         if (!readString(gf, title, 's')) continue;
         if (!readString(gf, year, 'y')) continue;
         Book& curbook = vbooks.emplace_back(id, title, stoi(year));
-
+        std::cout << "Read book" << std::endl;
         std::stringstream ss(temp);
         //Place genres
         if (!readString(gf, temp, 's')) continue;
@@ -156,7 +167,12 @@ void Data::bookinit() //TODO: Optimize
                 sought->addBook(curbook);
         }
         getline(gf, temp); //Ignores 1 line. TODO:Test
+        std::cout << "Linked book" << std::endl;
     }
+#ifndef NDEBUG
+    std::cout << "Successfully read books"<< std::endl;
+    system("pause");
+#endif
 }
 
 void Data::uinit()
@@ -220,27 +236,10 @@ void Data::save()
     for (auto& el: muser)
         fusr << el.first << "\n" << el.second << "\n" << std::endl;
     for (auto& el: vgenres)
-        fusr << el.id << "\n" << el.name << "\n" << std::endl;
+        fg << el << std::endl;
     for (auto& el: vauthors)
-        fusr << el.id << "\n" << el.name << "\n" << el.date << "\n" << el.country << "\n" << std::endl;
-
+        fa << el << std::endl;
     for (auto& book: vbooks)
-    {
-        fb << book.id << "\n" << book.name << "\n" << std::setfill('0') << std::setw(4) << book.year << "\n";
-        std::string delim;
-        for (auto& g: book.genres)
-        {
-            fb << delim << g->name;
-            delim = ',';
-        }
-        fb << "\n";
-        delim.clear();
-        for (auto& a: book.authors)
-        {
-            fb << delim << a->name;
-            delim = ',';
-        }
-        fb << "\n" << std::endl;
-    }
+        fb << book;
     //The destructor will close the files for me
 }

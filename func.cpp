@@ -8,7 +8,6 @@ void sleep(const unsigned& ms)
     std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 }
 
-
 std::string hash(const std::string& s)
 {
     SHA256 sha256;
@@ -19,7 +18,7 @@ unsigned getCurYear()
 {
     time_t t = time(nullptr);
     tm* nowTm = localtime(&t);
-    return nowTm->tm_year + 1900;
+    return (unsigned)nowTm->tm_year + 1900;
 }
 
 bool checkDate(const std::string& s)
@@ -61,6 +60,7 @@ bool checkDate(const std::string& s)
                     msgFalse("More than 31 days");
                 else
                     return true;
+                break;
             case 4:
             case 6:
             case 9:
@@ -69,6 +69,7 @@ bool checkDate(const std::string& s)
                     msgFalse("More than 30 days");
                 else
                     return true;
+                break;
             case 2:
                 if (year % 400 == 0 || (year % 100 != 0 && year % 4 == 0))
                 {
@@ -84,6 +85,7 @@ bool checkDate(const std::string& s)
                     else
                         return true;
                 }
+                break;
             default:
                 throw std::invalid_argument("Default case when parsing month");
         }
@@ -105,17 +107,19 @@ bool checkString(const std::string& s, char mode)
 {
     auto msgFalse = [& s](const std::string& msg)
             { std::cerr << "The value " << s << " is invalid: \n" << msg << std::endl; return false; };
-    if (s.size() < 3 )
-        msgFalse("The value should be longer than 3 characters.");
+    if (s.empty())
+        msgFalse("No data?");
     switch (mode)
     {
         case 'p':
         case 'n':
+            if (s.size() < 3) msgFalse("too short");
             for (auto ch: s)
                 if (!(isalnum(ch) || ch == '.' || ch == '-' || ch == '_' || ch == '\''))
                     msgFalse("invalid characters");
             break;
         case 's':
+            if (s.size() < 3) msgFalse("too short");
             for (auto ch: s)
                 if (!(isalnum(ch) || ispunct(ch) || ch == ' '))
                     msgFalse("invalid characters");
@@ -140,7 +144,7 @@ bool readString(std::istream& is, std::string& ret, char mode = 'n')
  // 's' for strings with spaces, 'n' for normal, 'd' for date, 'p' for password
 {
     std::string s;
-    if (!std::getline(is, s)) throw std::runtime_error("Critical read failure");
+    if (!std::getline(is, s)) return false;
 
     if (checkString(s, mode))
     {

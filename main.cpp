@@ -5,15 +5,17 @@
 
 std::string path; //extern global
 
-inline void cls() {system("cls");}
+inline void cls()
+{ system("cls"); }
 
 //TODO: Implement sort, implement filtering (date)?
 //TODO: Make the book table be displayed only by request
+//TODO: Implement case insensitivity
 
 bool yesNo(const std::string& msg)
 {
     std::cout << msg << " y/n" << std::endl;
-    while(true)
+    while (true)
     {
         switch (getch())
         {
@@ -27,7 +29,31 @@ bool yesNo(const std::string& msg)
     }
 }
 
-bool passConfirm (std::string& p)
+std::string inputID()
+{
+    std::string id;
+    if (!yesNo("Generate an ID?"))
+    {
+        while (true)
+        {
+            std::cout << "Enter the ID: ";
+            readString(std::cin, id, 'i');
+            if (id.size() == 9) break;
+        }
+    }
+    else
+        id = Data::genId();
+    return id;
+}
+
+unsigned select()
+{
+    std::string s;
+    while (!readString(std::cin, s, 'i'));
+    return stoul(s);
+}
+
+bool passConfirm(std::string& p)
 {
     Data& data = Data::getInstance();
     std::string tempA, tempB;
@@ -49,73 +75,134 @@ bool passConfirm (std::string& p)
     return true;
 }
 
-std::vector<Book>::iterator searchBooks()
+std::vector<Author*> searchAuthors()
+{
+return std::vector<Author*>();
+}
+
+std::vector<Book*> searchBooks()
 {
     Data& data = Data::getInstance();
-    while(true)
+    while (true)
     {
-        bool found = false;
+        cls();
         std::string s;
         std::cout << "Enter the title of the book to search: " << std::endl;
         while (!readString(std::cin, s, 's'));
-        auto it = data.searchBook(s);
-            if ( it != )
-            {
-                std::cout << "Found this book: " << std::endl << std::endl;
-                it->print();
-                std::cout << std::endl;
-                found = true;
-                sought = it;
-                break;
-            }
-        if (!found)
-            std::cout << "Sorry, there is no such book.";
-        //if (data.vBooks().empty()) return sought;
-
-        if (yesNo("Try again?")) continue;
-        else break;
+        auto sought = data.searchBook(s);
+        if (sought.empty())
+            if (!yesNo("Nothing was found. Try again?")) return sought;
+        std::cout << "Found: " << std::endl;
+        for (auto el: sought)
+            std::cout << *el;
+        if (!yesNo("Try again?")) return sought;
     }
-    return sought;
 }
 
-void addRecord() //TODO: put exit everywhere
+void searchUI()
+{
+    std::cout << "What would you like to search? "
+                 "\n1 -> Book"
+                 "\n2 -> Author"
+                 "\nq -> Nothing" << std::endl;
+    while (true)
+    {
+        switch (getch())
+        {
+            case '1':
+                searchBooks();
+                return;
+            case '2':
+                searchAuthors();
+                return;
+            case 'q':
+                return;
+            default :
+                break;
+        }
+    }
+}
+
+Author* newAuthor()
+{
+    return nullptr;
+//TODO: First you add a book/author, then you fill it with data for pointer safety.
+// Consider what happens if you try to add an author for a nonexistent book
+}
+
+
+Author* selectAuthorFromSearch()
+{
+    std::vector<Author*> sought = searchAuthors();
+    Author* pa = nullptr;
+    if (sought.empty())
+    {
+        if (!yesNo("Nothing found. Return?")) return pa; //TODO: Implement this recursion.
+        pa = newAuthor();
+        return pa;
+    }
+    cls();
+    for (auto it = sought.begin(); it != sought.end(); ++it)
+        std::cout << "#" << it + 1 - sought.begin() << ":\n" << **it;
+    std::cout << "Select the author you wish to add" << std::endl;
+    pa = sought[select() - 1];
+    return pa;
+}
+
+
+Book* newBook() //TODO: put exit everywhere
 {
     Data& data = Data::getInstance();
-    while(true)
+    while (true)
     {
+        //cls(); TODO: ??
+        std::string n, a, id, y;
         std::cout << "Enter the title of the book" << std::endl;
-        while (!readString(std::cin, book.name, 's'));
-        std::cout << "Enter the author's name and surname" << std::endl;
-        while (!readString(std::cin, book.author, 's'));
-        std::cout << "Enter the ISBN of the book" << std::endl;
-        while (!readString(std::cin, book.isbn, 'n'));
-        std::cout << "Enter the date the book was issued" << std::endl;
-        while (!readString(std::cin, book.date, 'd'));
-        data.vBooks().push_back(book);
+        while (!readString(std::cin, n, 's'));
+        std::vector<Author*> vecpa;
+        while (true)
+        {
+            Author* pa = selectAuthorFromSearch();
+            if (pa == nullptr) return nullptr;
+            vecpa.push_back(pa);
+            if (!yesNo("Add another author to book " + n + " ?")) break;
+        }
+        id = inputID();
+        std::cout << "Enter the year the book was issued" << std::endl;
+        while (!readString(std::cin, y, 'y'));
+        Book& bref = data.vbooks.emplace_back(id, n, std::stoul(y));
+        for (auto el: vecpa)
+            bref.addAuthor(*el);
         std::cout << "Successfully added your book" << std::endl;
-
-        if (!yesNo("Add another one?")) break;
+        if (!yesNo("Add another one?")) return &bref;
     }
 }
 
-void manageRecord()
+void editBookAuthor(Book* b)
+{
+    std::string temp;
+    Author* pa = selectAuthorFromSearch();
+    if (pa == nullptr) return;
+    b->addAuthor(*pa);
+    std::cout << "Changed successfully." << std::endl;
+    sleep(WAIT_TIME_MID);
+}
+
+void manageBook()
 {
     Data& data = Data::getInstance();
     std::string temp;
-    auto result = searchBooks();
-    if (result == data.vBooks().end()) return;
+    auto sought = searchBooks();
+    if (sought.empty()) return;
     cls();
-    std::cout << std::endl;
-    result->printBook();
-
-    if (data.vBooks().empty())
-    {
-        std::cout << "There are no books in the database. Add one first." << std::endl;
-        sleep(WAIT_TIME_LONG);
-        return;
-    }
+    for (auto it = sought.begin(); it != sought.end(); ++it)
+        std::cout << "#" << it + 1 - sought.begin() << ":\n" << **it;
+    std::cout << "Select the book you wish to edit" << std::endl;
+    Book* pbook = sought[select() - 1];
     while (true)
     {
+        cls();
+        std::cout << *pbook;
         std::cout << "What to do with this record? "
                      "\n1 -> delete  "
                      "\n2 -> edit "
@@ -125,49 +212,40 @@ void manageRecord()
             case '1':
                 if (yesNo("Delete this record?"))
                 {
-                    data.vBooks().erase(result);
+                    data.vbooks.erase(findName(data.vbooks, pbook->name));
                     return;
                 }
                 else return;
             case '2':
                 while (true)
                 {
+                    cls();
+                    std::cout << *pbook;
                     std::cout << "What would you like to edit? "
-                                 "\n1 -> Title "
-                                 "\n2 -> Author "
-                                 "\n3 -> ISBN "
-                                 "\n4 -> Date issued "
+                                 "\n1 -> Title"
+                                 "\n2 -> Authors"
+                                 "\n3 -> Year"
                                  "\nq -> Nothing" << std::endl;
                     switch (getch())
                     {
                         case '1':
                             std::cout << "Enter the new title of the book: " << std::endl;
                             while (!readString(std::cin, temp, 's'));
-                            result->name = temp;
+                            pbook->name = temp;
                             std::cout << "Changed successfully." << std::endl;
                             break;
                         case '2':
-                            std::cout << "Enter the new author of the book: " << std::endl;
-                            while (!readString(std::cin, temp, 's'));
-                            result->author = temp;
-                            std::cout << "Changed successfully." << std::endl;
-                            break;
+                            editBookAuthor(pbook);
+                            return;
                         case '3':
-                            std::cout << "Enter the new ISBN of the book: " << std::endl;
-                            while (!readString(std::cin, temp, 'n'));
-                            result->isbn = temp;
-                            std::cout << "Changed successfully." << std::endl;
-                            break;
-                        case '4':
-                            std::cout << "Enter the new issue date of the book: " << std::endl;
-                            while (!readString(std::cin, temp, 'd'));
-                            result->date = temp;
+                            std::cout << "Enter the new publishment year of the book: " << std::endl;
+                            while (!readString(std::cin, temp, 'y'));
+                            pbook->year = std::stoul(temp);
                             std::cout << "Changed successfully." << std::endl;
                             break;
                         case 'q':
                             return;
                         default :
-                            std::cerr << "Wrong input. Try again." << std::endl;
                             break;
                     }
                 }
@@ -178,8 +256,7 @@ void manageRecord()
         }
     }
 }
-//TODO: Left Here. (From bottom to up)
-void manageBooks(bool isadmin)
+void management(bool isadmin)
 {
     Data& data = Data::getInstance();
     if (isadmin)
@@ -190,8 +267,8 @@ void manageBooks(bool isadmin)
             data.printbooks();
             std::cout << ":ADMIN:" << std::endl;
             std::cout << "Select an option: "
-                      << "\n1 to add a new record "
-                      << "\n2 to manage a record "
+                      << "\n1 to add a new book "
+                      << "\n2 to manage a book " //TODO: Implement changing genres, authors
                       << "\n3 to search "
                       << "\nq to go back" << std::endl;
             switch (getch())
@@ -199,13 +276,13 @@ void manageBooks(bool isadmin)
                 case 'q':
                     return;
                 case '1':
-                    addRecord();
+                    newBook();
                     break;
                 case '2':
-                    manageRecord();
+                    manageBook();
                     break;
                 case '3':
-                    searchBooks();
+                    searchUI();
                     break;
                 default:
                     break;
@@ -225,7 +302,7 @@ void manageBooks(bool isadmin)
             switch (getch())
             {
                 case '1':
-                    searchBooks();
+                    searchUI();
                     break;
                 case 'q':
                     return;
@@ -256,15 +333,15 @@ void manageUsr()
         cls();
         data.printCredentials(false);
         std::cout << data.loginprompt << std::endl;
-        while(true)
+        while (true)
         {
             while (!readString(std::cin, l, 'n'));
             if (l == "exit") return;
-            if(data.loginCheck(l, false)) break;
+            if (data.loginCheck(l, false)) break;
             else
                 std::cout << "User not found." << std::endl;
         }
-        data.delAccount(l,false);
+        data.delAccount(l, false);
         std::cout << "Deleted account " << l << std::endl;
 
         if (data.enumAccounts(false) == 0) return;
@@ -285,7 +362,7 @@ void createAccPrompt(bool isadmin)
     while (!readString(std::cin, l, 'n'));
     if (l == "exit") return;
 
-    if(data.loginCheck(l,isadmin))
+    if (data.loginCheck(l, isadmin))
     {
         std::cerr << "Such account already exists!" << std::endl;
         sleep(WAIT_TIME_LONG);
@@ -326,7 +403,7 @@ bool delDialog(const std::string& l, bool isadmin)
     return true; //Was deleted
 }
 
-void admConsole(std::string& adm, std::string& pass)
+void admConsole(std::string& adm)
 {
     while (true)
     {
@@ -342,7 +419,7 @@ void admConsole(std::string& adm, std::string& pass)
         switch (getch())
         {
             case '1':
-                manageBooks(true);
+                management(true);
                 break;
             case '2':
                 manageUsr();
@@ -369,7 +446,7 @@ void admLogin()
     Data& data = Data::getInstance();
     std::string adm, pass;
 
-    while(true)
+    while (true)
     {
         cls();
         std::cout << data.loginprompt << std::endl;
@@ -382,7 +459,7 @@ void admLogin()
         sleep(WAIT_TIME_NORMAL);
     }
 
-    while(true)
+    while (true)
     {
         cls();
         std::cout << data.passprompt << std::endl;
@@ -396,12 +473,11 @@ void admLogin()
 
     std::cout << "Success. Redirecting..." << std::endl;
     sleep(WAIT_TIME_NORMAL);
-    admConsole(adm, pass);
+    admConsole(adm);
 }
 
 
-
-void usrConsole(const std::string& usr, const std::string& pass)
+void usrConsole(const std::string& usr)
 {
     while (true)
     {
@@ -417,13 +493,14 @@ void usrConsole(const std::string& usr, const std::string& pass)
             case 'q':
                 return;
             case '1':
-                manageBooks(false);
+                management(false);
                 break;
             case '2':
-                passChange(usr,false);
+                passChange(usr, false);
                 break;
             case '0':
-                if (delDialog(usr, false)) return; else break;
+                if (delDialog(usr, false)) return;
+                else break;
             default:
                 break;
         }
@@ -435,7 +512,7 @@ void usrLogin()
     Data& data = Data::getInstance();
     std::string usr, pass;
 
-    while(true)
+    while (true)
     {
         cls();
         std::cout << data.loginprompt << std::endl;
@@ -456,12 +533,12 @@ void usrLogin()
         if (data.passCheck(usr, pass, false))
             break;
         else
-            std::cout << "Wrong password." <<std::endl;
+            std::cout << "Wrong password." << std::endl;
         sleep(WAIT_TIME_MID);
     }
     std::cout << "Success. Redirecting..." << std::endl;
     sleep(WAIT_TIME_NORMAL);
-    usrConsole(usr, pass);
+    usrConsole(usr);
 }
 
 int main(int argc, char* argv[]) try

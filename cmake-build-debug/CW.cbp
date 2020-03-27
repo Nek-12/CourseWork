@@ -17,8 +17,8 @@
 					<DistClean command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
-			<Target title="header.h">
-				<Option output="C:/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/header.h.exe" prefix_auto="0" extension_auto="0"/>
+			<Target title="CW">
+				<Option output="C:/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/CW.exe" prefix_auto="0" extension_auto="0"/>
 				<Option working_dir="C:/Users/ender/Archive/Coding/CourseWork/cmake-build-debug"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
@@ -33,14 +33,14 @@
 					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.2.0/../../../../x86_64-w64-mingw32/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 header.h"/>
+					<Build command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 CW"/>
 					<CompileFile command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
 					<Clean command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 					<DistClean command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
-			<Target title="header.h/fast">
-				<Option output="C:/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/header.h.exe" prefix_auto="0" extension_auto="0"/>
+			<Target title="CW/fast">
+				<Option output="C:/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/CW.exe" prefix_auto="0" extension_auto="0"/>
 				<Option working_dir="C:/Users/ender/Archive/Coding/CourseWork/cmake-build-debug"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
@@ -55,7 +55,7 @@
 					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.2.0/../../../../x86_64-w64-mingw32/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 header.h/fast"/>
+					<Build command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 CW/fast"/>
 					<CompileFile command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
 					<Clean command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 					<DistClean command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
@@ -83,28 +83,31 @@
 			</Target>
 		</Build>
 		<Unit filename="C:/Users/ender/Archive/Coding/CourseWork/Data.cpp">
-			<Option target="header.h"/>
+			<Option target="CW"/>
 		</Unit>
 		<Unit filename="C:/Users/ender/Archive/Coding/CourseWork/booker.cpp">
-			<Option target="header.h"/>
+			<Option target="CW"/>
 		</Unit>
 		<Unit filename="C:/Users/ender/Archive/Coding/CourseWork/func.cpp">
-			<Option target="header.h"/>
+			<Option target="CW"/>
+		</Unit>
+		<Unit filename="C:/Users/ender/Archive/Coding/CourseWork/header.h">
+			<Option target="CW"/>
 		</Unit>
 		<Unit filename="C:/Users/ender/Archive/Coding/CourseWork/main.cpp">
-			<Option target="header.h"/>
+			<Option target="CW"/>
 		</Unit>
 		<Unit filename="C:/Users/ender/Archive/Coding/CourseWork/sha256.cpp">
-			<Option target="header.h"/>
+			<Option target="CW"/>
 		</Unit>
 		<Unit filename="C:/Users/ender/Archive/Coding/CourseWork/sha256.h">
-			<Option target="header.h"/>
+			<Option target="CW"/>
 		</Unit>
 		<Unit filename="C:/Users/ender/Archive/Coding/CourseWork/table_printer.cpp">
-			<Option target="header.h"/>
+			<Option target="CW"/>
 		</Unit>
 		<Unit filename="C:/Users/ender/Archive/Coding/CourseWork/table_printer.h">
-			<Option target="header.h"/>
+			<Option target="CW"/>
 		</Unit>
 		<Unit filename="C:/Users/ender/Archive/Coding/CourseWork/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
