@@ -28,6 +28,11 @@ void Data::printbooks()
     for (const auto& book: vbooks)
     {
         std::string authors, genres;
+
+#ifndef NDEBUG
+std::cout << book.genres.size() << ", " << book.authors.size() << std::endl;
+#endif
+
         for (auto g: book.genres)
             genres += g->name + ", ";
         for (auto a: book.authors)
@@ -97,20 +102,16 @@ std::vector<Book*> Data::searchBook(const std::string& s)
     return vret;
 }
 
-void Data::bookinit() //TODO: Optimize
+void Data::genreinit() try
 {
-    std::string bfname = "books.txt", gfname = "genres.txt", afname = "authors.txt";
-    ensureFileExists(bfname);
-    ensureFileExists(gfname);
-    ensureFileExists(afname);
-    std::ifstream bf(path + bfname);
-    std::ifstream gf(path + gfname);
-    std::ifstream af(path + afname);
+std::string gfname = "genres.txt";
+ensureFileExists(gfname);
+std::ifstream gf(path + gfname);
     while (gf) //Genres
     {
         std::string id, name;
-        if (!readString(gf, id, 'i')) continue;
-        if (!readString(gf, name, 's')) continue;
+        if (!readString(gf, id, 'i')) throw std::runtime_error("genre id");
+        if (!readString(gf, name, 's')) throw std::runtime_error("genre name");
         vgenres.emplace_back(id, name);
         getline(gf, name); //Ignores 1 line. TODO:Test
         std::cout << "Read genre" << std::endl;
@@ -118,45 +119,116 @@ void Data::bookinit() //TODO: Optimize
     }
 #ifndef NDEBUG
     std::cout << "Successfully read genres"<< std::endl;
+    std::cout << "Init vgenres state: \n";
+    for(auto& el: vgenres)
+        std::cout << el << std::endl;
     system("pause");
 #endif
+}
+catch (std::runtime_error& e)
+{
+    std::cerr << "Couldn't read the file genres.txt:" << e.what() << std::endl;
+    system("pause");
+    return;
+}
+catch (std::exception& e)
+{
+    std::cout << "Fatal error in genreinit(): " << e.what() << std::endl;
+    throw;
+}
+catch (...)
+{
+    std::cout << "Unresolved error in genreinit()" << std::endl;
+    throw;
+}
+
+
+void Data::authorinit() try
+{
+    std::string afname = "authors.txt";
+    ensureFileExists(afname);
+    std::ifstream af(path + afname);
+
     while (af) //Authors
     {
-        std::string id, name, date, country;
-        if (!readString(gf, id, 'i')) continue;
-        if (!readString(gf, name, 's')) continue;
-        if (!readString(gf, date, 'd')) continue;
-        if (!readString(gf, country, 's')) continue;
-        vauthors.emplace_back(id, name, date, country);
-        getline(gf, name); //Ignores 1 line. TODO:Test
-        std::cout << "Read author" << std::endl;
+        std::string id, name, date, country, temp;
+        if (!readString(af, id, 'i')) throw std::runtime_error("author id");
+        if (!readString(af, name, 's')) throw std::runtime_error("author name");
+        if (!readString(af, date, 'd')) throw std::runtime_error("author date");
+        if (!readString(af, country, 's')) throw std::runtime_error("author country");
+        std::cout << " Read this: " << id << ' ' << name << ' ' << date << ' ' <<  country << ' ' << std::endl;
+        vauthors.emplace_back(id,name,date,country);
+        getline(af, temp); //Ignores 1 line.
     }
 #ifndef NDEBUG
     std::cout << "Successfully read authors"<< std::endl;
-    system("pause");
+    std::cout << "Init vauthors state: \n";
+    for(auto& el: vauthors)
+        std::cout << el << std::endl;
 #endif
+}
+catch (std::runtime_error& e)
+{
+    std::cerr << "Couldn't read the file authors.txt:" << e.what() << std::endl;
+    system("pause");
+    return;
+}
+catch (std::exception& e)
+{
+    std::cout << "Fatal error in authorinit(): " << e.what() << std::endl;
+    throw;
+}
+catch (...)
+{
+    std::cout << "Unresolved error in authorinit()" << std::endl;
+    throw;
+}
+
+
+void Data::bookinit() try//TODO: Optimize
+{
+    std::string bfname = "books.txt";
+    ensureFileExists(bfname);
+    std::ifstream bf(path + bfname);
     while (bf)
     {
         std::string id, title, year, temp, entry;
-        if (!readString(gf, id, 'i')) continue;
-        if (!readString(gf, title, 's')) continue;
-        if (!readString(gf, year, 'y')) continue;
+        if (!readString(bf, id, 'i')) throw std::runtime_error("book id");
+        if (!readString(bf, title, 's')) throw std::runtime_error("book name");
+        if (!readString(bf, year, 'y')) throw std::runtime_error("book year");
         Book& curbook = vbooks.emplace_back(id, title, stoi(year));
-        std::cout << "Read book" << std::endl;
-        std::stringstream ss(temp);
+        std::cout << "Current vbooks state: ";
+        for(auto& el: vbooks)
+            std::cout << el << std::endl;
+        std::cout << "Current vgenres state: ";
+        for(auto& el: vgenres)
+            std::cout << el << std::endl;
+        std::cout << "Current vauthors state: ";
+        for(auto& el: vauthors)
+            std::cout << el << std::endl;
+
         //Place genres
-        if (!readString(gf, temp, 's')) continue;
+        if (!readString(bf, temp, 's')) throw std::runtime_error("book genres");
+        std::stringstream ss(temp);
+        std::cout << "Full line:" <<  temp << std::endl << "Parts: ";
         while (getline(ss, entry, ','))
         {
+            std::cout << entry << '\n';
             auto sought = findName(vgenres, entry);
+            std::cout << "findName returned: " << (sought == vgenres.end() ? "Nothing" : sought->name) << std::endl;
             if (sought == vgenres.end()) //If we didn't find anything
-                vgenres.emplace_back(genId(), entry).addBook(curbook); //create a new genre and bind it to the book
-                //The book is bound to the genre too
+            {
+                std::cout << "Executing new genre creation" << std::endl;
+                (vgenres.emplace_back(genId(), entry)).addBook(curbook); //create a new genre and bind it to the book
+            }   //The book is bound to the genre too
             else
+            {
+                std::cout << "Executing adding pointer" << std::endl;
                 sought->addBook(curbook);
+            }
         }
         //Place authors
-        if (!readString(gf, temp, 's')) continue;
+        if (!readString(bf, temp, 's')) throw std::runtime_error("book authors");
         ss.str(temp);
         while (getline(ss, entry, ','))
         {
@@ -166,13 +238,29 @@ void Data::bookinit() //TODO: Optimize
             else
                 sought->addBook(curbook);
         }
-        getline(gf, temp); //Ignores 1 line. TODO:Test
+        getline(bf, temp); //Ignores 1 line. TODO:Test
         std::cout << "Linked book" << std::endl;
     }
 #ifndef NDEBUG
     std::cout << "Successfully read books"<< std::endl;
     system("pause");
 #endif
+}
+catch (std::runtime_error& e)
+{
+    std::cerr << "Couldn't read the file books.txt:" << e.what() << std::endl;
+    system("pause");
+    return;
+}
+catch (std::exception& e)
+{
+    std::cout << "Fatal error: " << e.what() << std::endl;
+    throw;
+}
+catch (...)
+{
+    std::cout << "Unresolved error" << std::endl;
+    throw;
 }
 
 void Data::uinit()

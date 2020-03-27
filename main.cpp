@@ -547,6 +547,8 @@ int main(int argc, char* argv[]) try
     Data& data = Data::getInstance();
     data.uinit();
     data.adminit();
+    data.genreinit();
+    data.authorinit();
     data.bookinit();
 
     path = argv[0];

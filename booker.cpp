@@ -148,7 +148,7 @@ void Genre::addAuthor(Author& a)
 void Genre::addBook(Book& b)
 {
     books.insert(&b);
-    b.addGenre(*this);
+    b.addGenre(*this);// TODO: Left here, infinite loop
 }
 void Genre::remAuthor(Author& a)
 {

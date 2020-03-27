@@ -83,7 +83,7 @@ class Author
     friend void editBookAuthor(Book* );
 public:
     Author() = delete;
-    Author(const Author& a): id(a.id), country(a.country), date(a.date) { addToGenres(a), addToBooks(a);};
+    Author(const Author& a): id(a.id), name(a.name), country(a.country), date(a.date) { addToGenres(a), addToBooks(a);};
     explicit Author(std::string no, std::string n, std::string d = "Unknown", std::string c = "Unknown"):
     id(std::move(no)), name(std::move(n)),country(std::move(c)),date(std::move(d)) {};
     Author& operator=(const Author& rhs);
@@ -180,6 +180,8 @@ public:
     const std::string passprompt = "Enter the password or \"exit\" to exit:";
     const std::string passconfirm = "Confirm the password or enter \"exit\" to exit: ";
 
+    void genreinit();
+    void authorinit();
 private:
     Data() = default;
     static void ensureFileExists(const std::string& f);
