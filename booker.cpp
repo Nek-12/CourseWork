@@ -3,6 +3,7 @@
 
 //BOOK
 
+
 Book& Book::operator=(const Book& rhs)
 {
     remFromAuthors();
@@ -79,6 +80,15 @@ void Book::remFromAuthors()
     for (auto a: authors)
         a->remBook(*this);
 }
+bool Book::check(const std::string& s)
+{
+    if (s == name || s == std::to_string(year) || s == id ) return true;
+    for (auto el: genres)
+        if (el->name == s) return true;
+    for (auto el: authors)
+        if (el->name == s) return true;
+    return false;
+}
 
 //GENRE
 
@@ -102,6 +112,7 @@ Genre::~Genre()
     remFromAuthors();
     remFromBooks();
 }
+
 
 void Genre::addToBooks(const Genre& g)
 {
@@ -157,6 +168,10 @@ void Genre::print()
         std::cout << b->name << ", ";
     }
     std::cout << std::endl;
+}
+bool Genre::check(const std::string& s)
+{
+    return (s == name || s == id );
 }
 
 //AUTHOR
@@ -236,5 +251,9 @@ void Author::print()
         std::cout << g->name << ", ";
     }
     std::cout << std::endl;
+}
+bool Author::check(const std::string& s)
+{
+    return (s == name || s == id );
 }
 

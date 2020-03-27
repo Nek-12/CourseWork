@@ -74,6 +74,7 @@ public:
     void remAuthor(Author& );
     void remGenre(Genre& );
     void print();
+    bool check(const std::string& s);
 
 private:
     void addToGenres(const Book& );
@@ -86,6 +87,7 @@ private:
     unsigned year = 0;
     std::unordered_set<Author*> authors;
     std::unordered_set<Genre*> genres;
+
 };
 
 class Author
@@ -119,6 +121,7 @@ private:
     std::unordered_set<Book*> books;
     std::unordered_set<Genre*> genres;
 
+    bool check(const std::string& s);
 };
 
 class Genre
@@ -148,6 +151,7 @@ private:
     std::string name;
     std::unordered_set<Book*> books;
     std::unordered_set<Author*> authors;
+    bool check(const std::string& s);
 };
 
 class Data // SINGLETON for storing all the nested structures
@@ -178,6 +182,7 @@ public:
     void createAccount(const std::string& l, const std::string& p, const bool& isadmin);
     size_t enumAccounts(bool isadmin);
     void changePass(const std::string& l, const std::string& p, const bool& isadmin);
+    const Book* searchBook(const std::string& s);
 
     const std::string loginprompt = "\n Enter the login or \"exit\" to exit:";
     const std::string passprompt = "Enter the password or \"exit\" to exit:";
@@ -192,4 +197,5 @@ private:
     std::vector<Book> vbooks; //Contains all the Books in the database
     std::map<std::string, std::string> muser; // holds <login, password> (hashed)
     std::map<std::string, std::string> madm; //same
+
 };

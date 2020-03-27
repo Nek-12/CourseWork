@@ -39,7 +39,7 @@ void Data::printbooks()
     tp.print();
 }
 
-bool Data::delAccount(std::string l, bool isadmin)
+bool Data::delAccount(std::string l, const bool& isadmin)
 {
     if (isadmin)
     {
@@ -86,6 +86,13 @@ void Data::ensureFileExists(const std::string& f)
         std::ofstream file(path + f);
         file.close();
     }
+}
+
+const Book* Data::searchBook(const std::string& s)
+{
+    for (auto it = vbooks.begin(); it != vbooks.end(); ++it)
+        if ( it->check(s)) return &(*it);
+    return nullptr;
 }
 
 void Data::bookinit() //TODO: Optimize

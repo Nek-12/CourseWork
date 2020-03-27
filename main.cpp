@@ -55,11 +55,11 @@ std::vector<Book>::iterator searchBooks()
     while(true)
     {
         bool found = false;
-        std::string title;
+        std::string s;
         std::cout << "Enter the title of the book to search: " << std::endl;
-        while (!readString(std::cin, title, 's'));
-        for (auto it = data.vBooks().begin(); it != data.vBooks().end(); ++it)
-            if (it->name == title)
+        while (!readString(std::cin, s, 's'));
+        auto it = data.searchBook(s);
+            if ( it != )
             {
                 std::cout << "Found this book: " << std::endl << std::endl;
                 it->print();
@@ -83,7 +83,6 @@ void addRecord() //TODO: put exit everywhere
     Data& data = Data::getInstance();
     while(true)
     {
-        Book book;
         std::cout << "Enter the title of the book" << std::endl;
         while (!readString(std::cin, book.name, 's'));
         std::cout << "Enter the author's name and surname" << std::endl;
