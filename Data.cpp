@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <filesystem>
+#include <utility>
 
 void Data::printbooks()
 {
@@ -10,23 +11,23 @@ void Data::printbooks()
     tp.setPadding(1);
     tp.setDashedRawsStyle();
     tp.addMergedColumn("Book Database");
-    tp.addColumn("Title", 30);
-    tp.addColumn("Authors", 40);
-    tp.addColumn("Genres", 40);
+    tp.addColumn("Title", 35);
+    tp.addColumn("Authors", 35);
+    tp.addColumn("Genres", 35);
     tp.addColumn("ID", 9);
-    tp.addColumn("Date", 10);
+    tp.addColumn("Year", 4);
     for (const auto& book: sb)
     {
         std::string authors, genres;
 #ifndef NDEBUG
-std::cout << book.genres.size() << ", " << book.authors.size() << std::endl;
+std::cout << book.second.genres.size() << ", " << book.second.authors.size() << std::endl;
 #endif
-        for (auto g: book.genres)
-            genres += g->name + ", ";
-        for (auto a: book.authors)
-            authors += a->name + ", ";
+        for (auto g: book.second.genres)
+            genres += g.second->name + ", ";
+        for (auto a: book.second.authors)
+            authors += a.second->name + ", ";
 //TODO: Implement multiline using libfort
-        tp << book.name << authors << genres << book.id << book.year;
+        tp << book.second.name << authors << genres << book.second.id << book.second.year;
     }
     tp.print();
 }
@@ -82,12 +83,12 @@ void Data::ensureFileExists(const std::string& f)
     }
 }
 
-std::set<Book*> Data::searchBook(const std::string& s)
+std::map<ull,Book*> Data::searchBook(const std::string& s)
 {
-    std::set<Book*> vret;
+    std::map<ull,Book*> ret;
     for (auto book : sb)
-        if (book.check(s)) vret.insert(&book);
-    return vret;
+        if (book.second.check(s)) ret.insert(std::make_pair(book.first,&book.second));
+    return ret;
 }
 
 void Data::genreinit() try
@@ -100,9 +101,8 @@ std::ifstream gf(path + gfname);
         std::string id, name;
         if (!readString(gf, id, 'i')) throw std::runtime_error("genre id");
         if (!readString(gf, name, 's')) throw std::runtime_error("genre name");
-        sg.emplace(std::stoull(id), name);
+        sg.emplace(std::make_pair(std::stoull(id), Genre(std::stoull(id),name)));
         getline(gf, name); //Ignores 1 line. TODO:Test
-
     }
 #ifndef NDEBUG
     std::cout << "Successfully read genres"<< std::endl;
@@ -140,7 +140,7 @@ void Data::authorinit() try
         if (!readString(af, date, 'd')) throw std::runtime_error("author date");
         if (!readString(af, country, 's')) throw std::runtime_error("author country");
         std::cout << " Read this: " << id << ' ' << name << ' ' << date << ' ' << country << ' ' << std::endl;
-        sa.emplace(std::stoull(id), name, date, country);
+        sa.emplace(std::make_pair(std::stoull(id),Author(std::stoull(id), name, date, country)));
         getline(af, temp); //Ignores 1 line.
     }
 #ifndef NDEBUG
@@ -173,15 +173,15 @@ void Data::bookinit() try//TODO: Optimize
 #ifndef NDEBUG
     std::cout << "Current sb state: " << std::endl;
     for (auto& el: sb)
-        std::cout << el << std::endl;
+        std::cout << el.second << std::endl;
     std::cout << "Current sg state: " << std::endl;
     for (auto& el: sg)
-        std::cout << el << std::endl;
+        std::cout << el.second << std::endl;
     std::cout << "Current sa state: " << std::endl;
     for (auto& el: sa)
-        std::cout << el << std::endl;
+        std::cout << el.second << std::endl;
 #endif
-    while (bf)
+    while (bf) //TODO: Add checks for the authorinit and genreinit
     {
         std::cout << "Starting to parse a new book " << std::endl;
         std::string id, title, year, temp, entry;
@@ -189,9 +189,9 @@ void Data::bookinit() try//TODO: Optimize
         if (!readString(bf, title, 's')) throw std::runtime_error("book name");
         if (!readString(bf, year, 'y')) throw std::runtime_error("book year");
         std::cout << "emplace_back " << id << ' ' << title << ' ' << std::stoul(year) << std::endl;
-        std::pair<std::set<Book>::iterator,bool> curbook = sb.emplace(std::stoull(id), title, std::stoul(year));
+        auto curbook = sb.emplace(std::make_pair(std::stoull(id),Book(std::stoull(id), title, std::stoul(year) ) ) );
         std::cout << "emplace_back finished\n";
-        if (!curbook.second) throw std::runtime_error("Couldn't emplace book");
+        if (!curbook.second) throw std::runtime_error("Duplicate on emplace book");
         //Place genres
         if (!readString(bf, temp, 's')) throw std::runtime_error("book genres");
         std::stringstream ss(temp);
@@ -202,12 +202,13 @@ void Data::bookinit() try//TODO: Optimize
             if (sought == nullptr) //If we didn't find anything
             {
                 std::cout << "Executing new genre creation" << std::endl;
-                ((sg.emplace(genId(), entry)).first).addBook(curbook); //create a new genre and bind it to the book
+                ull id = genID();
+                sg.emplace(std::make_pair(id, Genre(id,entry))).first->second.addBook(curbook.first->second); //create a new genre and bind it to the book
             }   //The book is bound to the genre too
             else
             {
                 std::cout << "Executing adding pointer" << std::endl;
-                sought->addBook(*(curbook.first));
+                sought->addBook(curbook.first->second);
             }
         }
 #ifndef NDEBUG
@@ -224,12 +225,13 @@ void Data::bookinit() try//TODO: Optimize
             if (sought == nullptr)
             {
                 std::cout << "Executing new author creation" << std::endl;
-                sa.emplace(genId(), entry).first->addBook(curbook.first);
+                ull id = genID();
+                sa.emplace(std::make_pair(id, Author(id,entry))).first->second.addBook(curbook.first->second);
             }
             else
             {
                 std::cout << "Executing adding pointer" << std::endl;
-                sought->addBook(curbook);
+                sought->addBook(curbook.first->second);
             }
         }
         getline(bf, temp); //Ignores 1 line. TODO:Test
@@ -318,10 +320,10 @@ void Data::save()
     for (auto& el: mu)
         fusr << el.first << "\n" << el.second << "\n" << std::endl;
     for (auto& el: sg)
-        fg << el << std::endl;
+        fg << el.second << std::endl;
     for (auto& el: sa)
-        fa << el << std::endl;
+        fa << el.second << std::endl;
     for (auto& book: sb)
-        fb << book;
+        fb << book.second;
     //The destructor will close the files for me
 }

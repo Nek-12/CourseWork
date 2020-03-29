@@ -10,7 +10,7 @@ void sleep(const unsigned& ms)
     std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 }
 
-static ull genId()
+ull genID()
 {
     static std::default_random_engine e(time(nullptr));
     static std::uniform_int_distribution<unsigned long long> rng(0, 999999999);

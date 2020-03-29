@@ -29,7 +29,7 @@ bool yesNo(const std::string& msg)
     }
 }
 
-std::string inputID()
+ull inputID()
 {
     std::string id;
     if (!yesNo("Generate an ID?"))
@@ -42,8 +42,8 @@ std::string inputID()
         }
     }
     else
-        id = Data::genId();
-    return id;
+        return genID();
+    return std::stoull(id);
 }
 
 unsigned select()
@@ -80,7 +80,7 @@ std::vector<Author*> searchAuthors()
 return std::vector<Author*>();
 }
 
-std::vector<Book*> searchBooks()
+std::map<ull,Book*> searchBooks()
 {
     Data& data = Data::getInstance();
     while (true)
@@ -94,7 +94,7 @@ std::vector<Book*> searchBooks()
             if (!yesNo("Nothing was found. Try again?")) return sought;
         std::cout << "Found: " << std::endl;
         for (auto el: sought)
-            std::cout << *el;
+            std::cout << el.second;
         if (!yesNo("Try again?")) return sought;
     }
 }
@@ -157,7 +157,8 @@ Book* newBook() //TODO: put exit everywhere
     while (true)
     {
         //cls(); TODO: ??
-        std::string n, a, id, y;
+        std::string n, a, y;
+        ull id = 0;
         std::cout << "Enter the title of the book" << std::endl;
         while (!readString(std::cin, n, 's'));
         std::vector<Author*> vecpa;
@@ -171,11 +172,11 @@ Book* newBook() //TODO: put exit everywhere
         id = inputID();
         std::cout << "Enter the year the book was issued" << std::endl;
         while (!readString(std::cin, y, 'y'));
-        Book& bref = data.sb.emplace_back(id, n, std::stoul(y));
+        auto& bres = data.sb.emplace(std::make_pair(id,Book(id, n, std::stoul(y)))).first->second;
         for (auto el: vecpa)
-            bref.addAuthor(*el);
+            bres.addAuthor(*el);
         std::cout << "Successfully added your book" << std::endl;
-        if (!yesNo("Add another one?")) return &bref;
+        if (!yesNo("Add another one?")) return &bres;
     }
 }
 
@@ -197,7 +198,7 @@ void manageBook()
     if (sought.empty()) return;
     cls();
     for (auto it = sought.begin(); it != sought.end(); ++it)
-        std::cout << "#" << it + 1 - sought.begin() << ":\n" << **it;
+        std::cout << "#" << std::distance(it, sought.begin())+1 << ":\n" << it->second;
     std::cout << "Select the book you wish to edit" << std::endl;
     Book* pbook = sought[select() - 1];
     while (true)
@@ -214,7 +215,7 @@ void manageBook()
                 if (yesNo("Delete this record?"))
                 {
                     std::cout << "I did nothing" << std::endl;
-                    //TODO: IMplement
+                    data.sb.erase(pbook->id);
                     return;
                 }
                 else return;
@@ -335,18 +336,21 @@ void manageUsr()
         cls();
         data.printCredentials(false);
         std::cout << data.loginprompt << std::endl;
-        while (true)
+        while (!readString(std::cin, l, 'n'));
+        if (l == "exit") return;
+        if (!data.loginCheck(l, false))
+            std::cout << "User not found." << std::endl;
+        else
         {
-            while (!readString(std::cin, l, 'n'));
-            if (l == "exit") return;
-            if (data.loginCheck(l, false)) break;
-            else
-                std::cout << "User not found." << std::endl;
+            data.delAccount(l, false);
+            std::cout << "Deleted account " << l << std::endl;
+            if (data.enumAccounts(false) == 0)
+            {
+                std::cout << "No accounts left. " << std::endl;
+                sleep(WAIT_TIME_NORMAL);
+                return;
+            }
         }
-        data.delAccount(l, false);
-        std::cout << "Deleted account " << l << std::endl;
-
-        if (data.enumAccounts(false) == 0) return;
         if (yesNo("Delete another one?")) continue;
         else return;
     }
@@ -360,11 +364,10 @@ void createAccPrompt(bool isadmin)
 #ifndef NDEBUG
     data.printCredentials(isadmin);
 #endif
-    std::cout << "New account: " << data.loginprompt << std::endl;
+    std::cout << data.loginprompt << std::endl;
     while (!readString(std::cin, l, 'n'));
     if (l == "exit") return;
-
-    if (data.loginCheck(l, isadmin))
+    if (!data.loginCheck(l, isadmin)) //TODO: Why is it behaving strangely
     {
         std::cerr << "Such account already exists!" << std::endl;
         sleep(WAIT_TIME_LONG);
@@ -372,9 +375,9 @@ void createAccPrompt(bool isadmin)
     }
     if (!passConfirm(p)) return;
     data.createAccount(l, p, isadmin);
-    std::cout << "Successfully created account " << l << " ! Going back...";
+    std::cout << "Successfully created account " << l << " ! Going back..." << std::endl;
 #ifndef NDEBUG
-    data.printCredentials(false);
+    data.printCredentials(isadmin);
 #endif
     sleep(WAIT_TIME_LONG);
 }
@@ -398,6 +401,7 @@ bool delDialog(const std::string& l, bool isadmin)
     if (!data.delAccount(l, isadmin))
     {
         std::cerr << "You can't delete the last account!" << std::endl;
+        sleep(WAIT_TIME_NORMAL);
         return false;
     }
     std::cout << "Deleted account  " << l << std::endl;

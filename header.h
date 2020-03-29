@@ -24,8 +24,9 @@ class Genre;
 class Author;
 class Data;
 class Book;
-static ull genId();
+ull genID();
 void cls();
+bool checkString(const std::string&, char);
 std::string lowercase(const std::string& );
 void sleep(const unsigned& ); // const unsigned - milliseconds to sleep, uses std::this_thread::sleep_for
 std::string hash(const std::string& s); //uses sha256.cpp and sha256.h for encrypting passwords, outputs hashed string
@@ -34,7 +35,7 @@ bool readString(std::istream& is, std::string& s, char mode);
 // 's' for strings with spaces, 'n' for normal, 'd' for date, 'p' for passwords
 
 template<typename T>
-T* findName(std::vector<T>& vec, const std::string& title);
+T* findName(std::map<ull,T>& map, const std::string& title);
 
 
 class Book //contains data about book entries
@@ -43,7 +44,7 @@ class Book //contains data about book entries
     friend class Genre; //TODO: Add move-constructors
     friend class Data;
 
-    friend Book* findName<Book>(std::set<Book>&, const std::string&); //TODO: Remove this mess
+    friend Book* findName<Book>(std::map<ull,Book>&, const std::string&); //TODO: Remove this mess
     friend void manageBook();
     friend std::ostream& operator<<(std::ostream&, const Book&);
 public:
@@ -82,8 +83,8 @@ private:
     ull id; //unique book number
     std::string name;
     unsigned year = 0;
-    std::set<Author*> authors;
-    std::set<Genre*> genres;
+    std::map<ull,Author*> authors;
+    std::map<ull,Genre*> genres;
 
 };
 
@@ -93,7 +94,7 @@ class Author
     friend class Genre;
     friend class Data;
 
-    friend Author* findName<Author>(std::set<Author>&, const std::string&);
+    friend Author* findName<Author>(std::map<ull,Author>&, const std::string&);
     friend std::ostream& operator<<(std::ostream&, const Book&);
     friend std::ostream& operator<<(std::ostream& os, const Author& a);
     friend void editBookAuthor(Book*);
@@ -129,8 +130,8 @@ private:
     std::string name;
     std::string country;
     std::string date;
-    std::set<Book*> books;
-    std::set<Genre*> genres;
+    std::map<ull,Book*> books;
+    std::map<ull,Genre*> genres;
 };
 
 class Genre
@@ -139,7 +140,7 @@ class Genre
     friend class Book;
     friend class Data;
 
-    friend Genre* findName<Genre>(std::set<Genre>&, const std::string&);
+    friend Genre* findName<Genre>(std::map<ull,Genre>&, const std::string&);
     friend std::ostream& operator<<(std::ostream&, const Book&);
     friend std::ostream& operator<<(std::ostream&, const Genre&);
 public:
@@ -171,8 +172,8 @@ private:
 
     ull id;
     std::string name;
-    std::set<Book*> books;
-    std::set<Author*> authors;
+    std::map<ull,Book*> books;
+    std::map<ull,Author*> authors;
 
 };
 
@@ -206,7 +207,7 @@ public:
     void createAccount(const std::string& l, const std::string& p, const bool& isadmin);
     size_t enumAccounts(bool isadmin);
     void changePass(const std::string& l, const std::string& p, const bool& isadmin);
-    std::set<Book*> searchBook(const std::string& s);
+    std::map<ull, Book*> searchBook(const std::string& s);
 
     const std::string loginprompt = "Enter the login or \"exit\" to exit:";
     const std::string passprompt = "Enter the password or \"exit\" to exit:";
@@ -218,24 +219,24 @@ private:
     Data() = default;
     static void ensureFileExists(const std::string& f);
 
-    std::set<Genre> sg;
-    std::set<Author> sa;
-    std::set<Book> sb; //Contains all the Books in the database
+    std::map<ull,Genre> sg;
+    std::map<ull,Author> sa;
+    std::map<ull,Book> sb; //Contains all the Books in the database
     std::map<std::string, std::string> mu; // holds <login, password> (hashed)
     std::map<std::string, std::string> ma; //same
 
 };
 
 template<typename T>
-T* findName(std::set<T>& set, const std::string& title)
+T* findName(std::map<ull,T>& map, const std::string& title)
 {
-    for (auto it = set.begin(); it != set.end(); ++it)
+    for (auto it = map.begin(); it != map.end(); ++it)
     {
-        if (it->name == title) return &(*it);
+        if ((it->second).name == title) return &(it->second);
     }
     return nullptr;
 }
 
-template Author* findName(std::set<Author>&, const std::string&);
-template Genre* findName(std::set<Genre>&, const std::string&);
-template Book* findName(std::set<Book>&, const std::string&);
+template Author* findName(std::map<ull,Author>&, const std::string&);
+template Genre* findName(std::map<ull,Genre>&, const std::string&);
+template Book* findName(std::map<ull,Book>&, const std::string&);
