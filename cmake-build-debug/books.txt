@@ -1,0 +1,77 @@
+465789132
+War and Peace
+1865
+Novel,Historical
+L. Tolstoy
+
+465646746
+Smertniki
+2011
+Novel,Fantasy,Mystery,Thriller
+E. Proshkin,O. Ovchinnikov
+
+478949613
+Palachi
+2011
+Novel,Fantasy,Thriller
+E. Proshkin,O. Ovchinnikov
+
+547313798
+Vrag "Monolita"
+2011
+Novel,Thriller,Fantasy
+O. Ovchinnikov,E. Proshkin
+
+464987423
+The Old Man and The Sea
+1952
+Novel,Historical
+E. Hemingway
+
+546784354
+For Whom the Bell Tolls
+1940
+Novel,Historical
+E. Hemingway
+
+795409437
+The Killers
+1927
+Novel,Historical
+E. Hemingway
+
+649874137
+Shakespeare: Poems
+0000
+Poetry
+W. Shakespeare
+
+458974318
+Harry Potter and the Philosopher's Stone
+1997
+Novel,Fantasy
+J. Rowling
+
+564498799
+Harry Potter and the Deathly Hallows
+2007
+Novel,Fantasy
+J.Rowling
+
+549871547
+Lolita
+1955
+Novel,Romance,Drama
+V. Nabokov
+
+468431358
+The Theory of Everything
+2002
+Science
+E. Hemingway
+
+654843213
+A Brief History of Time
+1988
+Science
+E. Hemingway
