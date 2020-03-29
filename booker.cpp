@@ -1,8 +1,6 @@
 #include "header.h"
-#include <iostream>
 
 //BOOK
-
 
 Book& Book::operator=(const Book& rhs)
 {
@@ -89,7 +87,7 @@ void Book::remFromAuthors()
 bool Book::check(const std::string& s)
 {
     std::cout << "Function check was given " << s;
-    if (name.find(s) != std::string::npos || s == std::to_string(year) || s == id ) return true;
+    if (name.find(s) != std::string::npos || s == std::to_string(year) || std::stoull(s) == id ) return true;
     for (auto el: genres)
         if (el->name.find(s) != std::string::npos) return true;
     for (auto el: authors)
@@ -251,6 +249,6 @@ std::ostream& operator<<(std::ostream &os, const Author& a)
 }
 bool Author::check(const std::string& s)
 {
-    return (s == name || s == id );
+    return (s == name || std::stoull(s) == id );
 }
 

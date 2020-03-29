@@ -3,9 +3,18 @@
 #include "sha256.h"
 #include <thread>
 #include <regex>
+#include <random>
+#include <ctime>
 void sleep(const unsigned& ms)
 {
     std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+}
+
+static ull genId()
+{
+    static std::default_random_engine e(time(nullptr));
+    static std::uniform_int_distribution<unsigned long long> rng(0, 999999999);
+    return rng(e);
 }
 
 std::string hash(const std::string& s)

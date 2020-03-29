@@ -2,8 +2,9 @@
 #pragma once
 #include <map>
 #include "table_printer.h"
-#include <unordered_set>
-#include <vector>
+#include <set>
+#include <iostream>
+using ull = unsigned long long;
 
 enum
 {
@@ -23,6 +24,7 @@ class Genre;
 class Author;
 class Data;
 class Book;
+static ull genId();
 void cls();
 std::string lowercase(const std::string& );
 void sleep(const unsigned& ); // const unsigned - milliseconds to sleep, uses std::this_thread::sleep_for
@@ -38,29 +40,30 @@ T* findName(std::vector<T>& vec, const std::string& title);
 class Book //contains data about book entries
 {
     friend class Author;
-
-    friend class Genre;
-
+    friend class Genre; //TODO: Add move-constructors
     friend class Data;
 
-    friend Book* findName<Book>(std::vector<Book>&, const std::string&);
+    friend Book* findName<Book>(std::set<Book>&, const std::string&); //TODO: Remove this mess
     friend void manageBook();
     friend std::ostream& operator<<(std::ostream&, const Book&);
 public:
-    Book(Book&& b) noexcept: id(b.id), name(std::move(b.name)), year(b.year), authors(b.authors), genres(b.genres)
+    Book(Book&& b) noexcept: id(b.id), name(std::move(b.name)), year(b.year), authors(std::move(b.authors)), genres(std::move(b.genres))
     {
-        genres.clear();
-        authors.clear();
+        std::cout << "Book " << b.name << " was moved" << std::endl;
+        b.genres.clear();
+        b.authors.clear();
     }
     Book() = delete;
     Book(const Book& b) : id(b.id), name(b.name), year(b.year)
     {
         addToGenres(b);
         addToAuthors(b);
-        std::cout << name << " was created\n";
+        std::cout << name << " was copy-constructed\n";
     };
-    explicit Book(std::string n, std::string t, unsigned y = 0) : id(std::move(n)), name(std::move(t)), year(y)
-    {};
+    explicit Book(ull n, std::string t, unsigned y = 0) : id(n), name(std::move(t)), year(y)
+    {
+        std::cout << name << " was created \n";
+    };
     Book& operator=(const Book& rhs);
     ~Book();
 
@@ -69,45 +72,44 @@ public:
     void remAuthor(Author&);
     void remGenre(Genre&);
 
-    bool check(const std::string& s);
-
 private:
     void addToGenres(const Book&);
     void addToAuthors(const Book&);
     void remFromGenres();
     void remFromAuthors();
+    bool check(const std::string& s);
 
-    std::string id; //unique book number
+    ull id; //unique book number
     std::string name;
     unsigned year = 0;
-    std::unordered_set<Author*> authors;
-    std::unordered_set<Genre*> genres;
+    std::set<Author*> authors;
+    std::set<Genre*> genres;
 
 };
 
 class Author
 {
     friend class Book;
-
     friend class Genre;
-
     friend class Data;
 
-    friend Author* findName<Author>(std::vector<Author>&, const std::string&);
+    friend Author* findName<Author>(std::set<Author>&, const std::string&);
     friend std::ostream& operator<<(std::ostream&, const Book&);
     friend std::ostream& operator<<(std::ostream& os, const Author& a);
     friend void editBookAuthor(Book*);
 public:
     Author() = delete;
-
     Author(const Author& a) : id(a.id), name(a.name), country(a.country), date(a.date)
     {
-        addToGenres(a), addToBooks(a);
+        addToGenres(a);
+        addToBooks(a);
+        std::cout << name << " was copy-constructed\n";
+    };
+    explicit Author(ull no, std::string n, std::string d = "Unknown", std::string c = "Unknown") :
+    id(no), name(std::move(n)), country(std::move(c)), date(std::move(d))
+    {
         std::cout << name << " was created\n";
     };
-    explicit Author(std::string no, std::string n, std::string d = "Unknown", std::string c = "Unknown") :
-            id(std::move(no)), name(std::move(n)), country(std::move(c)), date(std::move(d))
-    {};
     Author& operator=(const Author& rhs);
     ~Author();
 
@@ -123,31 +125,35 @@ private:
     void remFromBooks();
     void remFromGenres();
 
-    std::string id;
+    ull id;
     std::string name;
     std::string country;
     std::string date;
-    std::unordered_set<Book*> books;
-    std::unordered_set<Genre*> genres;
+    std::set<Book*> books;
+    std::set<Genre*> genres;
 };
 
 class Genre
 {
     friend class Author;
-
     friend class Book;
-
     friend class Data;
 
-    friend Genre* findName<Genre>(std::vector<Genre>&, const std::string&);
+    friend Genre* findName<Genre>(std::set<Genre>&, const std::string&);
     friend std::ostream& operator<<(std::ostream&, const Book&);
     friend std::ostream& operator<<(std::ostream&, const Genre&);
 public:
     Genre() = delete;
     Genre(const Genre& g) : id(g.id), name(g.name)
-    { addToBooks(g), addToAuthors(g); };
-    explicit Genre(std::string no, std::string n) : id(std::move(no)), name(std::move(n))
-    {};
+    {
+        std::cout << name << " was copy-constructed\n";
+    addToBooks(g);
+    addToAuthors(g);
+    };
+    explicit Genre(ull no, std::string n) : id(no), name(std::move(n))
+    {
+        std::cout << name << " was created\n";
+    };
     Genre& operator=(const Genre& rhs);
     ~Genre();
 
@@ -163,10 +169,10 @@ private:
     void remFromBooks();
     void remFromAuthors();
 
-    std::string id;
+    ull id;
     std::string name;
-    std::unordered_set<Book*> books;
-    std::unordered_set<Author*> authors;
+    std::set<Book*> books;
+    std::set<Author*> authors;
 
 };
 
@@ -175,7 +181,7 @@ class Data // SINGLETON for storing all the nested structures
     friend class Book;
     friend class Genre;
     friend class Author;
-    friend Book* newBook();
+    friend Book* newBook(); //TODO: Remove this mess
     friend void manageBook();
     friend void editBookAuthor(Book* );
 public:
@@ -190,18 +196,17 @@ public:
 
     void save(); //Writes the data to the files (books.txt etc.)
     void printbooks();
-    void printCredentials(bool isadmin); //Just prints all the USERNAMES in the muser or madm
-    static std::string genId();
+    void printCredentials(bool isadmin); //Just prints all the USERNAMES in the mu or ma
     bool delAccount(const std::string& l, const bool& isadmin);
-    void uinit(); //Reads the data from "user.txt" and puts it into the Data::muser
+    void uinit(); //Reads the data from "user.txt" and puts it into the Data::mu
     void bookinit(); //Reads the data from "books.txt" and puts it into the Data::vBooks
-    void adminit(); //Reads the data from "admin.txt" and puts it into the Data::madm
+    void adminit(); //Reads the data from "admin.txt" and puts it into the Data::ma
     bool passCheck(const std::string& l, const std::string& p, const bool& isadmin);
     bool loginCheck(std::string& s, bool isadmin);
     void createAccount(const std::string& l, const std::string& p, const bool& isadmin);
     size_t enumAccounts(bool isadmin);
     void changePass(const std::string& l, const std::string& p, const bool& isadmin);
-    std::vector<Book*> searchBook(const std::string& s);
+    std::set<Book*> searchBook(const std::string& s);
 
     const std::string loginprompt = "Enter the login or \"exit\" to exit:";
     const std::string passprompt = "Enter the password or \"exit\" to exit:";
@@ -213,24 +218,24 @@ private:
     Data() = default;
     static void ensureFileExists(const std::string& f);
 
-    std::vector<Genre> vgenres;
-    std::vector<Author> vauthors;
-    std::vector<Book> vbooks; //Contains all the Books in the database
-    std::map<std::string, std::string> muser; // holds <login, password> (hashed)
-    std::map<std::string, std::string> madm; //same
+    std::set<Genre> sg;
+    std::set<Author> sa;
+    std::set<Book> sb; //Contains all the Books in the database
+    std::map<std::string, std::string> mu; // holds <login, password> (hashed)
+    std::map<std::string, std::string> ma; //same
 
 };
 
 template<typename T>
-T* findName(std::vector<T>& vec, const std::string& title)
+T* findName(std::set<T>& set, const std::string& title)
 {
-    for (auto it = vec.begin(); it != vec.end(); ++it)
+    for (auto it = set.begin(); it != set.end(); ++it)
     {
         if (it->name == title) return &(*it);
     }
     return nullptr;
 }
 
-template Author* findName(std::vector<Author>&, const std::string&);
-template Genre* findName(std::vector<Genre>&, const std::string&);
-template Book* findName(std::vector<Book>&, const std::string&);
+template Author* findName(std::set<Author>&, const std::string&);
+template Genre* findName(std::set<Genre>&, const std::string&);
+template Book* findName(std::set<Book>&, const std::string&);

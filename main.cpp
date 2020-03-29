@@ -171,7 +171,7 @@ Book* newBook() //TODO: put exit everywhere
         id = inputID();
         std::cout << "Enter the year the book was issued" << std::endl;
         while (!readString(std::cin, y, 'y'));
-        Book& bref = data.vbooks.emplace_back(id, n, std::stoul(y));
+        Book& bref = data.sb.emplace_back(id, n, std::stoul(y));
         for (auto el: vecpa)
             bref.addAuthor(*el);
         std::cout << "Successfully added your book" << std::endl;

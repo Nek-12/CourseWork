@@ -1,17 +1,7 @@
 #include "header.h"
-#include <random>
-#include <ctime>
-#include <iostream>
+
 #include <fstream>
 #include <filesystem>
-
-
-std::string Data::genId()
-{
-    static std::default_random_engine e(time(nullptr));
-    static std::uniform_int_distribution<unsigned long> rng(0, 999999999);
-    return std::to_string(rng(e));
-}
 
 void Data::printbooks()
 {
@@ -25,14 +15,12 @@ void Data::printbooks()
     tp.addColumn("Genres", 40);
     tp.addColumn("ID", 9);
     tp.addColumn("Date", 10);
-    for (const auto& book: vbooks)
+    for (const auto& book: sb)
     {
         std::string authors, genres;
-
 #ifndef NDEBUG
 std::cout << book.genres.size() << ", " << book.authors.size() << std::endl;
 #endif
-
         for (auto g: book.genres)
             genres += g->name + ", ";
         for (auto a: book.authors)
@@ -47,15 +35,15 @@ bool Data::delAccount(const std::string& l, const bool& isadmin)
 {
     if (isadmin)
     {
-        auto sought = madm.find(l);
-        if (sought == madm.end() || muser.size() < 2) return false;
-        madm.erase(sought);
+        auto sought = ma.find(l);
+        if (sought == ma.end() || mu.size() < 2) return false;
+        ma.erase(sought);
     }
     else
     {
-        auto sought = muser.find(l);
-        if (sought == muser.end()) return false;
-        muser.erase(sought);
+        auto sought = mu.find(l);
+        if (sought == mu.end()) return false;
+        mu.erase(sought);
     }
     return true;
 }
@@ -63,25 +51,25 @@ bool Data::delAccount(const std::string& l, const bool& isadmin)
 void Data::printCredentials(bool isAdmin)
 {
     std::cout << (isAdmin ? "Admin" : "User") << " credentials: " << std::endl;
-    for (const auto& el: (isAdmin ? madm : muser))
+    for (const auto& el: (isAdmin ? ma : mu))
         std::cout << el.first << "\n";
     std::cout << std::endl;
 }
 
 bool Data::passCheck(const std::string& l, const std::string& p, const bool& isadmin)
-{ return ((isadmin ? madm.find(l) : muser.find(l))->second == hash(p)); }
+{ return ((isadmin ? ma.find(l) : mu.find(l))->second == hash(p)); }
 
 bool Data::loginCheck(std::string& s, bool isadmin)
-{ return (isadmin ? madm.find(s) != madm.end() : madm.find(s) != muser.end()); }
+{ return (isadmin ? ma.find(s) != ma.end() : ma.find(s) != mu.end()); }
 
 void Data::createAccount(const std::string& l, const std::string& p, const bool& isadmin)
-{ (isadmin ? madm : muser)[l] = hash(p); }
+{ (isadmin ? ma : mu)[l] = hash(p); }
 
 size_t Data::enumAccounts(bool isadmin)
-{ return (isadmin? madm.size() : muser.size()); }
+{ return (isadmin ? ma.size() : mu.size()); }
 
 void Data::changePass(const std::string& l, const std::string& p, const bool& isadmin)
-{ (isadmin ? madm : muser )[l] = hash(p); }
+{ (isadmin ? ma : mu )[l] = hash(p); }
 
 void Data::ensureFileExists(const std::string& f)
 {
@@ -94,11 +82,11 @@ void Data::ensureFileExists(const std::string& f)
     }
 }
 
-std::vector<Book*> Data::searchBook(const std::string& s)
+std::set<Book*> Data::searchBook(const std::string& s)
 {
-    std::vector<Book*> vret;
-    for (auto book : vbooks)
-        if (book.check(s)) vret.push_back(&book);
+    std::set<Book*> vret;
+    for (auto book : sb)
+        if (book.check(s)) vret.insert(&book);
     return vret;
 }
 
@@ -112,7 +100,7 @@ std::ifstream gf(path + gfname);
         std::string id, name;
         if (!readString(gf, id, 'i')) throw std::runtime_error("genre id");
         if (!readString(gf, name, 's')) throw std::runtime_error("genre name");
-        vgenres.emplace_back(id, name);
+        sg.emplace(std::stoull(id), name);
         getline(gf, name); //Ignores 1 line. TODO:Test
 
     }
@@ -152,7 +140,7 @@ void Data::authorinit() try
         if (!readString(af, date, 'd')) throw std::runtime_error("author date");
         if (!readString(af, country, 's')) throw std::runtime_error("author country");
         std::cout << " Read this: " << id << ' ' << name << ' ' << date << ' ' << country << ' ' << std::endl;
-        vauthors.emplace_back(id, name, date, country);
+        sa.emplace(std::stoull(id), name, date, country);
         getline(af, temp); //Ignores 1 line.
     }
 #ifndef NDEBUG
@@ -183,14 +171,14 @@ void Data::bookinit() try//TODO: Optimize
     ensureFileExists(bfname);
     std::ifstream bf(path + bfname);
 #ifndef NDEBUG
-    std::cout << "Current vbooks state: " << std::endl;
-    for (auto& el: vbooks)
+    std::cout << "Current sb state: " << std::endl;
+    for (auto& el: sb)
         std::cout << el << std::endl;
-    std::cout << "Current vgenres state: " << std::endl;
-    for (auto& el: vgenres)
+    std::cout << "Current sg state: " << std::endl;
+    for (auto& el: sg)
         std::cout << el << std::endl;
-    std::cout << "Current vauthors state: " << std::endl;
-    for (auto& el: vauthors)
+    std::cout << "Current sa state: " << std::endl;
+    for (auto& el: sa)
         std::cout << el << std::endl;
 #endif
     while (bf)
@@ -201,24 +189,25 @@ void Data::bookinit() try//TODO: Optimize
         if (!readString(bf, title, 's')) throw std::runtime_error("book name");
         if (!readString(bf, year, 'y')) throw std::runtime_error("book year");
         std::cout << "emplace_back " << id << ' ' << title << ' ' << std::stoul(year) << std::endl;
-        Book& curbook = vbooks.emplace_back(id, title, std::stoul(year));
+        std::pair<std::set<Book>::iterator,bool> curbook = sb.emplace(std::stoull(id), title, std::stoul(year));
         std::cout << "emplace_back finished\n";
+        if (!curbook.second) throw std::runtime_error("Couldn't emplace book");
         //Place genres
         if (!readString(bf, temp, 's')) throw std::runtime_error("book genres");
         std::stringstream ss(temp);
         while (getline(ss, entry, ','))
         {
-            Genre* sought = findName(vgenres, entry);
+            Genre* sought = findName(sg, entry);
             std::cout << "findName returned: " << (sought == nullptr ? "Nothing" : sought->name) << std::endl;
             if (sought == nullptr) //If we didn't find anything
             {
                 std::cout << "Executing new genre creation" << std::endl;
-                (vgenres.emplace_back(genId(), entry)).addBook(curbook); //create a new genre and bind it to the book
+                ((sg.emplace(genId(), entry)).first).addBook(curbook); //create a new genre and bind it to the book
             }   //The book is bound to the genre too
             else
             {
                 std::cout << "Executing adding pointer" << std::endl;
-                sought->addBook(curbook);
+                sought->addBook(*(curbook.first));
             }
         }
 #ifndef NDEBUG
@@ -230,12 +219,12 @@ void Data::bookinit() try//TODO: Optimize
         ss.str(temp);
         while (getline(ss, entry, ','))
         {
-            Author* sought = findName(vauthors, entry);
+            Author* sought = findName(sa, entry);
             std::cout << "findName returned: " << (sought == nullptr ? "Nothing" : sought->name) << std::endl;
             if (sought == nullptr)
             {
                 std::cout << "Executing new author creation" << std::endl;
-                vauthors.emplace_back(genId(), entry).addBook(curbook);
+                sa.emplace(genId(), entry).first->addBook(curbook.first);
             }
             else
             {
@@ -278,7 +267,7 @@ void Data::uinit()
     {
         if (!readString(f, login, 'n')) break;
         if (!readString(f, pass, 'n')) break;
-        muser[login] = pass; //read pass, login and add them to the map. Duplicates removed.
+        mu[login] = pass; //read pass, login and add them to the map. Duplicates removed.
         if (!std::getline(f, temp)) break;
         if (!temp.empty() && temp != " ")
             throw std::invalid_argument("File " + name + " read error, check delimiters.");
@@ -296,18 +285,18 @@ void Data::adminit()
     {
         if (!readString(f, login, 'n')) break;
         if (!readString(f, pass, 'n')) break;
-        madm[login] = pass; //read pass, login and add them to the map. Duplicates removed.
+        ma[login] = pass; //read pass, login and add them to the map. Duplicates removed.
 
         if (!std::getline(f, temp)) break;
         if (!temp.empty() && temp != " ")
             throw std::invalid_argument("File " + name + " read error, check delimiters.");
         //continues to read if f is good;
     }
-    if (madm.empty())
+    if (ma.empty())
     {
         std::cerr << "Warning! We couldn't find any valid administrator accounts. \n"
                      "Created a new one: admin | admin" << std::endl;
-        madm["admin"] = hash("admin");
+        ma["admin"] = hash("admin");
     }
 }
 
@@ -324,15 +313,15 @@ void Data::save()
     printCredentials(true);
     printCredentials(false);
 #endif
-    for (auto& el: madm)
+    for (auto& el: ma)
         fadm << el.first << "\n" << el.second << "\n" << std::endl;
-    for (auto& el: muser)
+    for (auto& el: mu)
         fusr << el.first << "\n" << el.second << "\n" << std::endl;
-    for (auto& el: vgenres)
+    for (auto& el: sg)
         fg << el << std::endl;
-    for (auto& el: vauthors)
+    for (auto& el: sa)
         fa << el << std::endl;
-    for (auto& book: vbooks)
+    for (auto& book: sb)
         fb << book;
     //The destructor will close the files for me
 }
