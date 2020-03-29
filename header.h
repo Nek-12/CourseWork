@@ -12,20 +12,22 @@ enum
     WAIT_TIME_NORMAL = 1000,
     WAIT_TIME_LONG = 2000
 };
-
 //TODO: Update comments
-
 using tprinter::TablePrinter; //allows to use the tableprinter namespace
-
 extern std::string path; //Path to the program folder, see main.cpp -> int main()
 
-class Genre;
-class Author;
 class Data;
+
 class Book;
+
+class Genre;
+
+class Author;
+
+
 void cls();
-std::string lowercase(const std::string& );
-void sleep(const unsigned& ); // const unsigned - milliseconds to sleep, uses std::this_thread::sleep_for
+std::string lowercase(const std::string&);
+void sleep(const unsigned&); // const unsigned - milliseconds to sleep, uses std::this_thread::sleep_for
 std::string hash(const std::string& s); //uses sha256.cpp and sha256.h for encrypting passwords, outputs hashed string
 bool readString(std::istream& is, std::string& s, char mode);
 //allows for reading a line from the iostream object with input check (foolproofing)
