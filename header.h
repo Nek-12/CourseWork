@@ -32,35 +32,48 @@ bool readString(std::istream& is, std::string& s, char mode);
 // 's' for strings with spaces, 'n' for normal, 'd' for date, 'p' for passwords
 
 template<typename T>
-typename std::vector<T>::iterator findName(std::vector<T>& vec, const std::string& title);
-
+T* findName(std::vector<T>& vec, const std::string& title);
 
 
 class Book //contains data about book entries
 {
     friend class Author;
+
     friend class Genre;
+
     friend class Data;
-    friend typename std::vector<Book>::iterator findName<Book>(std::vector<Book>&, const std::string&);
+
+    friend Book* findName<Book>(std::vector<Book>&, const std::string&);
     friend void manageBook();
-    friend std::ostream &operator<<(std::ostream &, const Book&);
+    friend std::ostream& operator<<(std::ostream&, const Book&);
 public:
+    Book(Book&& b) noexcept: id(b.id), name(std::move(b.name)), year(b.year), authors(b.authors), genres(b.genres)
+    {
+        genres.clear();
+        authors.clear();
+    }
     Book() = delete;
-    Book(const Book& b): id(b.id), name(b.name),year(b.year) {addToGenres(b); addToAuthors(b);} ;
-    explicit Book(std::string n, std::string  t, unsigned y = 0): id(std::move(n)), name(std::move(t)), year(y) {};
+    Book(const Book& b) : id(b.id), name(b.name), year(b.year)
+    {
+        addToGenres(b);
+        addToAuthors(b);
+        std::cout << name << " was created\n";
+    };
+    explicit Book(std::string n, std::string t, unsigned y = 0) : id(std::move(n)), name(std::move(t)), year(y)
+    {};
     Book& operator=(const Book& rhs);
     ~Book();
 
-    void addAuthor(Author& );
-    void addGenre(Genre& );
-    void remAuthor(Author& );
-    void remGenre(Genre& );
+    void addAuthor(Author&);
+    void addGenre(Genre&);
+    void remAuthor(Author&);
+    void remGenre(Genre&);
 
     bool check(const std::string& s);
 
 private:
-    void addToGenres(const Book& );
-    void addToAuthors(const Book& );
+    void addToGenres(const Book&);
+    void addToAuthors(const Book&);
     void remFromGenres();
     void remFromAuthors();
 
@@ -75,29 +88,38 @@ private:
 class Author
 {
     friend class Book;
+
     friend class Genre;
+
     friend class Data;
-    friend std::vector<Author>::iterator findName<Author>(std::vector<Author>&, const std::string&);
-    friend std::ostream &operator<<(std::ostream &, const Book& );
-    friend std::ostream& operator<<(std::ostream &os, const Author& a);
-    friend void editBookAuthor(Book* );
+
+    friend Author* findName<Author>(std::vector<Author>&, const std::string&);
+    friend std::ostream& operator<<(std::ostream&, const Book&);
+    friend std::ostream& operator<<(std::ostream& os, const Author& a);
+    friend void editBookAuthor(Book*);
 public:
     Author() = delete;
-    Author(const Author& a): id(a.id), name(a.name), country(a.country), date(a.date) { addToGenres(a), addToBooks(a);};
-    explicit Author(std::string no, std::string n, std::string d = "Unknown", std::string c = "Unknown"):
-    id(std::move(no)), name(std::move(n)),country(std::move(c)),date(std::move(d)) {};
+
+    Author(const Author& a) : id(a.id), name(a.name), country(a.country), date(a.date)
+    {
+        addToGenres(a), addToBooks(a);
+        std::cout << name << " was created\n";
+    };
+    explicit Author(std::string no, std::string n, std::string d = "Unknown", std::string c = "Unknown") :
+            id(std::move(no)), name(std::move(n)), country(std::move(c)), date(std::move(d))
+    {};
     Author& operator=(const Author& rhs);
     ~Author();
 
-    void addGenre(Genre& );
-    void addBook(Book& );
-    void remGenre(Genre& );
-    void remBook(Book& );
+    void addGenre(Genre&);
+    void addBook(Book&);
+    void remGenre(Genre&);
+    void remBook(Book&);
     bool check(const std::string& s);
 
 private:
-    void addToBooks(const Author& );
-    void addToGenres(const Author& );
+    void addToBooks(const Author&);
+    void addToGenres(const Author&);
     void remFromBooks();
     void remFromGenres();
 
@@ -112,20 +134,25 @@ private:
 class Genre
 {
     friend class Author;
+
     friend class Book;
+
     friend class Data;
-    friend std::vector<Genre>::iterator findName<Genre>(std::vector<Genre>&, const std::string&);
-    friend std::ostream &operator<<(std::ostream&, const Book& );
-    friend std::ostream &operator<<(std::ostream&, const Genre& );
+
+    friend Genre* findName<Genre>(std::vector<Genre>&, const std::string&);
+    friend std::ostream& operator<<(std::ostream&, const Book&);
+    friend std::ostream& operator<<(std::ostream&, const Genre&);
 public:
     Genre() = delete;
-    Genre(const Genre& g): id(g.id), name(g.name) {addToBooks(g), addToAuthors(g);};
-    explicit Genre(std::string  no, std::string n): id(std::move(no)), name(std::move(n)) {};
+    Genre(const Genre& g) : id(g.id), name(g.name)
+    { addToBooks(g), addToAuthors(g); };
+    explicit Genre(std::string no, std::string n) : id(std::move(no)), name(std::move(n))
+    {};
     Genre& operator=(const Genre& rhs);
     ~Genre();
 
-    void addAuthor(Author& );
-    void addBook(Book& );
+    void addAuthor(Author&);
+    void addBook(Book&);
     void remAuthor(Author& );
     void remBook(Book& );
     bool check(const std::string& s);
@@ -176,7 +203,7 @@ public:
     void changePass(const std::string& l, const std::string& p, const bool& isadmin);
     std::vector<Book*> searchBook(const std::string& s);
 
-    const std::string loginprompt = "\n Enter the login or \"exit\" to exit:";
+    const std::string loginprompt = "Enter the login or \"exit\" to exit:";
     const std::string passprompt = "Enter the password or \"exit\" to exit:";
     const std::string passconfirm = "Confirm the password or enter \"exit\" to exit: ";
 
@@ -195,15 +222,15 @@ private:
 };
 
 template<typename T>
-typename std::vector<T>::iterator findName(std::vector<T>& vec, const std::string& title)
+T* findName(std::vector<T>& vec, const std::string& title)
 {
     for (auto it = vec.begin(); it != vec.end(); ++it)
     {
-        if (it->name == title ) return it;
+        if (it->name == title) return &(*it);
     }
-    return vec.end();
+    return nullptr;
 }
 
-template std::vector<Author>::iterator findName(std::vector<Author>&, const std::string&);
-template std::vector<Genre>::iterator findName(std::vector<Genre>&, const std::string&);
-template std::vector<Book>::iterator findName(std::vector<Book>&, const std::string&);
+template Author* findName(std::vector<Author>&, const std::string&);
+template Genre* findName(std::vector<Genre>&, const std::string&);
+template Book* findName(std::vector<Book>&, const std::string&);

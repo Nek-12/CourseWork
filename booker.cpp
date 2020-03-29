@@ -21,6 +21,7 @@ Book& Book::operator=(const Book& rhs)
 }
 Book::~Book()
 {
+    std::cout << "Book " << this->name << " Destroyed" << std::endl;
     remFromAuthors();
     remFromGenres();
 }
@@ -28,22 +29,22 @@ Book::~Book()
 void Book::addAuthor(Author& a)
 {
     authors.insert(&a);
-    a.addBook(*this);
+    a.books.insert(this);
 }
 void Book::addGenre(Genre& g)
 {
     genres.insert(&g);
-    g.addBook(*this);
+    g.books.insert(this);
 }
 void Book::remAuthor(Author& a)
 {
     authors.erase(&a);
-    a.remBook(*this);
+    a.books.erase(this);
 }
 void Book::remGenre(Genre& g)
 {
     genres.erase(&g);
-    g.remBook(*this);
+    g.books.erase(this);
 }
 std::ostream &operator<<(std::ostream &os, const Book& b)
 {
@@ -87,6 +88,7 @@ void Book::remFromAuthors()
 }
 bool Book::check(const std::string& s)
 {
+    std::cout << "Function check was given " << s;
     if (name.find(s) != std::string::npos || s == std::to_string(year) || s == id ) return true;
     for (auto el: genres)
         if (el->name.find(s) != std::string::npos) return true;
@@ -114,6 +116,7 @@ Genre& Genre::operator=(const Genre& rhs)
 
 Genre::~Genre()
 {
+    std::cout << "Genre " << this->name << " Destroyed" << std::endl;
     remFromAuthors();
     remFromBooks();
 }
@@ -143,22 +146,22 @@ void Genre::remFromAuthors()
 void Genre::addAuthor(Author& a)
 {
     authors.insert(&a);
-    a.addGenre(*this);
+    a.genres.insert(this);
 }
 void Genre::addBook(Book& b)
 {
     books.insert(&b);
-    b.addGenre(*this);// TODO: Left here, infinite loop
+    b.genres.insert(this);
 }
 void Genre::remAuthor(Author& a)
 {
     authors.erase(&a);
-    a.remGenre(*this);
+    a.genres.erase(this);
 }
 void Genre::remBook(Book& b)
 {
     books.erase(&b);
-    b.remGenre(*this);
+    b.genres.erase(this);
 }
 std::ostream& operator<<(std::ostream &os, const Genre& g)
 {
@@ -195,6 +198,7 @@ Author& Author::operator=(const Author& rhs)
 }
 Author::~Author()
 {
+    std::cout << "Author " << this->name << " Destroyed" << std::endl;
     remFromBooks();
     remFromGenres();
 }
@@ -223,22 +227,22 @@ void Author::remFromGenres()
 void Author::addGenre(Genre& g)
 {
     genres.insert(&g);
-    g.addAuthor(*this);
+    g.authors.insert(this);
 }
 void Author::addBook(Book& b)
 {
     books.insert(&b);
-    b.addAuthor(*this);
+    b.authors.insert(this);
 }
 void Author::remGenre(Genre& g)
 {
     genres.erase(&g);
-    g.remAuthor(*this);
+    g.authors.erase(this);
 }
 void Author::remBook(Book& b)
 {
     books.erase(&b);
-    b.remAuthor(*this);
+    b.authors.erase(this);
 }
 std::ostream& operator<<(std::ostream &os, const Author& a)
 {

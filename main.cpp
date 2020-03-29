@@ -101,6 +101,7 @@ std::vector<Book*> searchBooks()
 
 void searchUI()
 {
+    cls();
     std::cout << "What would you like to search? "
                  "\n1 -> Book"
                  "\n2 -> Author"
@@ -212,7 +213,8 @@ void manageBook()
             case '1':
                 if (yesNo("Delete this record?"))
                 {
-                    data.vbooks.erase(findName(data.vbooks, pbook->name));
+                    std::cout << "I did nothing" << std::endl;
+                    //TODO: IMplement
                     return;
                 }
                 else return;
@@ -561,7 +563,7 @@ int main(int argc, char* argv[]) try
     std::cout << std::endl;
     data.printCredentials(true);
     std::cout << std::endl;
-    getch();
+    system("pause");
 #endif
     bool workin = true;
     while (workin)
@@ -584,7 +586,7 @@ int main(int argc, char* argv[]) try
                 break;
         }
     }
-    data.save();
+    //data.save();
     return 0;
 }
 catch (std::invalid_argument& msg)
