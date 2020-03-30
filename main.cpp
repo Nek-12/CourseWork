@@ -80,7 +80,7 @@ std::vector<Author*> searchAuthors()
 return std::vector<Author*>();
 }
 
-std::map<ull,Book*> searchBooks()
+std::vector<Book*> searchBooks()
 {
     Data& data = Data::getInstance();
     while (true)
@@ -89,12 +89,13 @@ std::map<ull,Book*> searchBooks()
         std::string s;
         std::cout << "Enter the title of the book to search: " << std::endl;
         while (!readString(std::cin, s, 's'));
+        if (s.size() < 3 ) continue;
         auto sought = data.searchBook(s);
         if (sought.empty())
             if (!yesNo("Nothing was found. Try again?")) return sought;
         std::cout << "Found: " << std::endl;
         for (auto el: sought)
-            std::cout << el.second;
+            std::cout << *el;
         if (!yesNo("Try again?")) return sought;
     }
 }
@@ -172,7 +173,7 @@ Book* newBook() //TODO: put exit everywhere
         id = inputID();
         std::cout << "Enter the year the book was issued" << std::endl;
         while (!readString(std::cin, y, 'y'));
-        auto& bres = data.sb.emplace(std::make_pair(id,Book(id, n, std::stoul(y)))).first->second;
+        auto& bres = data.sb.emplace(std::make_pair(id,Book(id, n, std::stoul(y))))->second;
         for (auto el: vecpa)
             bres.addAuthor(*el);
         std::cout << "Successfully added your book" << std::endl;
@@ -198,7 +199,7 @@ void manageBook()
     if (sought.empty()) return;
     cls();
     for (auto it = sought.begin(); it != sought.end(); ++it)
-        std::cout << "#" << std::distance(it, sought.begin())+1 << ":\n" << it->second;
+        std::cout << "#" << std::distance(it, sought.begin())+1 << ":\n" << *it;
     std::cout << "Select the book you wish to edit" << std::endl;
     Book* pbook = sought[select() - 1];
     while (true)
@@ -573,8 +574,8 @@ int main(int argc, char* argv[]) try
     while (workin)
     {
         cls();
-        std::cout << "\nWelcome. Enter \n 1 for user sign in \n 2 for admin sign in \n q to exit" << std::endl;
-        switch (tolower(getch()))
+        std::cout << "\nWelcome. \n 1 -> user sign in \n 2 -> admin sign in \n 3 -> search (debug) \n q -> exit" << std::endl;
+        switch (getchar())
         {
             case 'q':
                 workin = false;
@@ -586,11 +587,13 @@ int main(int argc, char* argv[]) try
             case '2':
                 admLogin();
                 break;
+            case '3':
+                searchBooks();
             default:
                 break;
         }
     }
-    //data.save();
+    data.save();
     return 0;
 }
 catch (std::invalid_argument& msg)
