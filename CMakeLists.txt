@@ -7,4 +7,4 @@ set(GCC_COVERAGE_COMPILE_FLAGS "-static -Wall -Wextra -Wfloat-equal -Wundef -Wca
 #
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS}")
 
-add_executable(CW header.h func.cpp main.cpp sha256.h sha256.cpp table_printer.cpp table_printer.h Data.cpp booker.cpp)
+add_executable(CW header.h func.cpp main.cpp sha256.h sha256.cpp table_printer.cpp table_printer.h Data.cpp Entry.cpp)

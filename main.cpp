@@ -173,7 +173,7 @@ Book* newBook() //TODO: put exit everywhere
         id = inputID();
         std::cout << "Enter the year the book was issued" << std::endl;
         while (!readString(std::cin, y, 'y'));
-        auto& bres = data.sb.emplace(std::make_pair(id,Book(id, n, std::stoul(y))))->second;
+        auto& bres = data.mb.emplace(std::make_pair(id, Book(id, n, std::stoul(y))))->second;
         for (auto el: vecpa)
             bres.addAuthor(*el);
         std::cout << "Successfully added your book" << std::endl;
@@ -216,7 +216,7 @@ void manageBook()
                 if (yesNo("Delete this record?"))
                 {
                     std::cout << "I did nothing" << std::endl;
-                    data.sb.erase(pbook->id);
+                    data.mb.erase(pbook->id);
                     return;
                 }
                 else return;
@@ -335,7 +335,7 @@ void manageUsr()
     while (true)
     {
         cls();
-        data.printCredentials(false);
+        data.printUsrName(false);
         std::cout << data.loginprompt << std::endl;
         while (!readString(std::cin, l, 'n'));
         if (l == "exit") return;
@@ -363,7 +363,7 @@ void createAccPrompt(bool isadmin)
     std::string l, p, temp;
     cls();
 #ifndef NDEBUG
-    data.printCredentials(isadmin);
+    data.printUsrName(isadmin);
 #endif
     std::cout << data.loginprompt << std::endl;
     while (!readString(std::cin, l, 'n'));
@@ -378,7 +378,7 @@ void createAccPrompt(bool isadmin)
     data.createAccount(l, p, isadmin);
     std::cout << "Successfully created account " << l << " ! Going back..." << std::endl;
 #ifndef NDEBUG
-    data.printCredentials(isadmin);
+    data.printUsrName(isadmin);
 #endif
     sleep(WAIT_TIME_LONG);
 }
@@ -564,9 +564,9 @@ int main(int argc, char* argv[]) try
     data.printbooks();
     std::cout << std::endl;
     std::cout << path << std::endl;
-    data.printCredentials(false);
+    data.printUsrName(false);
     std::cout << std::endl;
-    data.printCredentials(true);
+    data.printUsrName(true);
     std::cout << std::endl;
     system("pause");
 #endif

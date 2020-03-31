@@ -4,6 +4,8 @@
 #include "table_printer.h"
 #include <set>
 #include <iostream>
+#include <utility>
+#include <memory>
 using ull = unsigned long long;
 
 enum
@@ -16,177 +18,187 @@ enum
 
 //TODO: Update comments
 
-using tprinter::TablePrinter; //allows to use the tableprinter namespace
+using tprinter::TablePrinter; //allows to use the table printer namespace
 
 extern std::string path; //Path to the program folder, see main.cpp -> int main()
 
+class Entry;
 class Genre;
 class Author;
 class Data;
 class Book;
+class Account;
+class User;
+class Admin;
+
 ull genID();
 void cls();
 bool checkString(const std::string&, char);
 std::string lowercase(const std::string& );
-void sleep(const unsigned& ); // const unsigned - milliseconds to sleep, uses std::this_thread::sleep_for
+void sleep(const unsigned& ms);
 std::string hash(const std::string& s); //uses sha256.cpp and sha256.h for encrypting passwords, outputs hashed string
 bool readString(std::istream& is, std::string& s, char mode);
 //allows for reading a line from the iostream object with input check (foolproofing)
 // 's' for strings with spaces, 'n' for normal, 'd' for date, 'p' for passwords
 
-template<typename T>
-T* findName(std::multimap<ull,T>& multimap, const std::string& title);
-
-
-class Book //contains data about book entries
+class Entry
 {
-    friend class Author;
-    friend class Genre; //TODO: Add move-constructors
-    friend class Data;
-
-    friend Book* findName<Book>(std::multimap<ull,Book>&, const std::string&); //TODO: Remove this mess
-    friend void manageBook();
-    friend std::ostream& operator<<(std::ostream&, const Book&);
+    friend std::ostream& operator<<(std::ostream&, const Entry&); //Uses to_string that is virtual, applicable for any entry
+    friend bool operator== (const Entry& lhs, const Entry& rhs) { return lhs.no == rhs.no; } //applicable to any entry because of dynamic binding
 public:
-    Book(Book&& b) noexcept: id(b.id), name(std::move(b.name)), year(b.year), authors(std::move(b.authors)), genres(std::move(b.genres))
-    {
-        std::cout << "Book " << b.name << " was moved" << std::endl;
-        b.genres.clear();
-        b.authors.clear();
-    }
-    Book() = delete;
-    Book(const Book& b) : id(b.id), name(b.name), year(b.year)
-    {
-        addToGenres(b);
-        addToAuthors(b);
-        std::cout << name << " was copy-constructed\n";
-    };
-    explicit Book(ull n, std::string t, unsigned y = 0) : id(n), name(std::move(t)), year(y)
-    {
-        std::cout << name << " was created \n";
-    };
-    Book& operator=(const Book& rhs);
-    ~Book();
+    Entry() = delete; //No blank entries
+    Entry(const Entry& e) = delete; //No copies!
+    Entry(Entry&& e) noexcept: no(e.no), title(std::move(e.title)) {} //Moving is allowed
+    Entry& operator=(const Entry& ) = delete; //No copying the same entry
+    explicit Entry(std::string n, const ull& id = genID() ): no(id), title(std::move(n)) {}
+    virtual ~Entry() = default;
+    explicit operator ull() const { return no; } //for convenience
+    explicit operator std::string() const { return title; } //for convenience
+
+    [[nodiscard]] const ull& id() const {return no;}
+    [[nodiscard]] std::string name() const { return title; }
+    virtual std::string to_string() const = 0; //for operator<<
+    virtual bool check(const std::string&) = 0; //checks this with anything unlike operator==
+    void rename(const std::string& s) { title = s; }
+    virtual Entry* clone() && = 0;
+protected:
+
+private:
+    ull no; //unique id
+    std::string title;
+};
+
+class Book: public Entry
+{
+public:
+    explicit Book(const std::string& n, unsigned y, const ull& no = genID() ): Entry(n, no), year(y) {}
+    Book(Book&& b) noexcept: Entry( std::move(b)), year(b.year), authors(std::move(b.authors)), genres(std::move(b.genres)) {}
+    ~Book() override;
+
 
     void addAuthor(Author&);
     void addGenre(Genre&);
     void remAuthor(Author&);
     void remGenre(Genre&);
+    bool check(const std::string& ) override;
+    [[nodiscard]] std::string to_string() const override;
+    Book* clone() && override { return new Book(std::move(*this)); }
 
 private:
-    void addToGenres(const Book&);
-    void addToAuthors(const Book&);
-    void remFromGenres();
-    void remFromAuthors();
-    bool check(const std::string& s);
-
-    ull id; //unique book number
-    std::string name;
     unsigned year = 0;
-    std::multimap<ull,Author*> authors;
-    std::multimap<ull,Genre*> genres;
-
+    std::set<ull> authors;
+    std::set<ull> genres;
 };
 
-class Author
+class Author: public Entry
 {
-    friend class Book;
-    friend class Genre;
-    friend class Data;
-
-    friend Author* findName<Author>(std::multimap<ull,Author>&, const std::string&);
-    friend std::ostream& operator<<(std::ostream&, const Book&);
-    friend std::ostream& operator<<(std::ostream& os, const Author& a);
-    friend void editBookAuthor(Book*);
 public:
-    Author() = delete;
-    Author(const Author& a) : id(a.id), name(a.name), country(a.country), date(a.date)
-    {
-        addToGenres(a);
-        addToBooks(a);
-        std::cout << name << " was copy-constructed\n";
-    };
-    explicit Author(ull no, std::string n, std::string d = "Unknown", std::string c = "Unknown") :
-    id(no), name(std::move(n)), country(std::move(c)), date(std::move(d))
-    {
-        std::cout << name << " was created\n";
-    };
-    Author& operator=(const Author& rhs);
-    ~Author();
+    explicit Author(const std::string& n, std::string d, std::string c, const ull& no = genID()):
+    Entry(n,no), date(std::move(d)), country(std::move(c)) {}
+
+    Author(Author&& a) noexcept:
+    Entry(std::move(a)), date(std::move(a.date)), country(std::move(a.country)), books(std::move(a.books)), genres(std::move(a.genres)) {};
+
+    ~Author() override;
 
     void addGenre(Genre&);
     void addBook(Book&);
     void remGenre(Genre&);
     void remBook(Book&);
-    bool check(const std::string& s);
-
+    bool check(const std::string& s) override;
+    [[nodiscard]] std::string to_string() const override;
+    Author* clone() && override { return new Author(std::move(*this)); }
 private:
-    void addToBooks(const Author&);
-    void addToGenres(const Author&);
-    void remFromBooks();
-    void remFromGenres();
-
-    ull id;
-    std::string name;
-    std::string country;
     std::string date;
-    std::multimap<ull,Book*> books;
-    std::multimap<ull,Genre*> genres;
+    std::string country;
+    std::set<ull> books;
+    std::set<ull> genres;
 };
 
-class Genre
+class Genre: public Entry
 {
-    friend class Author;
-    friend class Book;
-    friend class Data;
-
-    friend Genre* findName<Genre>(std::multimap<ull,Genre>&, const std::string&);
-    friend std::ostream& operator<<(std::ostream&, const Book&);
-    friend std::ostream& operator<<(std::ostream&, const Genre&);
 public:
-    Genre() = delete;
-    Genre(const Genre& g) : id(g.id), name(g.name)
-    {
-        std::cout << name << " was copy-constructed\n";
-    addToBooks(g);
-    addToAuthors(g);
-    };
-    explicit Genre(ull no, std::string n) : id(no), name(std::move(n))
-    {
-        std::cout << name << " was created\n";
-    };
-    Genre& operator=(const Genre& rhs);
-    ~Genre();
+    using Entry::Entry;
+    Genre(Genre&& g) noexcept: Entry(std::move(g)), books(std::move(g.books)), authors(std::move(g.authors)) {}
+    ~Genre() override;
 
     void addAuthor(Author&);
     void addBook(Book&);
-    void remAuthor(Author& );
+    void remAuthor(Author&);
     void remBook(Book& );
-    bool check(const std::string& s);
-
+    bool check(const std::string& s) override;
+    [[nodiscard]] std::string to_string() const override;
+    Genre* clone() && override { return new Genre(std::move(*this)); }
 private:
-    void addToBooks(const Genre& );
-    void addToAuthors(const Genre& );
-    void remFromBooks();
-    void remFromAuthors();
-
-    ull id;
-    std::string name;
-    std::multimap<ull,Book*> books;
-    std::multimap<ull,Author*> authors;
-
+    std::set<ull> books;
+    std::set<ull> authors;
 };
 
-class Data // SINGLETON for storing all the nested structures
+class Account : public Entry
 {
+public:
+    explicit Account(std::string n, std::string p, const ull& id = genID() ): Entry(std::move(n),id), pass(std::move(p)) {}
+    Account(Account&& a) noexcept: Entry(std::move(a)), pass(std::move(a.pass)) {}
+    friend bool operator== (const Account& lhs, const Account& rhs) { return (lhs.name() == rhs.name() && lhs.pass == rhs.pass ); } //TODO: ???
+    explicit operator std::pair<std::string,std::string>() { return std::make_pair(name(), pass); }
+    bool check(const std::string& l) override { return name() == l; };
+    [[nodiscard]] std::string to_string() const override = 0; //for operator<<
+
+private:
+    std::string pass;
+};
+
+class User: public Account
+{
+public:
+    using Account::Account;
+    User(User&& u) noexcept: Account(std::move(u)), books(std::move(u.books)) {}
+    bool addBook(const ull& b) { return books.insert(b).second; }
+    bool remBook(const ull& b) { return (books.erase(b) != 0 ); }
+    [[nodiscard]] std::string to_string() const override;
+    User* clone() && override {return new User(std::move(*this));}
+private:
+    std::set<ull> books;
+};
+
+class Admin: public Account
+{
+public:
+    explicit Admin(std::string n, std::string p, std::string s = "Default", const ull& id = genID() ):
+    Account(std::move(n),std::move(p),id), status(std::move(s)) {}
+    Admin(Admin&& a) noexcept: Account(std::move(a)) {}
+
+    [[nodiscard]] std::string to_string() const override;
+    [[nodiscard]] std::string getStatus() const { return status; }
+    void changeStatus(const std::string& s) { status = s; }
+    Admin* clone() && override {return new Admin(std::move(*this));}
+private:
+    std::string status;
+};
+
+//template<typename T>
+//class Journal
+//{
+//public:
+//    bool insert(T&& e ); //Move only
+//    bool erase(T& e );
+//    std::shared_ptr<T>& find(const ull& ); //TODO: ??
+//private:
+//    static bool compare(const std::shared_ptr<T> &lhs, const std::shared_ptr<T> &rhs) { return lhs->id() < rhs->id(); }
+//    std::set<std::shared_ptr<T>, decltype(compare)*> entries{compare};
+//};
+
+class Data
+{
+    friend class Entry;
     friend class Book;
     friend class Genre;
     friend class Author;
-    friend Book* newBook(); //TODO: Remove this mess
-    friend void manageBook();
-    friend void editBookAuthor(Book* );
+    friend class Account;
+    friend class Admin;
+    friend class User;
 public:
-    Data(Data const&) = delete; //Deleted because it's a singleton. We use & instead
+    Data(Data const&) = delete; //No copying, moving!
     void operator=(Data const&) = delete; //No copying!
 
     static Data& getInstance() //Returns a reference to the single static instance of Data.
@@ -194,49 +206,32 @@ public:
         static Data instance;
         return instance;
     }
+    bool add(Entry& );
+    bool remove(Entry& );
+    void load();
+    void save();
+    bool replace(const Entry& e); //replace e in the container of e's
+    void print(char what); //'b' for books, 'a' for authors, 'g' for genres 'U' for users 'A' for admins
+    size_t amount(char);
+    Entry& fetch(const Entry& what);
 
-    void save(); //Writes the data to the files (books.txt etc.)
-    void printbooks();
-    void printCredentials(bool isadmin); //Just prints all the USERNAMES in the mu or ma
-    bool delAccount(const std::string& l, const bool& isadmin);
-    void uinit(); //Reads the data from "user.txt" and puts it into the Data::mu
-    void bookinit(); //Reads the data from "books.txt" and puts it into the Data::vBooks
-    void adminit(); //Reads the data from "admin.txt" and puts it into the Data::ma
     bool passCheck(const std::string& l, const std::string& p, const bool& isadmin);
     bool loginCheck(std::string& s, bool isadmin);
     void createAccount(const std::string& l, const std::string& p, const bool& isadmin);
-    size_t enumAccounts(bool isadmin);
+
     void changePass(const std::string& l, const std::string& p, const bool& isadmin);
     std::vector <Book*> searchBook(const std::string& s);
 
     const std::string loginprompt = "Enter the login or \"exit\" to exit:";
     const std::string passprompt = "Enter the password or \"exit\" to exit:";
     const std::string passconfirm = "Confirm the password or enter \"exit\" to exit: ";
-
-    void genreinit();
-    void authorinit();
+    static std::map<ull, Book> books;
+    static std::map<ull, Author> authors;
+    static std::map<ull, Genre> genres;
+    static std::map<ull, Admin> admins;
+    static std::map<ull, User> users;
 private:
+
     Data() = default;
     static void ensureFileExists(const std::string& f);
-
-    std::multimap<ull,Genre> sg;
-    std::multimap<ull,Author> sa;
-    std::multimap<ull,Book> sb; //Contains all the Books in the database
-    std::map<std::string, std::string> mu; // holds <login, password> (hashed)
-    std::map<std::string, std::string> ma; //same
-
 };
-
-template<typename T>
-T* findName(std::multimap<ull,T>& map, const std::string& title)
-{
-    for (auto it = map.begin(); it != map.end(); ++it)
-    {
-        if ((it->second).name == title) return &(it->second);
-    }
-    return nullptr;
-}
-
-template Author* findName(std::multimap<ull,Author>&, const std::string&);
-template Genre* findName(std::multimap<ull,Genre>&, const std::string&);
-template Book* findName(std::multimap<ull,Book>&, const std::string&);

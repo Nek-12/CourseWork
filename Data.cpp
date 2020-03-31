@@ -16,15 +16,15 @@ void Data::printbooks()
     tp.addColumn("Genres", 35);
     tp.addColumn("ID", 9);
     tp.addColumn("Year", 4);
-    for (const auto& book: sb)
+    for (const auto& book: mb)
     {
         std::string authors, genres;
 #ifndef NDEBUG
-std::cout << book.second.genres.size() << ", " << book.second.authors.size() << std::endl;
+std::cout << book.second.sg.size() << ", " << book.second.sa.size() << std::endl;
 #endif
-        for (auto g: book.second.genres)
+        for (auto g: book.second.sg)
             genres += g.second->name + ", ";
-        for (auto a: book.second.authors)
+        for (auto a: book.second.sa)
             authors += a.second->name + ", ";
 //TODO: Implement multiline using libfort
         tp << book.second.name << authors << genres << book.second.id << book.second.year;
@@ -37,40 +37,40 @@ bool Data::delAccount(const std::string& l, const bool& isadmin)
     if (isadmin)
     {
         auto sought = ma.find(l);
-        if (sought == ma.end() || mu.size() < 2) return false;
+        if (sought == ma.end() || mU.size() < 2) return false;
         ma.erase(sought);
     }
     else
     {
-        auto sought = mu.find(l);
-        if (sought == mu.end()) return false;
-        mu.erase(sought);
+        auto sought = mU.find(l);
+        if (sought == mU.end()) return false;
+        mU.erase(sought);
     }
     return true;
 }
 
-void Data::printCredentials(bool isAdmin)
+void Data::printUsrName(bool isAdmin)
 {
-    std::cout << (isAdmin ? "Admin" : "User") << " credentials: " << std::endl;
-    for (const auto& el: (isAdmin ? ma : mu))
+    std::cout << (isadmin ? "Admin" : "User") << " credentials: " << std::endl;
+    for (const auto& el: (isadmin ? ma : mU))
         std::cout << el.first << "\n";
     std::cout << std::endl;
 }
 
 bool Data::passCheck(const std::string& l, const std::string& p, const bool& isadmin)
-{ return ((isadmin ? ma.find(l) : mu.find(l))->second == hash(p)); }
+{ return ((isadmin ? ma.find(l) : mU.find(l))->second == hash(p)); }
 
 bool Data::loginCheck(std::string& s, bool isadmin)
-{ return (isadmin ? ma.find(s) != ma.end() : ma.find(s) != mu.end()); }
+{ return (isadmin ? ma.find(s) != ma.end() : ma.find(s) != mU.end()); }
 
 void Data::createAccount(const std::string& l, const std::string& p, const bool& isadmin)
-{ (isadmin ? ma : mu)[l] = hash(p); }
+{ (isadmin ? ma : mU)[l] = hash(p); }
 
 size_t Data::enumAccounts(bool isadmin)
-{ return (isadmin ? ma.size() : mu.size()); }
+{ return (isadmin ? ma.size() : mU.size()); }
 
 void Data::changePass(const std::string& l, const std::string& p, const bool& isadmin)
-{ (isadmin ? ma : mu )[l] = hash(p); }
+{ (isadmin ? ma : mU )[l] = hash(p); }
 
 void Data::ensureFileExists(const std::string& f)
 {
@@ -86,7 +86,7 @@ void Data::ensureFileExists(const std::string& f)
 std::vector<Book*> Data::searchBook(const std::string& s)
 {
     std::vector<Book*> ret;
-    for (auto book : sb)
+    for (auto book : mb)
         if (book.second.check(s)) ret.push_back(&book.second);
     return ret;
 }
@@ -101,7 +101,7 @@ std::ifstream gf(path + gfname);
         std::string id, name;
         if (!readString(gf, id, 'i')) throw std::runtime_error("genre id");
         if (!readString(gf, name, 's')) throw std::runtime_error("genre name");
-        sg.emplace(std::make_pair(std::stoull(id), Genre(std::stoull(id),name)));
+        mg.emplace(std::make_pair(std::stoull(id), Genre(std::stoull(id), name)));
         getline(gf, name); //Ignores 1 line. TODO:Test
     }
 #ifndef NDEBUG
@@ -140,7 +140,7 @@ void Data::authorinit() try
         if (!readString(af, date, 'd')) throw std::runtime_error("author date");
         if (!readString(af, country, 's')) throw std::runtime_error("author country");
         std::cout << " Read this: " << id << ' ' << name << ' ' << date << ' ' << country << ' ' << std::endl;
-        sa.emplace(std::make_pair(std::stoull(id),Author(std::stoull(id), name, date, country)));
+        ma.emplace(std::make_pair(std::stoull(id), Author(std::stoull(id), name, date, country)));
         getline(af, temp); //Ignores 1 line.
     }
 #ifndef NDEBUG
@@ -172,13 +172,13 @@ void Data::bookinit() try//TODO: Optimize
     std::ifstream bf(path + bfname);
 #ifndef NDEBUG
     std::cout << "Current sb state: " << std::endl;
-    for (auto& el: sb)
+    for (auto& el: mb)
         std::cout << el.second << std::endl;
     std::cout << "Current sg state: " << std::endl;
-    for (auto& el: sg)
+    for (auto& el: mg)
         std::cout << el.second << std::endl;
     std::cout << "Current sa state: " << std::endl;
-    for (auto& el: sa)
+    for (auto& el: ma)
         std::cout << el.second << std::endl;
 #endif
     while (bf) //TODO: Add checks for the authorinit and genreinit
@@ -189,20 +189,20 @@ void Data::bookinit() try//TODO: Optimize
         if (!readString(bf, title, 's')) throw std::runtime_error("book name");
         if (!readString(bf, year, 'y')) throw std::runtime_error("book year");
         std::cout << "emplace_back " << id << ' ' << title << ' ' << std::stoul(year) << std::endl;
-        auto curbook = sb.emplace(std::make_pair(std::stoull(id),Book(std::stoull(id), title, std::stoul(year) ) ) );
+        auto curbook = mb.emplace(std::make_pair(std::stoull(id), Book(std::stoull(id), title, std::stoul(year) ) ) );
         std::cout << "emplace_back finished\n";
         //Place genres
         if (!readString(bf, temp, 's')) throw std::runtime_error("book genres");
         std::stringstream ss(temp);
         while (getline(ss, entry, ','))
         {
-            Genre* sought = findName(sg, entry);
+            Genre* sought = findName(mg, entry);
             std::cout << "findName returned: " << (sought == nullptr ? "Nothing" : sought->name) << std::endl;
             if (sought == nullptr) //If we didn't find anything
             {
                 std::cout << "Executing new genre creation" << std::endl;
                 ull gid = genID();
-                sg.emplace(std::make_pair(gid, Genre(gid,entry)))->second.addBook(curbook->second); //create a new genre and bind it to the book
+                mg.emplace(std::make_pair(gid, Genre(gid, entry)))->second.addBook(curbook->second); //create a new genre and bind it to the book
             }   //The book is bound to the genre too
             else
             {
@@ -219,13 +219,13 @@ void Data::bookinit() try//TODO: Optimize
         ss.str(temp);
         while (getline(ss, entry, ','))
         {
-            Author* sought = findName(sa, entry);
+            Author* sought = findName(ma, entry);
             std::cout << "findName returned: " << (sought == nullptr ? "Nothing" : sought->name) << std::endl;
             if (sought == nullptr)
             {
                 std::cout << "Executing new author creation" << std::endl;
                 ull gid = genID();
-                sa.emplace(std::make_pair(gid, Author(gid,entry)))->second.addBook(curbook->second);
+                ma.emplace(std::make_pair(gid, Author(gid, entry)))->second.addBook(curbook->second);
             }
             else
             {
@@ -268,7 +268,7 @@ void Data::uinit()
     {
         if (!readString(f, login, 'n')) break;
         if (!readString(f, pass, 'n')) break;
-        mu[login] = pass; //read pass, login and add them to the map. Duplicates removed.
+        mU[login] = pass; //read pass, login and add them to the map. Duplicates removed.
         if (!std::getline(f, temp)) break;
         if (!temp.empty() && temp != " ")
             throw std::invalid_argument("File " + name + " read error, check delimiters.");
@@ -311,18 +311,18 @@ void Data::save()
     std::ofstream fadm(path + "admin.txt");
 #ifndef NDEBUG
     printbooks();
-    printCredentials(true);
-    printCredentials(false);
+    printUsrName(true);
+    printUsrName(false);
 #endif
     for (auto& el: ma)
         fadm << el.first << "\n" << el.second << "\n" << std::endl;
-    for (auto& el: mu)
+    for (auto& el: mU)
         fusr << el.first << "\n" << el.second << "\n" << std::endl;
-    for (auto& el: sg)
+    for (auto& el: mg)
         fg << el.second << std::endl;
-    for (auto& el: sa)
+    for (auto& el: ma)
         fa << el.second << std::endl;
-    for (auto& book: sb)
+    for (auto& book: mb)
         fb << book.second;
     //The destructor will close the files for me
 }
