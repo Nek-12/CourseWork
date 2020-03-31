@@ -10,25 +10,25 @@ std::ostream& operator<<(std::ostream& os, const Entry& e )
 
 Book::~Book()
 {
-    for (auto id: this->authors)
-        Data::authors.find(id)->second.remBook(*this);
+    for (auto id: setA)
+        Data::jauthors.find(id)->remA(*this);
     for (auto id: this->genres)
-        Data::genres.find(id)->second.remBook(*this);
+        Data::jgenres.find(*this)->remBook(*this);
 }
-void Book::addAuthor(Author& a)
+void Book::addA(Entry& a) //author
 {
-    authors.insert(a.id());
+    authors.insert(*this);
     a.books.insert(id());
 }
-void Book::addGenre(Genre&)
+void Book::addB(Genre&) //genre
 {
 
 }
-void Book::remAuthor(Author&)
+void Book::remA(Author&) //author
 {
 
 }
-void Book::remGenre(Genre&)
+void Book::remB(Genre&) //genre
 {
 
 }
@@ -50,19 +50,19 @@ Author::~Author()
     for (auto id: this->genres)
         Data::genres.find(id)->second.remAuthor(*this);
 }
-void Author::addGenre(Genre&)
+void Author::addA(Genre&) //book
 {
 
 }
-void Author::addBook(Book&)
+void Author::addB(Book&) //genre
 {
 
 }
-void Author::remGenre(Genre&)
+void Author::remA(Genre&) //book
 {
 
 }
-void Author::remBook(Book&)
+void Author::remBook(Book&) //genre
 {
 
 }

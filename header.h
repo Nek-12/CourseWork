@@ -1,4 +1,7 @@
 //#define NDEBUG
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
+
 #pragma once
 #include <map>
 #include "table_printer.h"
@@ -55,17 +58,23 @@ public:
     explicit operator ull() const { return no; } //for convenience
     explicit operator std::string() const { return title; } //for convenience
 
+    virtual void addA(const Entry& e) = 0; //for Book = addAuthor, for Author = addBook, for Genre = addBook
+    virtual void addB(const Entry& e) = 0; //for Book = addGenre, for Author = addGenre, for Genre = addAuthor
+    virtual void remA(const Entry& e) = 0; //for Book = remAuthor, for Author = remBook, for Genre = remBook
+    virtual void remB(const Entry& e) = 0; //for Book = remGenre, for Author = remGenre, for Genre = remAuthor
     [[nodiscard]] const ull& id() const {return no;}
     [[nodiscard]] std::string name() const { return title; }
-    virtual std::string to_string() const = 0; //for operator<<
+    [[nodiscard]] virtual std::string to_string() const = 0; //for operator<<
     virtual bool check(const std::string&) = 0; //checks this with anything unlike operator==
     void rename(const std::string& s) { title = s; }
     virtual Entry* clone() && = 0;
 protected:
-
+    std::set<ull> setA; //for Book = authors, for Author = books, for Genre = books
+    std::set<ull> setB; //for Book = genres, for Author = genres, for Genre = authors
 private:
     ull no; //unique id
     std::string title;
+
 };
 
 class Book: public Entry
@@ -75,19 +84,18 @@ public:
     Book(Book&& b) noexcept: Entry( std::move(b)), year(b.year), authors(std::move(b.authors)), genres(std::move(b.genres)) {}
     ~Book() override;
 
-
-    void addAuthor(Author&);
-    void addGenre(Genre&);
-    void remAuthor(Author&);
-    void remGenre(Genre&);
+    void addA(const Entry& e) override; //authors
+    void addB(const Entry& e) override; //genres
+    void remA(const Entry& e) override; //authors
+    void remB(const Entry& e) override; //genres
     bool check(const std::string& ) override;
     [[nodiscard]] std::string to_string() const override;
     Book* clone() && override { return new Book(std::move(*this)); }
 
 private:
     unsigned year = 0;
-    std::set<ull> authors;
-    std::set<ull> genres;
+    //setA = authors
+    //setB = genres
 };
 
 class Author: public Entry
@@ -101,18 +109,18 @@ public:
 
     ~Author() override;
 
-    void addGenre(Genre&);
-    void addBook(Book&);
-    void remGenre(Genre&);
-    void remBook(Book&);
+    void addA(const Entry& e) override; //books
+    void addB(const Entry& e) override; //genres
+    void remA(const Entry& e) override; //books
+    void remB(const Entry& e) override; //genres
     bool check(const std::string& s) override;
     [[nodiscard]] std::string to_string() const override;
     Author* clone() && override { return new Author(std::move(*this)); }
 private:
     std::string date;
     std::string country;
-    std::set<ull> books;
-    std::set<ull> genres;
+    //setA = books
+    //setB = genres
 };
 
 class Genre: public Entry
@@ -122,16 +130,16 @@ public:
     Genre(Genre&& g) noexcept: Entry(std::move(g)), books(std::move(g.books)), authors(std::move(g.authors)) {}
     ~Genre() override;
 
-    void addAuthor(Author&);
-    void addBook(Book&);
-    void remAuthor(Author&);
-    void remBook(Book& );
+    void addA(const Entry& e) override; //books
+    void addB(const Entry& e) override; //authors
+    void remA(const Entry& e) override; //books
+    void remB(const Entry& e) override; //authors
     bool check(const std::string& s) override;
     [[nodiscard]] std::string to_string() const override;
     Genre* clone() && override { return new Genre(std::move(*this)); }
 private:
-    std::set<ull> books;
-    std::set<ull> authors;
+    //setA = books
+    //setB = genres
 };
 
 class Account : public Entry
@@ -176,17 +184,16 @@ private:
     std::string status;
 };
 
-//template<typename T>
-//class Journal
-//{
-//public:
-//    bool insert(T&& e ); //Move only
-//    bool erase(T& e );
-//    std::shared_ptr<T>& find(const ull& ); //TODO: ??
-//private:
-//    static bool compare(const std::shared_ptr<T> &lhs, const std::shared_ptr<T> &rhs) { return lhs->id() < rhs->id(); }
-//    std::set<std::shared_ptr<T>, decltype(compare)*> entries{compare};
-//};
+class Journal
+{
+public:
+    bool insert(Entry&& e ); //Move only
+    bool erase(const Entry& e );
+    std::shared_ptr<Entry>& find(const Entry& e); //TODO: ??
+private:
+    static bool compare(const std::shared_ptr<Entry> &lhs, const std::shared_ptr<Entry> &rhs) { return lhs->id() < rhs->id(); }
+    std::set<std::shared_ptr<Entry>, decltype(compare)*> entries{compare};
+};
 
 class Data
 {
@@ -225,13 +232,16 @@ public:
     const std::string loginprompt = "Enter the login or \"exit\" to exit:";
     const std::string passprompt = "Enter the password or \"exit\" to exit:";
     const std::string passconfirm = "Confirm the password or enter \"exit\" to exit: ";
-    static std::map<ull, Book> books;
-    static std::map<ull, Author> authors;
-    static std::map<ull, Genre> genres;
-    static std::map<ull, Admin> admins;
-    static std::map<ull, User> users;
+    static Journal jbooks;
+    static Journal jauthors;
+    static Journal jgenres;
+    static Journal jusers;
+    static Journal jadmins;
+
+
 private:
 
     Data() = default;
     static void ensureFileExists(const std::string& f);
 };
+#pragma clang diagnostic pop
