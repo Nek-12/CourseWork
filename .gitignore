@@ -6,3 +6,5 @@
 **/CourseWork.cbp
 cmake-build-debug/admin.txt
 cmake-build-debug/books.txt
+cmake-build-debug/CMakeCache.txt
+cmake-build-release/CMakeCache.txt
