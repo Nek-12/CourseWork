@@ -20,25 +20,38 @@ void Book::addAuthor(Author& a)
     authors.insert(a.id());
     a.books.insert(id());
 }
-void Book::addGenre(Genre&)
+void Book::addGenre(Genre& g)
 {
+    genres.insert(g.id());
+    g.books.insert(id());
+}
+void Book::remAuthor(Author& a )
+{
+    authors.erase(a.id());
+    a.books.erase(id());
+}
+void Book::remGenre(Genre& g )
+{
+    genres.insert(g.id());
+    g.books.insert(id());
+}
 
-}
-void Book::remAuthor(Author&)
-{
-
-}
-void Book::remGenre(Genre&)
-{
-
-}
-bool Book::check(const std::string&)
-{
-    return false;
-}
 std::string Book::to_string() const
 {
-    return std::string();
+    std::string ret = std::to_string(id()) + '\n' + name() + '\n' + std::to_string(year);
+    std::string delim = "\n";
+    for (auto el: genres)
+    {
+        ret += delim + Data::authors.find(el)->second.name();
+        delim = ",";
+    }
+    delim = "\n";
+    for (auto el: authors)
+    {
+        ret += delim + Data::authors.find(el)->second.name();
+        delim = ",";
+    }
+    return ret;
 }
 
 //Author
@@ -50,29 +63,42 @@ Author::~Author()
     for (auto id: this->genres)
         Data::genres.find(id)->second.remAuthor(*this);
 }
-void Author::addGenre(Genre&)
+void Author::addGenre(Genre& g )
 {
-
+    genres.insert(g.id());
+    g.authors.insert(id());
 }
-void Author::addBook(Book&)
+void Author::addBook(Book& b)
 {
-
+    books.insert(b.id());
+    b.authors.insert(id());
 }
-void Author::remGenre(Genre&)
+void Author::remGenre(Genre& g )
 {
-
+    genres.erase(g.id());
+    g.authors.erase(id());
 }
-void Author::remBook(Book&)
+void Author::remBook(Book& b )
 {
-
-}
-bool Author::check(const std::string& s)
-{
-    return true;
+    books.erase(b.id());
+    b.authors.erase(id());
 }
 std::string Author::to_string() const
 {
-    return;
+    std::string ret = std::to_string(id()) + '\n' + name() + '\n' + date + '\n' + country;
+    std::string delim = "\n";
+    for (auto el: books)
+    {
+        ret += delim + Data::books.find(el)->second.name();
+        delim = ",";
+    }
+    delim = "\n";
+    for (auto el: genres)
+    {
+        ret += delim + Data::genres.find(el)->second.name();
+        delim = ",";
+    }
+    return ret;
 }
 
 //GENRE
@@ -84,36 +110,49 @@ Genre::~Genre()
     for (auto id: this->books)
         Data::books.find(id)->second.remGenre(*this);
 }
-void Genre::addAuthor(Author&)
+void Genre::addAuthor(Author& a )
 {
-
+ authors.insert(a.id());
+ a.genres.insert(id());
 }
-void Genre::addBook(Book&)
+void Genre::addBook(Book& b )
 {
-
+    books.insert(b.id());
+    b.genres.insert(id());
 }
-void Genre::remAuthor(Author&)
+void Genre::remAuthor(Author& a )
 {
-
+    authors.erase(a.id());
+    a.genres.erase(id());
 }
-void Genre::remBook(Book&)
+void Genre::remBook(Book& b )
 {
-
-}
-bool Genre::check(const std::string& s)
-{
-    return true;
+    books.erase(b.id());
+    b.genres.erase(id());
 }
 std::string Genre::to_string() const
 {
-    return;
+    std::string ret = std::to_string(id()) + '\n' + name();
+    std::string delim = "\n";
+    for (auto el: books)
+    {
+        ret += delim + Data::books.find(el)->second.name();
+        delim = ",";
+    }
+    delim = "\n";
+    for (auto el: authors)
+    {
+        ret += delim + Data::authors.find(el)->second.name();
+        delim = ",";
+    }
+    return ret;
 }
 
 //USER
 
 std::string User::to_string() const
 {
-    return;
+
 }
 
 //ADMIN
@@ -124,16 +163,18 @@ std::string Admin::to_string() const
 }
 
 //JOURNAL
-
-//bool Journal::insert(Entry&& e)
-//{
-//    return false;
-//}
-//bool Journal::erase(const Entry& e)
-//{
-//    return false;
-//}
-//std::shared_ptr<Entry>& Journal::find(const ull& id)
+//template <typename T>
+//bool Journal<T>::insert(T&& e )
 //{
 //
 //}
+//template <typename T>
+//bool Journal<T>::erase(T& e )
+//{
+//
+//}
+//template <typename T>
+//std::shared_ptr<T>& Journal<T>::find(ull id) //TODO: Return pointer or ref?
+//{
+//    for (auto p: entries)
+//        if (id == *p) return p;

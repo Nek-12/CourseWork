@@ -4,32 +4,47 @@
 #include <filesystem>
 #include <utility>
 
-void Data::printbooks()
+void Data::print(char what) //'b' for books, 'a' for authors, 'g' for genres 'U' for users 'A' for admins
 {
     TablePrinter tp;
-    tp.alignCenter();
-    tp.setPadding(1);
-    tp.setDashedRawsStyle();
-    tp.addMergedColumn("Book Database");
-    tp.addColumn("Title", 35);
-    tp.addColumn("Authors", 35);
-    tp.addColumn("Genres", 35);
-    tp.addColumn("ID", 9);
-    tp.addColumn("Year", 4);
-    for (const auto& book: mb)
+    switch (what)
     {
-        std::string authors, genres;
-#ifndef NDEBUG
-std::cout << book.second.sg.size() << ", " << book.second.sa.size() << std::endl;
-#endif
-        for (auto g: book.second.sg)
-            genres += g.second->name + ", ";
-        for (auto a: book.second.sa)
-            authors += a.second->name + ", ";
+        case 'b':
+            tp.alignCenter();
+            tp.setPadding(1);
+            tp.setDashedRawsStyle();
+            tp.addMergedColumn("Book Database");
+            tp.addColumn("Title", 30);
+            tp.addColumn("Authors", 30);
+            tp.addColumn("Genres", 30);
+            tp.addColumn("Year", 4);
+            tp.addColumn("ID", 9);
+            for (const auto& book: books)
+            {
+                std::string a, g, delim;
+                for (auto el: book.second.genres)
+                {
+                    g += delim + genres.find(el)->second.name();
+                    delim = ",";
+                }
+                delim.clear();
+                for (auto el: book.second.authors)
+                {
+                    a += delim+ genres.find(el)->second.name();
+                    delim = ",";
+                }
 //TODO: Implement multiline using libfort
-        tp << book.second.name << authors << genres << book.second.id << book.second.year;
+                tp << book.second.name() << authors << genres << book.second.id() << book.second.year;
+            }
+            tp.print();
+        case 'a':
+        case 'U':
+        case 'g':
+        case 'A':
+            std::cout << "Not implemented" << std::endl;
+        default:
+            throw std::invalid_argument("Bad argument for Data::print");
     }
-    tp.print();
 }
 
 bool Data::delAccount(const std::string& l, const bool& isadmin)

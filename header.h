@@ -43,8 +43,9 @@ bool readString(std::istream& is, std::string& s, char mode);
 
 class Entry
 {
+    friend class Data;
     friend std::ostream& operator<<(std::ostream&, const Entry&); //Uses to_string that is virtual, applicable for any entry
-    friend bool operator== (const Entry& lhs, const Entry& rhs) { return lhs.no == rhs.no; } //applicable to any entry because of dynamic binding
+    friend bool operator== (const Entry& lhs, const Entry& rhs) { return lhs.no == rhs.no; }
 public:
     Entry() = delete; //No blank entries
     Entry(const Entry& e) = delete; //No copies!
@@ -57,10 +58,9 @@ public:
 
     [[nodiscard]] const ull& id() const {return no;}
     [[nodiscard]] std::string name() const { return title; }
-    virtual std::string to_string() const = 0; //for operator<<
-    virtual bool check(const std::string&) = 0; //checks this with anything unlike operator==
+    [[nodiscard]] virtual std::string to_string() const = 0; //for operator<<
+    bool check(const std::string& s) {return (this->to_string().find(s) == std::string::npos);}; //checks this with anything unlike operator==
     void rename(const std::string& s) { title = s; }
-    virtual Entry* clone() && = 0;
 protected:
 
 private:
@@ -70,20 +70,20 @@ private:
 
 class Book: public Entry
 {
+    friend class Genre;
+    friend class Author;
+    friend class Data;
 public:
     explicit Book(const std::string& n, unsigned y, const ull& no = genID() ): Entry(n, no), year(y) {}
     Book(Book&& b) noexcept: Entry( std::move(b)), year(b.year), authors(std::move(b.authors)), genres(std::move(b.genres)) {}
     ~Book() override;
 
 
-    void addAuthor(Author&);
-    void addGenre(Genre&);
+    void addAuthor(Author&); //TODO: Use overloaded link and unlink functions
+    void addGenre(Genre&); //TODO: Move to pointers. At any cost.
     void remAuthor(Author&);
     void remGenre(Genre&);
-    bool check(const std::string& ) override;
     [[nodiscard]] std::string to_string() const override;
-    Book* clone() && override { return new Book(std::move(*this)); }
-
 private:
     unsigned year = 0;
     std::set<ull> authors;
@@ -92,6 +92,9 @@ private:
 
 class Author: public Entry
 {
+    friend class Book;
+    friend class Genre;
+    friend class Data;
 public:
     explicit Author(const std::string& n, std::string d, std::string c, const ull& no = genID()):
     Entry(n,no), date(std::move(d)), country(std::move(c)) {}
@@ -105,9 +108,7 @@ public:
     void addBook(Book&);
     void remGenre(Genre&);
     void remBook(Book&);
-    bool check(const std::string& s) override;
     [[nodiscard]] std::string to_string() const override;
-    Author* clone() && override { return new Author(std::move(*this)); }
 private:
     std::string date;
     std::string country;
@@ -117,6 +118,9 @@ private:
 
 class Genre: public Entry
 {
+    friend class Book;
+    friend class Author;
+    friend class Data;
 public:
     using Entry::Entry;
     Genre(Genre&& g) noexcept: Entry(std::move(g)), books(std::move(g.books)), authors(std::move(g.authors)) {}
@@ -126,9 +130,7 @@ public:
     void addBook(Book&);
     void remAuthor(Author&);
     void remBook(Book& );
-    bool check(const std::string& s) override;
     [[nodiscard]] std::string to_string() const override;
-    Genre* clone() && override { return new Genre(std::move(*this)); }
 private:
     std::set<ull> books;
     std::set<ull> authors;
@@ -141,7 +143,6 @@ public:
     Account(Account&& a) noexcept: Entry(std::move(a)), pass(std::move(a.pass)) {}
     friend bool operator== (const Account& lhs, const Account& rhs) { return (lhs.name() == rhs.name() && lhs.pass == rhs.pass ); } //TODO: ???
     explicit operator std::pair<std::string,std::string>() { return std::make_pair(name(), pass); }
-    bool check(const std::string& l) override { return name() == l; };
     [[nodiscard]] std::string to_string() const override = 0; //for operator<<
 
 private:
@@ -156,7 +157,6 @@ public:
     bool addBook(const ull& b) { return books.insert(b).second; }
     bool remBook(const ull& b) { return (books.erase(b) != 0 ); }
     [[nodiscard]] std::string to_string() const override;
-    User* clone() && override {return new User(std::move(*this));}
 private:
     std::set<ull> books;
 };
@@ -171,7 +171,6 @@ public:
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] std::string getStatus() const { return status; }
     void changeStatus(const std::string& s) { status = s; }
-    Admin* clone() && override {return new Admin(std::move(*this));}
 private:
     std::string status;
 };
@@ -182,7 +181,7 @@ private:
 //public:
 //    bool insert(T&& e ); //Move only
 //    bool erase(T& e );
-//    std::shared_ptr<T>& find(const ull& ); //TODO: ??
+//    std::shared_ptr<T>& find(ull id); //TODO: ??
 //private:
 //    static bool compare(const std::shared_ptr<T> &lhs, const std::shared_ptr<T> &rhs) { return lhs->id() < rhs->id(); }
 //    std::set<std::shared_ptr<T>, decltype(compare)*> entries{compare};
@@ -190,13 +189,6 @@ private:
 
 class Data
 {
-    friend class Entry;
-    friend class Book;
-    friend class Genre;
-    friend class Author;
-    friend class Account;
-    friend class Admin;
-    friend class User;
 public:
     Data(Data const&) = delete; //No copying, moving!
     void operator=(Data const&) = delete; //No copying!
@@ -217,7 +209,6 @@ public:
 
     bool passCheck(const std::string& l, const std::string& p, const bool& isadmin);
     bool loginCheck(std::string& s, bool isadmin);
-    void createAccount(const std::string& l, const std::string& p, const bool& isadmin);
 
     void changePass(const std::string& l, const std::string& p, const bool& isadmin);
     std::vector <Book*> searchBook(const std::string& s);
@@ -231,7 +222,6 @@ public:
     static std::map<ull, Admin> admins;
     static std::map<ull, User> users;
 private:
-
     Data() = default;
     static void ensureFileExists(const std::string& f);
 };
