@@ -125,15 +125,23 @@ std::string Admin::to_string() const
 
 //JOURNAL
 
-//bool Journal::insert(Entry&& e)
-//{
-//    return false;
-//}
-//bool Journal::erase(const Entry& e)
-//{
-//    return false;
-//}
-//std::shared_ptr<Entry>& Journal::find(const ull& id)
-//{
-//
-//}
+template <typename T>
+bool Journal<T>::erase(const sptr<T>& )
+{
+
+}
+template <typename T>
+sptr<T> Journal<T>::find(const ull& id)
+{
+    for (auto p: entries)
+        if ( *p == id ) return p;
+}
+template <typename T>
+std::vector<sptr<T> > Journal<T>::multifind(const std::string& s)
+{
+    std::vector<sptr<T> > v;
+    for (auto p: entries)
+        if (p->to_string().find(s) != std::string::npos)
+            v.push_back(p);
+    return v;
+}

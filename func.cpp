@@ -150,7 +150,7 @@ bool checkString(const std::string& s, char mode)
 }
 
 bool readString(std::istream& is, std::string& ret, char mode = 'n')
- // 's' for strings with spaces, 'n' for normal, 'd' for date, 'p' for password
+ // 's' for strings with spaces, 'n' for normal, 'd' for date, 'p' for password, 'i' for numbers
 {
     std::string s;
     if (!std::getline(is, s)) return false;

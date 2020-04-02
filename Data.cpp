@@ -49,7 +49,7 @@ bool Data::delAccount(const std::string& l, const bool& isadmin)
     return true;
 }
 
-void Data::printUsrName(bool isAdmin)
+void Data::printUsrName(bool isadmin)
 {
     std::cout << (isadmin ? "Admin" : "User") << " credentials: " << std::endl;
     for (const auto& el: (isadmin ? ma : mU))

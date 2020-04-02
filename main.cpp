@@ -552,11 +552,7 @@ int main(int argc, char* argv[]) try
 {
 //TODO: Implement autosaving.
     Data& data = Data::getInstance();
-    data.uinit();
-    data.adminit();
-    data.genreinit();
-    data.authorinit();
-    data.bookinit();
+    data.load();
 
     path = argv[0];
     path.erase(path.find_last_of('\\') + 1); //Makes 'path' be the path to the app folder
