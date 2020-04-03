@@ -24,13 +24,13 @@
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
-					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.2.0/../../../../include/c++/9.2.0"/>
-					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.2.0/../../../../include/c++/9.2.0/x86_64-w64-mingw32"/>
-					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.2.0/../../../../include/c++/9.2.0/backward"/>
-					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.2.0/include"/>
-					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.2.0/../../../../include"/>
-					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.2.0/include-fixed"/>
-					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.2.0/../../../../x86_64-w64-mingw32/include"/>
+					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.3.0/../../../../include/c++/9.3.0"/>
+					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.3.0/../../../../include/c++/9.3.0/x86_64-w64-mingw32"/>
+					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.3.0/../../../../include/c++/9.3.0/backward"/>
+					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.3.0/include"/>
+					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.3.0/../../../../include"/>
+					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.3.0/include-fixed"/>
+					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.3.0/../../../../x86_64-w64-mingw32/include"/>
 				</Compiler>
 				<MakeCommands>
 					<Build command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 CW"/>
@@ -46,13 +46,13 @@
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
-					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.2.0/../../../../include/c++/9.2.0"/>
-					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.2.0/../../../../include/c++/9.2.0/x86_64-w64-mingw32"/>
-					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.2.0/../../../../include/c++/9.2.0/backward"/>
-					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.2.0/include"/>
-					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.2.0/../../../../include"/>
-					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.2.0/include-fixed"/>
-					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.2.0/../../../../x86_64-w64-mingw32/include"/>
+					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.3.0/../../../../include/c++/9.3.0"/>
+					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.3.0/../../../../include/c++/9.3.0/x86_64-w64-mingw32"/>
+					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.3.0/../../../../include/c++/9.3.0/backward"/>
+					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.3.0/include"/>
+					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.3.0/../../../../include"/>
+					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.3.0/include-fixed"/>
+					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.3.0/../../../../x86_64-w64-mingw32/include"/>
 				</Compiler>
 				<MakeCommands>
 					<Build command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 CW/fast"/>
@@ -85,7 +85,7 @@
 		<Unit filename="C:/Users/ender/Archive/Coding/CourseWork/Data.cpp">
 			<Option target="CW"/>
 		</Unit>
-		<Unit filename="C:/Users/ender/Archive/Coding/CourseWork/booker.cpp">
+		<Unit filename="C:/Users/ender/Archive/Coding/CourseWork/Entry.cpp">
 			<Option target="CW"/>
 		</Unit>
 		<Unit filename="C:/Users/ender/Archive/Coding/CourseWork/func.cpp">

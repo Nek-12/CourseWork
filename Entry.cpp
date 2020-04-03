@@ -2,7 +2,7 @@
 
 std::ostream& operator<<(std::ostream& os, const Entry& e )
 {
-    os <<  e.to_string();
+    os <<  e.to_string(0);
     return os;
 }
 
@@ -10,117 +10,172 @@ std::ostream& operator<<(std::ostream& os, const Entry& e )
 
 Book::~Book()
 {
-    for (auto id: this->authors)
-        Data::authors.find(id)->second.remBook(*this);
-    for (auto id: this->genres)
-        Data::genres.find(id)->second.remBook(*this);
+    for (const auto& ptr: this->authors)
+        if (!ptr.expired())
+            ptr.lock()->remBook(shared_from_this());
+    for (const auto& ptr: this->genres)
+        if (!ptr.expired())
+            (ptr.lock())->remBook(shared_from_this());
 }
-void Book::addAuthor(Author& a)
+void Book::addAuthor(const sptr<Author>& p)
 {
-    authors.insert(a.id());
-    a.books.insert(id());
+    authors.insert(p);
+    p->books.insert(shared_from_this());
 }
-void Book::addGenre(Genre&)
+void Book::addGenre(const sptr<Genre>& p)
 {
+    genres.insert(p);
+    p->books.insert(shared_from_this());
+}
+void Book::remAuthor(const sptr<Author>& p)
+{
+    authors.erase(p);
+    p->books.erase(shared_from_this());
+}
+void Book::remGenre(const sptr<Genre>& p)
+{
+    genres.erase(p);
+    p->books.erase(shared_from_this());
+}
 
-}
-void Book::remAuthor(Author&)
+std::string Book::to_string(bool isUsingID) const
 {
-
-}
-void Book::remGenre(Genre&)
-{
-
-}
-bool Book::check(const std::string&)
-{
-    return false;
-}
-std::string Book::to_string() const
-{
-    return std::string();
+    std::string ret = std::to_string(id()) + '\n' + name() + '\n' + std::to_string(year);
+    std::string delim = "\n";
+    for (const auto& el: genres)
+    {
+        if (!el.expired())
+            ret += delim + (isUsingID? std::to_string(el.lock()->id()) : el.lock()->name());
+        delim = ",";
+    }
+    delim = "\n";
+    for (const auto& el: authors)
+    {
+        if (!el.expired())
+            ret += delim + (isUsingID? std::to_string(el.lock()->id()) : el.lock()->name());
+        delim = ",";
+    }
+    return ret;
 }
 
 //Author
 
 Author::~Author()
 {
-    for (auto id: this->books)
-        Data::books.find(id)->second.remAuthor(*this);
-    for (auto id: this->genres)
-        Data::genres.find(id)->second.remAuthor(*this);
+    for (const auto& ptr: this->books)
+        if (!ptr.expired())
+            ptr.lock()->remAuthor(shared_from_this());
+    for (const auto& ptr: this->genres)
+        if (!ptr.expired())
+            (ptr.lock())->remAuthor(shared_from_this());
 }
-void Author::addGenre(Genre&)
+void Author::addGenre(const sptr<Genre>& p)
 {
+    genres.insert(p);
+    p->authors.insert(shared_from_this());
+}
+void Author::addBook(const sptr<Book>& p)
+{
+    books.insert(p);
+    p->authors.insert(shared_from_this());
+}
+void Author::remGenre(const sptr<Genre>&p)
+{
+    genres.erase(p);
+    p->authors.erase(shared_from_this());
+}
+void Author::remBook(const sptr<Book>& p)
+{
+    books.erase(p);
+    p->authors.erase(shared_from_this());
+}
 
-}
-void Author::addBook(Book&)
+std::string Author::to_string(bool isUsingID ) const
 {
-
-}
-void Author::remGenre(Genre&)
-{
-
-}
-void Author::remBook(Book&)
-{
-
-}
-bool Author::check(const std::string& s)
-{
-    return true;
-}
-std::string Author::to_string() const
-{
-    return;
+    std::string ret = std::to_string(id()) + '\n' + name() + '\n' + date + '\n' + country;
+    std::string delim = "\n";
+    for (const auto& el: books)
+    {
+        ret += delim + (isUsingID? std::to_string(el.lock()->id()) : el.lock()->name());
+        delim = ",";
+    }
+    delim = "\n";
+    for (const auto& el: genres)
+    {
+        ret += delim + (isUsingID? std::to_string(el.lock()->id()) : el.lock()->name());
+        delim = ",";
+    }
+    return ret;
 }
 
 //GENRE
 
 Genre::~Genre()
 {
-    for (auto id: this->authors)
-        Data::authors.find(id)->second.remGenre(*this);
-    for (auto id: this->books)
-        Data::books.find(id)->second.remGenre(*this);
+    for (const auto& ptr: this->authors)
+        if (!ptr.expired())
+            ptr.lock()->remGenre(shared_from_this());
+    for (const auto& ptr: this->books)
+        if (!ptr.expired())
+            (ptr.lock())->remGenre(shared_from_this());
 }
-void Genre::addAuthor(Author&)
+void Genre::addAuthor(const sptr<Author>& p)
 {
-
+    authors.insert(p);
+    p->genres.insert(shared_from_this());
 }
-void Genre::addBook(Book&)
+void Genre::addBook(const sptr<Book>& p)
 {
-
+    books.insert(p);
+    p->genres.insert(shared_from_this());
 }
-void Genre::remAuthor(Author&)
+void Genre::remAuthor(const sptr<Author>& p)
 {
-
+    authors.erase(p);
+    p->genres.erase(shared_from_this());
 }
-void Genre::remBook(Book&)
+void Genre::remBook(const sptr<Book>& p)
 {
-
+    books.erase(p);
+    p->genres.erase(shared_from_this());
 }
-bool Genre::check(const std::string& s)
+std::string Genre::to_string(bool isUsingID) const
 {
-    return true;
-}
-std::string Genre::to_string() const
-{
-    return;
+    std::string ret = std::to_string(id()) + '\n' + name();
+    std::string delim = "\n";
+    for (const auto& el: books)
+    {
+        ret += delim + (isUsingID? std::to_string(el.lock()->id()) : el.lock()->name());
+        delim = ",";
+    }
+    delim = "\n";
+    for (const auto& el: authors)
+    {
+        ret += delim + (isUsingID? std::to_string(el.lock()->id()) : el.lock()->name());
+        delim = ",";
+    }
+    return ret;
 }
 
 //USER
 
-std::string User::to_string() const
+std::string User::to_string(bool isUsingID) const
 {
-    return;
+    std::string ret = std::to_string(id()) + '\n' + name();
+    std::string delim = "\n";
+    for (const auto& el: books)
+    {
+        ret += delim + (isUsingID? std::to_string(el.lock()->id()) : el.lock()->name());
+        delim = ",";
+    }
+    return ret;
 }
 
 //ADMIN
 
-std::string Admin::to_string() const
+std::string Admin::to_string(bool isUsingID_UNUSED) const
 {
-    return;
+    return std::to_string(id()) + '\n' + name() + '\n' + status;
 }
 
 //JOURNAL

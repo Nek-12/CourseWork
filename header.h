@@ -64,8 +64,8 @@ public:
     explicit operator std::string() const { return title; } //for convenience
     [[nodiscard]] const ull& id() const {return no;}
     [[nodiscard]] std::string name() const { return title; }
-    [[nodiscard]] virtual std::string to_string() const = 0; //for operator<<
-    virtual bool check(const std::string&) = 0; //checks this with anything unlike operator==
+    [[nodiscard]] virtual std::string to_string(bool isUsingID) const = 0; //
+    bool check(const std::string& s) {return (this->to_string(false).find(s) == std::string::npos);}
     void rename(const std::string& s) { title = s; }
 protected:
     explicit Entry(std::string n, const ull& id = genID() ): no(id), title(std::move(n)) {}
@@ -74,18 +74,19 @@ private:
     std::string title;
 };
 
-class Book: public Entry
+class Book: public Entry, std::enable_shared_from_this<Book>
 {
     friend class Journal<Book>;
+    friend class Genre;
+    friend class Author;
 public:
     ~Book() override;
 
-    void addAuthor(Author&);
-    void addGenre(Genre&);
-    void remAuthor(Author&);
-    void remGenre(Genre&);
-    bool check(const std::string& ) override;
-    [[nodiscard]] std::string to_string() const override;
+    void addAuthor(const sptr<Author>& );
+    void addGenre(const sptr<Genre>& );
+    void remAuthor(const sptr<Author>& );
+    void remGenre(const sptr<Genre>& );
+    [[nodiscard]] std::string to_string(bool) const override;
 
 private:
     explicit Book(const std::string& n, unsigned y, const ull& no = genID() ): Entry(n, no), year(y) {}
@@ -94,18 +95,19 @@ private:
     std::set<wptr<Genre>> genres;
 };
 
-class Author: public Entry
+class Author: public Entry, std::enable_shared_from_this<Author>
 {
     friend class Journal<Author>;
+    friend class Book;
+    friend class Genre;
 public:
     ~Author() override;
 
-    void addGenre(Genre&);
-    void addBook(Book&);
-    void remGenre(Genre&);
-    void remBook(Book&);
-    bool check(const std::string& s) override;
-    [[nodiscard]] std::string to_string() const override;
+    void addGenre(const sptr<Genre>& );
+    void addBook(const sptr<Book>&);
+    void remGenre(const sptr<Genre>&);
+    void remBook(const sptr<Book>&);
+    [[nodiscard]] std::string to_string(bool) const override;
 private:
     explicit Author(const std::string& n, std::string d, std::string c, const ull& no = genID()):
     Entry(n,no), date(std::move(d)), country(std::move(c)) {}
@@ -115,18 +117,19 @@ private:
     std::set<wptr<Genre>> genres;
 };
 
-class Genre: public Entry
+class Genre: public Entry, std::enable_shared_from_this<Genre>
 {
     friend class Journal<Genre>;
+    friend class Book;
+    friend class Author;
 public:
     ~Genre() override;
 
-    void addAuthor(Author&);
-    void addBook(Book&);
-    void remAuthor(Author&);
-    void remBook(Book& );
-    bool check(const std::string& s) override;
-    [[nodiscard]] std::string to_string() const override;
+    void addAuthor(const sptr<Author>&);
+    void addBook(const sptr<Book>&);
+    void remAuthor(const sptr<Author>&);
+    void remBook(const sptr<Book>& );
+    [[nodiscard]] std::string to_string(bool) const override;
 private:
     using Entry::Entry;
     std::set<wptr<Book>> books;
@@ -139,8 +142,7 @@ class Account : public Entry
 public:
     friend bool operator== (const Account& lhs, const Account& rhs) { return (lhs.name() == rhs.name() && lhs.pass == rhs.pass ); } //TODO: ???
     explicit operator std::pair<std::string,std::string>() { return std::make_pair(name(), pass); }
-    bool check(const std::string& l) override { return name() == l; };
-    [[nodiscard]] std::string to_string() const override = 0; //for operator<<
+    [[nodiscard]] std::string to_string(bool) const override = 0; //for operator<<
 protected:
     explicit Account(std::string n, std::string p, const ull& id = genID() ): Entry(std::move(n),id), pass(std::move(p)) {}
 private:
@@ -151,9 +153,9 @@ class User: public Account
 {
     friend class Journal<User>;
 public:
-    bool addBook(const ull& b) { return books.insert(b).second; }
-    bool remBook(const ull& b) { return (books.erase(b) != 0 ); }
-    [[nodiscard]] std::string to_string() const override;
+    bool addBook(const sptr<Book>& b) { return books.insert(b).second; }
+    bool remBook(const sptr<Book>& b) { return (books.erase(b) != 0 ); }
+    [[nodiscard]] std::string to_string(bool withPassword) const override;
 private:
     using Account::Account;
     std::set<wptr<Book>> books;
@@ -165,7 +167,7 @@ class Admin: public Account
 public:
     explicit Admin(std::string n, std::string p, std::string s = "Default", const ull& id = genID() ):
     Account(std::move(n),std::move(p),id), status(std::move(s)) {}
-    [[nodiscard]] std::string to_string() const override;
+    [[nodiscard]] std::string to_string(bool withPassword) const override;
     [[nodiscard]] std::string getStatus() const { return status; }
     void changeStatus(const std::string& s) { status = s; }
 private:
