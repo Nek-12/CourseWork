@@ -2,24 +2,11 @@
 
 //BOOK
 
-Book& Book::operator=(const Book& rhs)
-{
-    remFromAuthors();
-    remFromGenres();
-    //Handles self-assignment by removing pointers first
-    id = rhs.id;
-    name = rhs.name;
-    year = rhs.year;
-    authors = rhs.authors;
-    genres = rhs.genres;
-
-    addToAuthors(rhs);
-    addToGenres(rhs);
-    return *this;
-}
 Book::~Book()
 {
+#ifndef NDEBUG
     std::cout << "Book " << this->name << " Destroyed" << std::endl;
+#endif
     remFromAuthors();
     remFromGenres();
 }
@@ -95,30 +82,14 @@ bool Book::check(const std::string& s)
     return false;
 }
 
-//GENRE
-
-Genre& Genre::operator=(const Genre& rhs)
-{
-    remFromAuthors();
-    remFromBooks();
-    //Handles self-assignment by removing pointers first
-    id = rhs.id;
-    name = rhs.name;
-    authors = rhs.authors;
-    books = rhs.books;
-
-    addToAuthors(rhs);
-    addToBooks(rhs);
-    return *this;
-}
-
 Genre::~Genre()
 {
+#ifndef NDEBUG
     std::cout << "Genre " << this->name << " Destroyed" << std::endl;
+#endif
     remFromAuthors();
     remFromBooks();
 }
-
 
 void Genre::addToBooks(const Genre& g)
 {
@@ -179,21 +150,6 @@ bool Genre::check(const std::string& s)
 
 //AUTHOR
 
-Author& Author::operator=(const Author& rhs)
-{
-    remFromGenres();
-    remFromBooks();
-    id = rhs.id;
-    name = rhs.name;
-    country = rhs.country;
-    date = rhs.date;
-    books = rhs.books;
-    genres = rhs.genres;
-
-    addToBooks(*this);
-    addToGenres(*this);
-    return *this;
-}
 Author::~Author()
 {
     std::cout << "Author " << this->name << " Destroyed" << std::endl;

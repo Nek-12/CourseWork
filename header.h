@@ -4,7 +4,7 @@
 #include "table_printer.h"
 #include <set>
 #include <iostream>
-using ull = unsigned long long;
+using ull = unsigned long;
 
 enum
 {
@@ -15,6 +15,8 @@ enum
 };
 
 //TODO: Update comments
+//TODO: Add move-constuctors for huge perf gain
+//TODO: Write a log class and put everything into it;
 
 using tprinter::TablePrinter; //allows to use the tableprinter namespace
 
@@ -34,26 +36,14 @@ bool readString(std::istream& is, std::string& s, char mode);
 //allows for reading a line from the iostream object with input check (foolproofing)
 // 's' for strings with spaces, 'n' for normal, 'd' for date, 'p' for passwords
 
-template<typename T>
-T* findName(std::map<ull,T>& map, const std::string& title);
-
-
 class Book //contains data about book entries
 {
     friend class Author;
-    friend class Genre; //TODO: Add move-constructors
+    friend class Genre;
     friend class Data;
-
-    friend Book* findName<Book>(std::map<ull,Book>&, const std::string&); //TODO: Remove this mess
     friend void manageBook();
     friend std::ostream& operator<<(std::ostream&, const Book&);
 public:
-    Book(Book&& b) noexcept: id(b.id), name(std::move(b.name)), year(b.year), authors(std::move(b.authors)), genres(std::move(b.genres))
-    {
-        std::cout << "Book " << b.name << " was moved" << std::endl;
-        b.genres.clear();
-        b.authors.clear();
-    }
     Book() = delete;
     Book(const Book& b) : id(b.id), name(b.name), year(b.year)
     {
@@ -65,7 +55,7 @@ public:
     {
         std::cout << name << " was created \n";
     };
-    Book& operator=(const Book& rhs);
+    Book& operator=(const Book& rhs) = delete;
     ~Book();
 
     void addAuthor(Author&);
@@ -93,8 +83,7 @@ class Author
     friend class Book;
     friend class Genre;
     friend class Data;
-
-    friend Author* findName<Author>(std::map<ull,Author>&, const std::string&);
+    
     friend std::ostream& operator<<(std::ostream&, const Book&);
     friend std::ostream& operator<<(std::ostream& os, const Author& a);
     friend void editBookAuthor(Book*);
@@ -111,7 +100,7 @@ public:
     {
         std::cout << name << " was created\n";
     };
-    Author& operator=(const Author& rhs);
+    Author& operator=(const Author& rhs) = delete;
     ~Author();
 
     void addGenre(Genre&);
@@ -140,7 +129,6 @@ class Genre
     friend class Book;
     friend class Data;
 
-    friend Genre* findName<Genre>(std::map<ull,Genre>&, const std::string&);
     friend std::ostream& operator<<(std::ostream&, const Book&);
     friend std::ostream& operator<<(std::ostream&, const Genre&);
 public:
@@ -155,7 +143,7 @@ public:
     {
         std::cout << name << " was created\n";
     };
-    Genre& operator=(const Genre& rhs);
+    Genre& operator=(const Genre& rhs) = delete;
     ~Genre();
 
     void addAuthor(Author&);
@@ -174,7 +162,6 @@ private:
     std::string name;
     std::map<ull,Book*> books;
     std::map<ull,Author*> authors;
-
 };
 
 class Data // SINGLETON for storing all the nested structures
@@ -188,13 +175,12 @@ class Data // SINGLETON for storing all the nested structures
 public:
     Data(Data const&) = delete; //Deleted because it's a singleton. We use & instead
     void operator=(Data const&) = delete; //No copying!
-
     static Data& getInstance() //Returns a reference to the single static instance of Data.
     {
         static Data instance;
         return instance;
     }
-
+    void load();
     void save(); //Writes the data to the files (books.txt etc.)
     void printbooks();
     void printCredentials(bool isadmin); //Just prints all the USERNAMES in the mu or ma
@@ -207,7 +193,7 @@ public:
     void createAccount(const std::string& l, const std::string& p, const bool& isadmin);
     size_t enumAccounts(bool isadmin);
     void changePass(const std::string& l, const std::string& p, const bool& isadmin);
-    std::map<ull, Book*> searchBook(const std::string& s);
+    std::vector<Book*> searchBook(const std::string& s);
 
     const std::string loginprompt = "Enter the login or \"exit\" to exit:";
     const std::string passprompt = "Enter the password or \"exit\" to exit:";
@@ -215,6 +201,7 @@ public:
 
     void genreinit();
     void authorinit();
+    Book* searchBook(ull id);
 private:
     Data() = default;
     static void ensureFileExists(const std::string& f);
@@ -224,19 +211,4 @@ private:
     std::map<ull,Book> sb; //Contains all the Books in the database
     std::map<std::string, std::string> mu; // holds <login, password> (hashed)
     std::map<std::string, std::string> ma; //same
-
 };
-
-template<typename T>
-T* findName(std::map<ull,T>& map, const std::string& title)
-{
-    for (auto it = map.begin(); it != map.end(); ++it)
-    {
-        if ((it->second).name == title) return &(it->second);
-    }
-    return nullptr;
-}
-
-template Author* findName(std::map<ull,Author>&, const std::string&);
-template Genre* findName(std::map<ull,Genre>&, const std::string&);
-template Book* findName(std::map<ull,Book>&, const std::string&);

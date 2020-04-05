@@ -1,10 +1,7 @@
 #include "header.h"
 #include <iostream>
 #include <conio.h>
-
-
 std::string path; //extern global
-
 inline void cls()
 { system("cls"); }
 
@@ -43,7 +40,7 @@ ull inputID()
     }
     else
         return genID();
-    return std::stoull(id);
+    return std::stoul(id);
 }
 
 unsigned select()
@@ -80,22 +77,32 @@ std::vector<Author*> searchAuthors()
 return std::vector<Author*>();
 }
 
-std::map<ull,Book*> searchBooks()
+Book* searchBookID()
 {
     Data& data = Data::getInstance();
     while (true)
     {
         cls();
-        std::string s;
-        std::cout << "Enter the title of the book to search: " << std::endl;
-        while (!readString(std::cin, s, 's'));
-        auto sought = data.searchBook(s);
-        if (sought.empty())
-            if (!yesNo("Nothing was found. Try again?")) return sought;
-        std::cout << "Found: " << std::endl;
-        for (auto el: sought)
-            std::cout << el.second;
-        if (!yesNo("Try again?")) return sought;
+        while (true)
+        {
+            std::string s;
+            std::cout << "Enter the ID of the book to search: " << std::endl;
+            while (!readString(std::cin, s, 'i'));
+            Book* sought = data.searchBook(std::stoul(s));
+            if (sought == nullptr)
+            {
+                if (!yesNo("Nothing was found. Try again?"))
+                    return sought;
+                else
+                    continue;
+            }
+            else
+            {
+                std::cout << "Found: " << std::endl;
+                std::cout << *sought << std::endl;
+            }
+            if (!yesNo("Try again?")) return sought;
+        }
     }
 }
 
@@ -111,7 +118,7 @@ void searchUI()
         switch (getch())
         {
             case '1':
-                searchBooks();
+                searchBookID();
                 return;
             case '2':
                 searchAuthors();
@@ -194,13 +201,13 @@ void manageBook()
 {
     Data& data = Data::getInstance();
     std::string temp;
-    auto sought = searchBooks();
-    if (sought.empty()) return;
+    auto *pbook = searchBookID();
+    if (pbook == nullptr) return;
     cls();
-    for (auto it = sought.begin(); it != sought.end(); ++it)
-        std::cout << "#" << std::distance(it, sought.begin())+1 << ":\n" << it->second;
-    std::cout << "Select the book you wish to edit" << std::endl;
-    Book* pbook = sought[select() - 1];
+//    for (auto it = sought.begin(); it != sought.end(); ++it)
+//        std::cout << "#" << std::distance(it, sought.begin())+1 << ":\n" << it->second;
+//    std::cout << "Select the book you wish to edit" << std::endl;
+//    Book* pbook = sought[select() - 1];
     while (true)
     {
         cls();
@@ -214,8 +221,9 @@ void manageBook()
             case '1':
                 if (yesNo("Delete this record?"))
                 {
-                    std::cout << "I did nothing" << std::endl;
+                    std::cout << "Erased this book and removed all references." << std::endl;
                     data.sb.erase(pbook->id);
+                    sleep(WAIT_TIME_NORMAL);
                     return;
                 }
                 else return;
@@ -551,12 +559,7 @@ int main(int argc, char* argv[]) try
 {
 //TODO: Implement autosaving.
     Data& data = Data::getInstance();
-    data.uinit();
-    data.adminit();
-    data.genreinit();
-    data.authorinit();
-    data.bookinit();
-
+    data.load();
     path = argv[0];
     path.erase(path.find_last_of('\\') + 1); //Makes 'path' be the path to the app folder
 #ifndef NDEBUG
@@ -569,6 +572,7 @@ int main(int argc, char* argv[]) try
     std::cout << std::endl;
     system("pause");
 #endif
+    manageBook();
     bool workin = true;
     while (workin)
     {
@@ -590,7 +594,7 @@ int main(int argc, char* argv[]) try
                 break;
         }
     }
-    //data.save();
+    data.save();
     return 0;
 }
 catch (std::invalid_argument& msg)
