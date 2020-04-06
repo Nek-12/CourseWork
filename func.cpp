@@ -116,31 +116,32 @@ bool checkString(const std::string& s, char mode)
     auto msgFalse = [& s](const std::string& msg)
             { std::cerr << "The value " << s << " is invalid: \n" << msg << std::endl; return false; };
     if (s.empty())
-        msgFalse("No data?");
+        return msgFalse("No data?");
     switch (mode)
     {
         case 'p':
         case 'n':
-            if (s.size() < 3) msgFalse("too short");
+            if (s.size() < 3) return msgFalse("too short for a word");
             for (auto ch: s)
                 if (!(isalnum(ch) || ch == '.' || ch == '-' || ch == '_' || ch == '\''))
-                    msgFalse("invalid characters");
+                    return msgFalse("invalid characters");
             break;
         case 's':
-            if (s.size() < 4) msgFalse("too short");
+            if (s.size() < 2) return msgFalse("too short for a string");
             for (auto ch: s)
                 if (!(isalnum(ch) || ispunct(ch) || ch == ' '))
-                    msgFalse("invalid characters");
+                    return msgFalse("invalid characters");
             break;
         case 'd':
             return (checkDate(s));
         case 'i':
+            if (s.size() > 9) return msgFalse("too long for a number");
             for (auto ch: s)
                 if(!isdigit(ch))
-                    msgFalse("invalid characters");
+                    return msgFalse("invalid characters in a number");
             break;
         case 'y':
-            if (!checkYear(s)) msgFalse("invalid year");
+            if (!checkYear(s)) return msgFalse("invalid year");
             break;
         default:
             throw std::invalid_argument("Bad argument for checkString");
@@ -165,7 +166,7 @@ bool readString(std::istream& is, std::string& ret, char mode = 'n')
 std::string lowercase(const std::string& s)
 {
     std::string ret = s;
-    for (auto ch: ret)
+    for (auto& ch: ret)
         ch = tolower(ch);
     return ret;
 }

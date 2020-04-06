@@ -1,10 +1,11 @@
 //#define NDEBUG
 #pragma once
-
 #include <map>
-#include "table_printer.h"
+#include <vector>
 #include <set>
 #include <iostream>
+#include "fort.hpp"
+#include <utility>
 
 using ull = unsigned long;
 
@@ -20,8 +21,6 @@ enum
 //TODO: Add move-constuctors for huge perf gain
 //TODO: Write a log class and put everything into it;
 
-using tprinter::TablePrinter; //allows to use the tableprinter namespace
-
 extern std::string path; //Path to the program folder, see main.cpp -> int main()
 
 class Genre;
@@ -30,6 +29,7 @@ class Data;
 class Book;
 ull genID();
 void cls();
+unsigned getCurYear();
 bool checkString(const std::string&, char);
 std::string lowercase(const std::string&);
 void sleep(const unsigned&); // const unsigned - milliseconds to sleep, uses std::this_thread::sleep_for
@@ -83,7 +83,7 @@ private:
     bool check(const std::string& s);
 
     ull id; //unique book number
-    std::string name;
+    std::string name;//TODO: Refactor this to work with vectors, maps with *s are bs
     unsigned year = 0;
     std::map<ull, Author*> authors;
     std::map<ull, Genre*> genres;
@@ -236,8 +236,10 @@ public:
     const std::string loginprompt = "Enter the login or \"exit\" to exit:";
     const std::string passprompt = "Enter the password or \"exit\" to exit:";
     const std::string passconfirm = "Confirm the password or enter \"exit\" to exit: ";
-    Book* searchBook(ull id);
     std::vector<Genre*> searchGenre(const std::string& s);
+    void printAuthors();
+    void printGenres(unsigned);
+    std::vector<Author*> searchAuthor(const std::string& s);
 private:
     Data() = default;
     static void ensureFileExists(const std::string& f);

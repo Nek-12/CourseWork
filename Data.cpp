@@ -1,34 +1,80 @@
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "performance-inefficient-string-concatenation"
 #include "header.h"
-
 #include <fstream>
 #include <filesystem>
-#include <utility>
 
 void Data::printbooks()
 {
-    TablePrinter tp;
-    tp.alignCenter();
-    tp.setPadding(1);
-    tp.setDashedRawsStyle();
-    tp.addMergedColumn("Books");
-    tp.addColumn("Title", 35);
-    tp.addColumn("Authors", 35);
-    tp.addColumn("Genres", 30);
-    tp.addColumn("ID", 9);
-    tp.addColumn("Year", 4);
+    fort::char_table t;
+    t << fort::header << "Title" << "Genres" << "Authors" << "Year" << "ID" << fort::endr;
     for (const auto& book: sb)
     {
-        std::string authors, genres;
+        std::string authors, genres, delim;
         for (auto g: book.second.genres)
-            genres += g.second->name + ", ";
+        {
+            genres += delim + g.second->name ;
+        delim = "\n";
+        }
+        delim.clear();
         for (auto a: book.second.authors)
-            authors += a.second->name + ", ";
-//TODO: Implement multiline using libfort
-        tp << book.second.name << authors << genres << book.second.id << book.second.year;
+        {
+            authors += delim + a.second->name;
+            delim = "\n";
+        }
+            t << book.second.name << genres << authors << book.second.year << book.second.id << fort::endr;
     }
-    tp.print();
+    t.set_cell_text_align(fort::text_align::center);
+    t.set_border_style(FT_BASIC2_STYLE);
+    t.column(0).set_cell_content_fg_color(fort::color::green);
+    t.column(4).set_cell_content_fg_color(fort::color::red);
+    std::cout << t.to_string() << std::endl;
+}
+void Data::printAuthors()
+{
+    fort::char_table t;
+    t << fort::header << "Name" << "Books" << "Birthdate" << "Country" << "ID" << fort::endr;
+    for (const auto& author: sa)
+    {
+        std::string books, delim;
+        delim.clear();
+        for (auto a: author.second.books)
+        {
+            books += delim + a.second->name;
+            delim = "\n";
+        }
+        t << author.second.name << books << author.second.date << author.second.country << author.second.id << fort::endr;
+    }
+    t.set_cell_text_align(fort::text_align::center);
+    t.set_border_style(FT_BASIC2_STYLE);
+    t.column(0).set_cell_content_fg_color(fort::color::green);
+    t.column(5).set_cell_content_fg_color(fort::color::red);
+    std::cout << t.to_string() << std::endl;
+}
+
+void Data::printGenres(unsigned years = getCurYear() )
+{
+    unsigned compar = getCurYear() - years;
+    fort::char_table t;
+    std::cout << "Books grouped by genres for the past " << years << " years" << std::endl;
+    t << fort::header << "Name" << "Quantity" <<"Books" << "ID" << fort::endr;
+    for (const auto& genre: sg)
+    {
+        unsigned long cnt = 0;
+        std::string books, delim;
+        for (auto b: genre.second.books)
+        {
+            if (b.second->year <= compar) continue;
+            books += delim + b.second->name;
+            delim = "\n";
+            ++cnt;
+        }
+        delim.clear();
+        t << genre.second.name << cnt << books << genre.second.id << fort::endr;
+    }
+    t.set_cell_text_align(fort::text_align::center);
+    t.set_border_style(FT_BASIC2_STYLE);
+    t.column(0).set_cell_content_fg_color(fort::color::green);
+    t.column(2).set_cell_content_fg_color(fort::color::red);
+    std::cout << t.to_string() << std::endl;
 }
 
 bool Data::delAccount(const std::string& l, const bool& isadmin)
@@ -89,19 +135,20 @@ std::vector<Book*> Data::searchBook(const std::string& s)
         if (book.second.check(s)) ret.push_back(&book.second);
     return ret;
 }
-Book* Data::searchBook(ull id)
-{
-    auto sought = sb.find(id);
-    if (sought == sb.end())
-    return nullptr;
-    else return &sought->second;
-}
 
 std::vector<Genre*> Data::searchGenre(const std::string& s)
 {
     std::vector<Genre*> ret;
     for (auto& g : sg)
         if (g.second.check(s)) ret.push_back(&g.second);
+    return ret;
+}
+
+std::vector<Author*> Data::searchAuthor(const std::string& s)
+{
+    std::vector<Author*> ret;
+    for (auto& a : sa)
+        if (a.second.check(s)) ret.push_back(&a.second);
     return ret;
 }
 //TODO: Overload searchGenre by ID or remove
@@ -284,6 +331,7 @@ void Data::save()
 {
     std::cout << "Saving..." << std::endl;
     std::ofstream f(path + "user.txt");
+    f << std::setfill('0');
 #ifndef NDEBUG
     printbooks();
     printCredentials(true);
@@ -296,31 +344,28 @@ void Data::save()
         f << el.first << "\n" << el.second << "\n" << std::endl;
     f.close(); f.open(path + "genres.txt");
     for (auto& el: sg)
-        f << el.first  << '\n' << el.second.name << '\n' << std::endl;
+        f <<  std::setw(9) << el.first  << '\n' << el.second.name << '\n' << std::endl;
     f.close(); f.open(path + "authors.txt");
     for (auto& el: sa)
-        f << el.first << '\n' << el.second.name << '\n' << el.second.date << '\n'  << el.second.country << '\n' <<std::endl;
+        f <<  std::setw(9) << el.first << '\n' << el.second.name << '\n' << el.second.date << '\n'  << el.second.country << '\n' <<std::endl;
     f.close(); f.open(path + "books.txt");
     for (auto& b: sb)
         {
-            f << b.first << "\n" << b.second.name << "\n" << std::setfill('0') << std::setw(4) << b.second.year << "\n";
+            f << std::setw(9) << b.first << "\n" << b.second.name << "\n" << std::setw(4) << b.second.year << "\n";
             std::string delim;
             for (auto& g: b.second.genres)
             {
-                f << delim << g.second->id;
+                f << delim << std::setw(9) << g.second->id;
                 delim = ',';
             }
             f << "\n";
             delim.clear();
             for (auto& a: b.second.authors)
             {
-                f << delim << a.second->id;
+                f << delim << std::setw(9) << a.second->id;
                 delim = ',';
             }
             f << "\n" << std::setfill(' ') << std::endl;
         }
     //The destructor will close the files for me
 }
-
-
-#pragma clang diagnostic pop
