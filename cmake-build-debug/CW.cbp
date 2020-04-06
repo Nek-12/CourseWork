@@ -88,6 +88,15 @@
 		<Unit filename="C:/Users/ender/Archive/Coding/CourseWork/booker.cpp">
 			<Option target="CW"/>
 		</Unit>
+		<Unit filename="C:/Users/ender/Archive/Coding/CourseWork/fort.c">
+			<Option target="CW"/>
+		</Unit>
+		<Unit filename="C:/Users/ender/Archive/Coding/CourseWork/fort.h">
+			<Option target="CW"/>
+		</Unit>
+		<Unit filename="C:/Users/ender/Archive/Coding/CourseWork/fort.hpp">
+			<Option target="CW"/>
+		</Unit>
 		<Unit filename="C:/Users/ender/Archive/Coding/CourseWork/func.cpp">
 			<Option target="CW"/>
 		</Unit>
@@ -101,12 +110,6 @@
 			<Option target="CW"/>
 		</Unit>
 		<Unit filename="C:/Users/ender/Archive/Coding/CourseWork/sha256.h">
-			<Option target="CW"/>
-		</Unit>
-		<Unit filename="C:/Users/ender/Archive/Coding/CourseWork/table_printer.cpp">
-			<Option target="CW"/>
-		</Unit>
-		<Unit filename="C:/Users/ender/Archive/Coding/CourseWork/table_printer.h">
 			<Option target="CW"/>
 		</Unit>
 		<Unit filename="C:/Users/ender/Archive/Coding/CourseWork/CMakeLists.txt">

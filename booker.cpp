@@ -1,25 +1,13 @@
+#include <iomanip>
 #include "header.h"
 
 //BOOK
 
-Book& Book::operator=(const Book& rhs)
-{
-    remFromAuthors();
-    remFromGenres();
-    //Handles self-assignment by removing pointers first
-    id = rhs.id;
-    name = rhs.name;
-    year = rhs.year;
-    authors = rhs.authors;
-    genres = rhs.genres;
-
-    addToAuthors(rhs);
-    addToGenres(rhs);
-    return *this;
-}
 Book::~Book()
 {
+#ifndef NDEBUG
     std::cout << "Book " << this->name << " Destroyed" << std::endl;
+#endif
     remFromAuthors();
     remFromGenres();
 }
@@ -86,39 +74,23 @@ void Book::remFromAuthors()
 }
 bool Book::check(const std::string& s)
 {
-    std::cout << "Function check was given " << s << std::endl;
-    if (name.find(s) != std::string::npos || s == std::to_string(year) || s == std::to_string(id) ) return true;
-    for (auto el: genres)
-        if (el.second->name.find(s) != std::string::npos) return true;
-    for (auto el: authors)
-        if (el.second->name.find(s) != std::string::npos) return true;
+    std::string ls = lowercase(s);
+    if (lowercase(name).find(ls) != std::string::npos || s == std::to_string(year) || s == std::to_string(id) ) return true;
+    for (const auto& el: genres)
+        if (lowercase(el.second->name).find(ls) != std::string::npos) return true;
+    for (const auto& el: authors)
+        if (lowercase(el.second->name).find(ls) != std::string::npos) return true;
     return false;
-}
-
-//GENRE
-
-Genre& Genre::operator=(const Genre& rhs)
-{
-    remFromAuthors();
-    remFromBooks();
-    //Handles self-assignment by removing pointers first
-    id = rhs.id;
-    name = rhs.name;
-    authors = rhs.authors;
-    books = rhs.books;
-
-    addToAuthors(rhs);
-    addToBooks(rhs);
-    return *this;
 }
 
 Genre::~Genre()
 {
+#ifndef NDEBUG
     std::cout << "Genre " << this->name << " Destroyed" << std::endl;
+#endif
     remFromAuthors();
     remFromBooks();
 }
-
 
 void Genre::addToBooks(const Genre& g)
 {
@@ -169,31 +141,17 @@ std::ostream& operator<<(std::ostream &os, const Genre& g)
 
 bool Genre::check(const std::string& s)
 {
-    if (name.find(s) != std::string::npos || s == std::to_string(id) ) return true;
+    std::string ls = lowercase(s);
+    if (lowercase(name).find(ls) != std::string::npos || s == std::to_string(id) ) return true;
     for (auto el: books)
-        if (el.second->name.find(s) != std::string::npos) return true;
+        if (lowercase(el.second->name).find(ls) != std::string::npos) return true;
     for (auto el: authors)
-        if (el.second->name.find(s) != std::string::npos) return true;
+        if (lowercase(el.second->name).find(ls) != std::string::npos) return true;
     return false;
 }
 
 //AUTHOR
 
-Author& Author::operator=(const Author& rhs)
-{
-    remFromGenres();
-    remFromBooks();
-    id = rhs.id;
-    name = rhs.name;
-    country = rhs.country;
-    date = rhs.date;
-    books = rhs.books;
-    genres = rhs.genres;
-
-    addToBooks(*this);
-    addToGenres(*this);
-    return *this;
-}
 Author::~Author()
 {
     std::cout << "Author " << this->name << " Destroyed" << std::endl;
@@ -249,6 +207,14 @@ std::ostream& operator<<(std::ostream &os, const Author& a)
 }
 bool Author::check(const std::string& s)
 {
-    return (s == name || s == std::to_string(id) );
+    std::string ls = lowercase(s);
+    if (lowercase(name).find(ls) != std::string::npos
+        || s == std::to_string(id) || lowercase(date).find(ls) != std::string::npos
+        || lowercase(country).find(ls) != std::string::npos ) return true;
+    for (auto el: books)
+        if (lowercase(el.second->name).find(ls) != std::string::npos) return true;
+    for (auto el: genres)
+        if (lowercase(el.second->name).find(ls) != std::string::npos) return true;
+    return false;
 }
 

@@ -1,35 +1,80 @@
 #include "header.h"
-
 #include <fstream>
 #include <filesystem>
-#include <utility>
 
 void Data::printbooks()
 {
-    TablePrinter tp;
-    tp.alignCenter();
-    tp.setPadding(1);
-    tp.setDashedRawsStyle();
-    tp.addMergedColumn("Book Database");
-    tp.addColumn("Title", 35);
-    tp.addColumn("Authors", 35);
-    tp.addColumn("Genres", 35);
-    tp.addColumn("ID", 9);
-    tp.addColumn("Year", 4);
+    fort::char_table t;
+    t << fort::header << "Title" << "Genres" << "Authors" << "Year" << "ID" << fort::endr;
     for (const auto& book: sb)
     {
-        std::string authors, genres;
-#ifndef NDEBUG
-std::cout << book.second.genres.size() << ", " << book.second.authors.size() << std::endl;
-#endif
+        std::string authors, genres, delim;
         for (auto g: book.second.genres)
-            genres += g.second->name + ", ";
+        {
+            genres += delim + g.second->name ;
+        delim = "\n";
+        }
+        delim.clear();
         for (auto a: book.second.authors)
-            authors += a.second->name + ", ";
-//TODO: Implement multiline using libfort
-        tp << book.second.name << authors << genres << book.second.id << book.second.year;
+        {
+            authors += delim + a.second->name;
+            delim = "\n";
+        }
+            t << book.second.name << genres << authors << book.second.year << book.second.id << fort::endr;
     }
-    tp.print();
+    t.set_cell_text_align(fort::text_align::center);
+    t.set_border_style(FT_BASIC2_STYLE);
+    t.column(0).set_cell_content_fg_color(fort::color::green);
+    t.column(4).set_cell_content_fg_color(fort::color::red);
+    std::cout << t.to_string() << std::endl;
+}
+void Data::printAuthors()
+{
+    fort::char_table t;
+    t << fort::header << "Name" << "Books" << "Birthdate" << "Country" << "ID" << fort::endr;
+    for (const auto& author: sa)
+    {
+        std::string books, delim;
+        delim.clear();
+        for (auto a: author.second.books)
+        {
+            books += delim + a.second->name;
+            delim = "\n";
+        }
+        t << author.second.name << books << author.second.date << author.second.country << author.second.id << fort::endr;
+    }
+    t.set_cell_text_align(fort::text_align::center);
+    t.set_border_style(FT_BASIC2_STYLE);
+    t.column(0).set_cell_content_fg_color(fort::color::green);
+    t.column(5).set_cell_content_fg_color(fort::color::red);
+    std::cout << t.to_string() << std::endl;
+}
+
+void Data::printGenres(unsigned years = getCurYear() )
+{
+    unsigned compar = getCurYear() - years;
+    fort::char_table t;
+    std::cout << "Books grouped by genres for the past " << years << " years" << std::endl;
+    t << fort::header << "Name" << "Quantity" <<"Books" << "ID" << fort::endr;
+    for (const auto& genre: sg)
+    {
+        unsigned long cnt = 0;
+        std::string books, delim;
+        for (auto b: genre.second.books)
+        {
+            if (b.second->year <= compar) continue;
+            books += delim + b.second->name;
+            delim = "\n";
+            ++cnt;
+        }
+        delim.clear();
+        t << genre.second.name << cnt << books << genre.second.id << fort::endr;
+    }
+    t.set_cell_text_align(fort::text_align::center);
+    t.set_border_style(FT_BASIC2_STYLE);
+    t.column(0).set_cell_content_fg_color(fort::color::green);
+    t.column(2).set_cell_content_fg_color(fort::color::red);
+    std::cout << t.to_string() << std::endl;
 }
 
 bool Data::delAccount(const std::string& l, const bool& isadmin)
@@ -83,247 +128,244 @@ void Data::ensureFileExists(const std::string& f)
     }
 }
 
-std::map<ull,Book*> Data::searchBook(const std::string& s)
+std::vector<Book*> Data::searchBook(const std::string& s)
 {
-    std::map<ull,Book*> ret;
-    for (auto book : sb)
-        if (book.second.check(s)) ret.insert(std::make_pair(book.first,&book.second));
+    std::vector<Book*> ret;
+    for (auto& book : sb)
+        if (book.second.check(s)) ret.push_back(&book.second);
     return ret;
 }
 
-void Data::genreinit() try
+std::vector<Genre*> Data::searchGenre(const std::string& s)
 {
-std::string gfname = "genres.txt";
-ensureFileExists(gfname);
-std::ifstream gf(path + gfname);
-    while (gf)
-    {
-        std::string id, name;
-        if (!readString(gf, id, 'i')) throw std::runtime_error("genre id");
-        if (!readString(gf, name, 's')) throw std::runtime_error("genre name");
-        sg.emplace(std::make_pair(std::stoull(id), Genre(std::stoull(id),name)));
-        getline(gf, name); //Ignores 1 line. TODO:Test
-    }
-#ifndef NDEBUG
-    std::cout << "Successfully read genres"<< std::endl;
-#endif
-}
-catch (std::runtime_error& e)
-{
-    std::cerr << "Couldn't read the file genres.txt:" << e.what() << std::endl;
-    system("pause");
-    return;
-}
-catch (std::exception& e)
-{
-    std::cout << "Fatal error in genreinit(): " << e.what() << std::endl;
-    throw;
-}
-catch (...)
-{
-    std::cout << "Unresolved error in genreinit()" << std::endl;
-    throw;
+    std::vector<Genre*> ret;
+    for (auto& g : sg)
+        if (g.second.check(s)) ret.push_back(&g.second);
+    return ret;
 }
 
+std::vector<Author*> Data::searchAuthor(const std::string& s)
+{
+    std::vector<Author*> ret;
+    for (auto& a : sa)
+        if (a.second.check(s)) ret.push_back(&a.second);
+    return ret;
+}
+//TODO: Overload searchGenre by ID or remove
 
-void Data::authorinit() try
+void Data::load() try
 {
-    std::string afname = "authors.txt";
-    ensureFileExists(afname);
-    std::ifstream af(path + afname);
-
-    while (af)
-    {
-        std::string id, name, date, country, temp;
-        if (!readString(af, id, 'i')) throw std::runtime_error("author id");
-        if (!readString(af, name, 's')) throw std::runtime_error("author name");
-        if (!readString(af, date, 'd')) throw std::runtime_error("author date");
-        if (!readString(af, country, 's')) throw std::runtime_error("author country");
-        std::cout << " Read this: " << id << ' ' << name << ' ' << date << ' ' << country << ' ' << std::endl;
-        sa.emplace(std::make_pair(std::stoull(id),Author(std::stoull(id), name, date, country)));
-        getline(af, temp); //Ignores 1 line.
-    }
-#ifndef NDEBUG
-    std::cout << "Successfully read authors"<< std::endl;
-#endif
-}
-catch (std::runtime_error& e)
-{
-    std::cerr << "Couldn't read the file authors.txt:" << e.what() << std::endl;
-    system("pause");
-    return;
-}
-catch (std::exception& e)
-{
-    std::cout << "Fatal error in authorinit(): " << e.what() << std::endl;
-    throw;
-}
-catch (...)
-{
-    std::cout << "Unresolved error in authorinit()" << std::endl;
-    throw;
-}
-
-
-void Data::bookinit() try//TODO: Optimize
-{
-    std::string bfname = "books.txt";
-    ensureFileExists(bfname);
-    std::ifstream bf(path + bfname);
-#ifndef NDEBUG
-    std::cout << "Current sb state: " << std::endl;
-    for (auto& el: sb)
-        std::cout << el.second << std::endl;
-    std::cout << "Current sg state: " << std::endl;
-    for (auto& el: sg)
-        std::cout << el.second << std::endl;
-    std::cout << "Current sa state: " << std::endl;
-    for (auto& el: sa)
-        std::cout << el.second << std::endl;
-#endif
-    while (bf) //TODO: Add checks for the authorinit and genreinit
-    {
-        std::cout << "Starting to parse a new book " << std::endl;
-        std::string id, title, year, temp, entry;
-        if (!readString(bf, id, 'i')) throw std::runtime_error("book id");
-        if (!readString(bf, title, 's')) throw std::runtime_error("book name");
-        if (!readString(bf, year, 'y')) throw std::runtime_error("book year");
-        std::cout << "emplace_back " << id << ' ' << title << ' ' << std::stoul(year) << std::endl;
-        auto curbook = sb.emplace(std::make_pair(std::stoull(id),Book(std::stoull(id), title, std::stoul(year) ) ) );
-        std::cout << "emplace_back finished\n";
-        if (!curbook.second) throw std::runtime_error("Duplicate on emplace book");
-        //Place genres
-        if (!readString(bf, temp, 's')) throw std::runtime_error("book genres");
-        std::stringstream ss(temp);
-        while (getline(ss, entry, ','))
-        {
-            Genre* sought = findName(sg, entry);
-            std::cout << "findName returned: " << (sought == nullptr ? "Nothing" : sought->name) << std::endl;
-            if (sought == nullptr) //If we didn't find anything
-            {
-                std::cout << "Executing new genre creation" << std::endl;
-                ull id = genID();
-                sg.emplace(std::make_pair(id, Genre(id,entry))).first->second.addBook(curbook.first->second); //create a new genre and bind it to the book
-            }   //The book is bound to the genre too
-            else
-            {
-                std::cout << "Executing adding pointer" << std::endl;
-                sought->addBook(curbook.first->second);
-            }
-        }
-#ifndef NDEBUG
-        std::cout << "Linked books with genres";
-#endif
-        //Place authors
-        if (!readString(bf, temp, 's')) throw std::runtime_error("book authors");
-        ss.clear();
-        ss.str(temp);
-        while (getline(ss, entry, ','))
-        {
-            Author* sought = findName(sa, entry);
-            std::cout << "findName returned: " << (sought == nullptr ? "Nothing" : sought->name) << std::endl;
-            if (sought == nullptr)
-            {
-                std::cout << "Executing new author creation" << std::endl;
-                ull id = genID();
-                sa.emplace(std::make_pair(id, Author(id,entry))).first->second.addBook(curbook.first->second);
-            }
-            else
-            {
-                std::cout << "Executing adding pointer" << std::endl;
-                sought->addBook(curbook.first->second);
-            }
-        }
-        getline(bf, temp); //Ignores 1 line. TODO:Test
-        std::cout << "Linked book" << std::endl;
-    }
-#ifndef NDEBUG
-    std::cout << "Successfully read books"<< std::endl;
-    system("pause");
-#endif
-}
-catch (std::runtime_error& e)
-{
-    std::cerr << "Couldn't read the file books.txt:" << e.what() << std::endl;
-    system("pause");
-    return;
-}
-catch (std::exception& e)
-{
-    std::cout << "Fatal error: " << e.what() << std::endl;
-    throw;
-}
-catch (...)
-{
-    std::cout << "Unresolved error" << std::endl;
-    throw;
-}
-
-void Data::uinit()
-{
-    std::string login, pass, temp, name = "user.txt";
+    std::string tempA, tempB, tempC, tempD, name = "user.txt";
     ensureFileExists(name);
     std::ifstream f(path + name);
-    if (!f) throw std::runtime_error("File " + name + " could not be opened after creating.");
+    auto empty = [&f ]() { return f.peek() == std::ifstream::traits_type::eof(); };
     while (f) //Starts parsing the file. Paragraphs are divided by a blank line
     {
-        if (!readString(f, login, 'n')) break;
-        if (!readString(f, pass, 'n')) break;
-        mu[login] = pass; //read pass, login and add them to the map. Duplicates removed.
-        if (!std::getline(f, temp)) break;
-        if (!temp.empty() && temp != " ")
+        if (empty()) break;
+        if (!readString(f, tempA, 'n')) throw std::invalid_argument("File: " + name + " couldn't read line: " + tempA);
+        if (!readString(f, tempB, 'n')) throw std::invalid_argument("File: " + name + " couldn't read line: " + tempB);
+        mu[tempA] = tempB; //read pass, login and add them to the map. Duplicates removed.
+        if (!std::getline(f, tempC)) break;
+        if (!tempC.empty() && tempC != " ")
             throw std::invalid_argument("File " + name + " read error, check delimiters.");
         //continues to read if f is good;
     }
-}
-
-void Data::adminit()
-{
-    std::string login, pass, temp, name = "admin.txt";
+    std::cout << "Successfully read users" << std::endl;
+    name = "admin.txt";
+    f.close();
     ensureFileExists(name);
-    std::ifstream f(path + name);
-    if (!f) throw std::runtime_error("File " + name + " could not be opened.");
+    f.open(path + name);
     while (f) //Starts parsing the file. Paragraphs are divided by a blank line
     {
-        if (!readString(f, login, 'n')) break;
-        if (!readString(f, pass, 'n')) break;
-        ma[login] = pass; //read pass, login and add them to the map. Duplicates removed.
-
-        if (!std::getline(f, temp)) break;
-        if (!temp.empty() && temp != " ")
+        if (empty()) break;
+        if (f.eof()) break;
+        if (!readString(f, tempA, 'n')) throw std::invalid_argument("File: " + name + " couldn't read line: " + tempA);
+        if (!readString(f, tempB, 'n')) throw std::invalid_argument("File: " + name + " couldn't read line: " + tempB);
+        ma[tempA] = tempB; //read pass, login and add them to the map. Duplicates removed.
+        if (!std::getline(f, tempC)) break;
+        if (!tempC.empty() && tempC != " ")
             throw std::invalid_argument("File " + name + " read error, check delimiters.");
         //continues to read if f is good;
     }
+    std::cout << "Successfully read admins" << std::endl;
     if (ma.empty())
     {
-        std::cerr << "Warning! We couldn't find any valid administrator accounts. \n"
+        std::cerr << "Warning! We  couldn't find any valid administrator accounts. \n"
                      "Created a new one: admin | admin" << std::endl;
         ma["admin"] = hash("admin");
     }
+    name = "genres.txt";
+    f.close();
+    ensureFileExists(name);
+    f.open(path + name);
+    while (f)
+    {
+        if (empty()) break;
+        if (!readString(f, tempA, 'i')) throw std::invalid_argument("File: " + name + " couldn't read line: " + tempA);
+        if (!readString(f, tempB, 's')) throw std::invalid_argument("File: " + name + " couldn't read line: " + tempB);
+        sg.emplace(std::make_pair(std::stoul(tempA), Genre(std::stoul(tempA), tempB)));
+        getline(f, tempC); //Ignores 1 line.
+    }
+    std::cout << "Successfully read genres" << std::endl;
+    name = "authors.txt";
+    f.close();
+    ensureFileExists(name);
+    f.open(path + name);
+    while (f)
+    { //id, name, date, country
+        if (empty()) break;
+        if (!readString(f, tempA, 'i')) throw std::invalid_argument("File: " + name + " couldn't read id: " + tempA);
+        if (!readString(f, tempB, 's')) throw std::invalid_argument("File: " + name + " couldn't read name: " + tempB);
+        if (!readString(f, tempC, 'd')) throw std::invalid_argument("File: " + name + " couldn't read date: " + tempC);
+        if (!readString(f, tempD, 's')) throw std::invalid_argument("File: " + name + " couldn't read country: " + tempD);
+                sa.emplace(std::make_pair(std::stoul(tempA), Author(std::stoul(tempA), tempB, tempC, tempD)));
+        getline(f, tempC); //Ignores 1 line.
+    }
+    std::cout << "Successfully read authors" << std::endl;
+    f.close();
+    name = "books.txt";
+    ensureFileExists(name);
+    f.open(path + name);
+#ifndef NDEBUG
+    std::cout << "Current sb state: " << std::endl;
+    for (auto& el: sb)
+        std::cout << "key: " << el.first << "\n" << el.second << std::endl;
+    std::cout << "Current sg state: " << std::endl;
+    for (auto& el: sg)
+        std::cout << "key: " << el.first << "\n" << el.second << std::endl;
+    std::cout << "Current sa state: " << std::endl;
+    for (auto& el: sa)
+        std::cout << "key: " << el.first << "\n" << el.second << std::endl;
+#endif
+    while (f) //TODO: Add checks for the authorinit and genreinit
+    { //id, title, year, temp, entry
+        if (empty()) break;
+        std::cout << "Starting to parse a new book " << std::endl;
+        if (!readString(f, tempA, 'i')) throw std::invalid_argument("File: " + name + " couldn't read id: " + tempA);
+        if (!readString(f, tempB, 's')) throw std::invalid_argument("File: " + name + " couldn't read title: " + tempB);
+        if (!readString(f, tempC, 'y')) throw std::invalid_argument("File: " + name + " couldn't read year: " + tempC);
+#ifndef NDEBUG
+        std::cout << "emplace_back " << tempA << ' ' << tempB << ' ' << tempC << std::endl;
+#endif
+        auto curbook = sb.emplace(std::make_pair(std::stoul(tempA), Book(std::stoul(tempA), tempB, std::stoul(tempC))));
+#ifndef NDEBUG
+        std::cout << "emplace_back finished\n";
+#endif
+        if (!curbook.second) throw std::runtime_error("Duplicate on emplace book");
+        //Place genres
+        if (!readString(f, tempA, 's')) throw std::invalid_argument("File: " + name + " couldn't read book's genres: " + tempA);
+        std::stringstream ss(tempA); //tempA - line with genres, tempD - genre;
+        while (getline(ss, tempD, ','))
+        {
+            if (!checkString(tempD, 'i')) throw std::invalid_argument("File: " + name + " couldn't read book's genre ID: " + tempD);
+            auto sought = sg.find(std::stoul(tempD));
+#ifndef NDEBUG
+            std::cout << "sought.first is: " << (sought != sg.end() ? std::to_string(sought->first) : "NULL") << std::endl;
+#endif
+            if (sought == sg.end()) //If we didn't find anything
+            {
+#ifndef NDEBUG
+                std::cout << "Executing new genre creation" << std::endl;
+#endif
+                sg.emplace(std::make_pair(std::stoul(tempD), Genre(std::stoul(tempD), "Unknown genre"))).first->second.addBook(
+                        curbook.first->second); //create a new genre and bind it to the book
+            }   //The book is bound to the genre too
+            else
+            {
+#ifndef NDEBUG
+                std::cout << "Executing adding pointer" << std::endl;
+#endif
+                sought->second.addBook(curbook.first->second);
+            }
+            tempD.clear();
+        }
+        std::cout << "Successfully linked books with genres\n";
+        //Place authors
+        if (!readString(f, tempA, 's')) throw std::invalid_argument("File: " + name + " couldn't read book's authors: " + tempA);
+        ss.clear(); //TODO: is this needed?
+        ss.str(tempA); //author's line, tempD is author's ID;
+        while (getline(ss, tempD, ','))
+        {
+            if (!checkString(tempD, 'i')) throw std::invalid_argument("File: " + name + " couldn't read book's author ID " + tempD);
+            auto sought = sa.find(std::stoul(tempD));
+            std::cout << "sought.first is: " << (sought != sa.end() ? std::to_string(sought->first) : "NULL") << std::endl;
+            if (sought == sa.end())
+            {
+#ifndef NDEBUG
+                std::cout << "Executing new author creation" << std::endl;
+#endif
+                sa.emplace(std::make_pair(std::stoul(tempD), Author(std::stoul(tempD), "Unknown author"))).first->second.addBook(
+                        curbook.first->second);
+            }
+            else
+            {
+#ifndef NDEBUG
+                std::cout << "Executing adding pointer" << std::endl;
+#endif
+                sought->second.addBook(curbook.first->second);
+            }
+            tempD.clear();
+        }
+        getline(f, tempA); //Ignores 1 line. TODO:Test
+#ifndef NDEBUG
+        std::cout << "Linked book " << tempB << std::endl;
+#endif
+    }
+#ifndef NDEBUG
+    std::cout << "Successfully read books" << std::endl;
+    system("pause");
+#endif
 }
-
+catch (const std::exception& e)
+{
+    std::cerr << "Critical error while reading files. The program cannot continue. \n"
+    << "Error: " << e.what() << std::endl;
+    throw;
+}
+catch (...)
+{
+    std::cerr << "Unknown error while reading files. The program cannot continue." << std::endl;
+   throw;
+}
 void Data::save()
 {
     std::cout << "Saving..." << std::endl;
-    std::ofstream fb(path + "books.txt");
-    std::ofstream fg(path + "books.txt");
-    std::ofstream fa(path + "authors.txt");
-    std::ofstream fusr(path + "user.txt");
-    std::ofstream fadm(path + "admin.txt");
+    std::ofstream f(path + "user.txt");
+    f << std::setfill('0');
 #ifndef NDEBUG
     printbooks();
     printCredentials(true);
     printCredentials(false);
 #endif
-    for (auto& el: ma)
-        fadm << el.first << "\n" << el.second << "\n" << std::endl;
     for (auto& el: mu)
-        fusr << el.first << "\n" << el.second << "\n" << std::endl;
+        f << el.first << "\n" << el.second << "\n" << std::endl;
+    f.close(); f.open(path + "admin.txt");
+    for (auto& el: ma)
+        f << el.first << "\n" << el.second << "\n" << std::endl;
+    f.close(); f.open(path + "genres.txt");
     for (auto& el: sg)
-        fg << el.second << std::endl;
+        f <<  std::setw(9) << el.first  << '\n' << el.second.name << '\n' << std::endl;
+    f.close(); f.open(path + "authors.txt");
     for (auto& el: sa)
-        fa << el.second << std::endl;
-    for (auto& book: sb)
-        fb << book.second;
+        f <<  std::setw(9) << el.first << '\n' << el.second.name << '\n' << el.second.date << '\n'  << el.second.country << '\n' <<std::endl;
+    f.close(); f.open(path + "books.txt");
+    for (auto& b: sb)
+        {
+            f << std::setw(9) << b.first << "\n" << b.second.name << "\n" << std::setw(4) << b.second.year << "\n";
+            std::string delim;
+            for (auto& g: b.second.genres)
+            {
+                f << delim << std::setw(9) << g.second->id;
+                delim = ',';
+            }
+            f << "\n";
+            delim.clear();
+            for (auto& a: b.second.authors)
+            {
+                f << delim << std::setw(9) << a.second->id;
+                delim = ',';
+            }
+            f << "\n" << std::setfill(' ') << std::endl;
+        }
     //The destructor will close the files for me
 }

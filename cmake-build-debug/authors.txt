@@ -1,54 +1,54 @@
-167946879
+0014
 L. Tolstoy
 09.09.1828
 Russia
 
-164446498
+0015
 E. Hemingway
 21.07.1899
 America
 
-145621354
+0016
 W. Shakespeare
 26.04.1564
 England
 
-156464643
+0017
 M. Twain
 30.11.1835
 America
 
-165548796
+0018
 C. Dickens
 07.02.1812
 England
 
-164684864
+0019
 J. Rowling
 31.07.1965
 England
 
-649889871
+0020
 V. Nabokov
 22.04.1899
 Russia
 
-464864345
+0021
 F. Dostoyevsky
 11.11.1821
 Russia
 
-467944698
+0022
 S. Hawking
 08.01.1942
 England
 
-547948987
+0023
 O. Ovchinnikov
 30.03.1973
 Russia
 
-648653978
+0024
 E. Proshkin
 28.05.1970
 Russia
