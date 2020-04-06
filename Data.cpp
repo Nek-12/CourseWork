@@ -83,11 +83,11 @@ void Data::ensureFileExists(const std::string& f)
     }
 }
 
-std::vector<Book*> Data::searchBook(const std::string& s)
+std::map<ull,Book*> Data::searchBook(const std::string& s)
 {
-    std::vector<Book*> ret;
+    std::map<ull,Book*> ret;
     for (auto book : sb)
-        if (book.second.check(s)) ret.push_back(&book.second);
+        if (book.second.check(s)) ret.insert(std::make_pair(book.first,&book.second));
     return ret;
 }
 
@@ -191,6 +191,7 @@ void Data::bookinit() try//TODO: Optimize
         std::cout << "emplace_back " << id << ' ' << title << ' ' << std::stoul(year) << std::endl;
         auto curbook = sb.emplace(std::make_pair(std::stoull(id),Book(std::stoull(id), title, std::stoul(year) ) ) );
         std::cout << "emplace_back finished\n";
+        if (!curbook.second) throw std::runtime_error("Duplicate on emplace book");
         //Place genres
         if (!readString(bf, temp, 's')) throw std::runtime_error("book genres");
         std::stringstream ss(temp);
@@ -201,13 +202,13 @@ void Data::bookinit() try//TODO: Optimize
             if (sought == nullptr) //If we didn't find anything
             {
                 std::cout << "Executing new genre creation" << std::endl;
-                ull gid = genID();
-                sg.emplace(std::make_pair(gid, Genre(gid,entry)))->second.addBook(curbook->second); //create a new genre and bind it to the book
+                ull id = genID();
+                sg.emplace(std::make_pair(id, Genre(id,entry))).first->second.addBook(curbook.first->second); //create a new genre and bind it to the book
             }   //The book is bound to the genre too
             else
             {
                 std::cout << "Executing adding pointer" << std::endl;
-                sought->addBook(curbook->second);
+                sought->addBook(curbook.first->second);
             }
         }
 #ifndef NDEBUG
@@ -224,13 +225,13 @@ void Data::bookinit() try//TODO: Optimize
             if (sought == nullptr)
             {
                 std::cout << "Executing new author creation" << std::endl;
-                ull gid = genID();
-                sa.emplace(std::make_pair(gid, Author(gid,entry)))->second.addBook(curbook->second);
+                ull id = genID();
+                sa.emplace(std::make_pair(id, Author(id,entry))).first->second.addBook(curbook.first->second);
             }
             else
             {
                 std::cout << "Executing adding pointer" << std::endl;
-                sought->addBook(curbook->second);
+                sought->addBook(curbook.first->second);
             }
         }
         getline(bf, temp); //Ignores 1 line. TODO:Test
