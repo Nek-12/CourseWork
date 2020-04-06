@@ -21,9 +21,6 @@ void Data::printbooks()
     for (const auto& book: sb)
     {
         std::string authors, genres;
-#ifndef NDEBUG
-std::cout << book.second.genres.size() << ", " << book.second.authors.size() << std::endl;
-#endif
         for (auto g: book.second.genres)
             genres += g.second->name + ", ";
         for (auto a: book.second.authors)
@@ -88,7 +85,7 @@ void Data::ensureFileExists(const std::string& f)
 std::vector<Book*> Data::searchBook(const std::string& s)
 {
     std::vector<Book*> ret;
-    for (auto book : sb)
+    for (auto& book : sb)
         if (book.second.check(s)) ret.push_back(&book.second);
     return ret;
 }
@@ -99,6 +96,15 @@ Book* Data::searchBook(ull id)
     return nullptr;
     else return &sought->second;
 }
+
+std::vector<Genre*> Data::searchGenre(const std::string& s)
+{
+    std::vector<Genre*> ret;
+    for (auto& g : sg)
+        if (g.second.check(s)) ret.push_back(&g.second);
+    return ret;
+}
+//TODO: Overload searchGenre by ID or remove
 
 void Data::load() try
 {

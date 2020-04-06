@@ -75,9 +75,9 @@ bool Book::check(const std::string& s)
 {
     std::cout << "Function check was given " << s << std::endl;
     if (name.find(s) != std::string::npos || s == std::to_string(year) || s == std::to_string(id) ) return true;
-    for (auto el: genres)
+    for (const auto& el: genres)
         if (el.second->name.find(s) != std::string::npos) return true;
-    for (auto el: authors)
+    for (const auto& el: authors)
         if (el.second->name.find(s) != std::string::npos) return true;
     return false;
 }

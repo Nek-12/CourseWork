@@ -1,9 +1,11 @@
 //#define NDEBUG
 #pragma once
+
 #include <map>
 #include "table_printer.h"
 #include <set>
 #include <iostream>
+
 using ull = unsigned long;
 
 enum
@@ -29,8 +31,8 @@ class Book;
 ull genID();
 void cls();
 bool checkString(const std::string&, char);
-std::string lowercase(const std::string& );
-void sleep(const unsigned& ); // const unsigned - milliseconds to sleep, uses std::this_thread::sleep_for
+std::string lowercase(const std::string&);
+void sleep(const unsigned&); // const unsigned - milliseconds to sleep, uses std::this_thread::sleep_for
 std::string hash(const std::string& s); //uses sha256.cpp and sha256.h for encrypting passwords, outputs hashed string
 bool readString(std::istream& is, std::string& s, char mode);
 //allows for reading a line from the iostream object with input check (foolproofing)
@@ -41,7 +43,6 @@ class Book //contains data about book entries
     friend class Author;
     friend class Genre;
     friend class Data;
-    friend void manageBook();
     friend std::ostream& operator<<(std::ostream&, const Book&);
 public:
     Book() = delete;
@@ -62,7 +63,18 @@ public:
     void addGenre(Genre&);
     void remAuthor(Author&);
     void remGenre(Genre&);
-
+    [[nodiscard]] const std::string& getName() const
+    { return name; }
+    void rename(const std::string& s)
+    { name = s; }
+    std::map<ull, Author*>& getAuthors()
+    { return authors; } //TODO: Very bad
+    std::map<ull, Genre*>& getGenres()
+    { return genres; }
+    [[nodiscard]] unsigned int getYear() const
+    { return year; }
+    void setYear(unsigned int y)
+    { year = y; }
 private:
     void addToGenres(const Book&);
     void addToAuthors(const Book&);
@@ -73,8 +85,8 @@ private:
     ull id; //unique book number
     std::string name;
     unsigned year = 0;
-    std::map<ull,Author*> authors;
-    std::map<ull,Genre*> genres;
+    std::map<ull, Author*> authors;
+    std::map<ull, Genre*> genres;
 
 };
 
@@ -83,10 +95,9 @@ class Author
     friend class Book;
     friend class Genre;
     friend class Data;
-    
+
     friend std::ostream& operator<<(std::ostream&, const Book&);
     friend std::ostream& operator<<(std::ostream& os, const Author& a);
-    friend void editBookAuthor(Book*);
 public:
     Author() = delete;
     Author(const Author& a) : id(a.id), name(a.name), country(a.country), date(a.date)
@@ -95,8 +106,8 @@ public:
         addToBooks(a);
         std::cout << name << " was copy-constructed\n";
     };
-    explicit Author(ull no, std::string n, std::string d = "Unknown", std::string c = "Unknown") :
-    id(no), name(std::move(n)), country(std::move(c)), date(std::move(d))
+    explicit Author(ull no, std::string n, std::string d = "Unknown", std::string c = "Unknown") : //TODO: Bad
+            id(no), name(std::move(n)), country(std::move(c)), date(std::move(d))
     {
         std::cout << name << " was created\n";
     };
@@ -108,7 +119,14 @@ public:
     void remGenre(Genre&);
     void remBook(Book&);
     bool check(const std::string& s);
-
+    [[nodiscard]] const std::string& getName() const
+    { return name; }
+    void rename(const std::string& s)
+    { name = s; }
+    std::map<ull, Book*>& getBooks()
+    { return books; } //TODO: Very bad
+    std::map<ull, Genre*>& getGenres()
+    { return genres; }
 private:
     void addToBooks(const Author&);
     void addToGenres(const Author&);
@@ -119,8 +137,8 @@ private:
     std::string name;
     std::string country;
     std::string date;
-    std::map<ull,Book*> books;
-    std::map<ull,Genre*> genres;
+    std::map<ull, Book*> books;
+    std::map<ull, Genre*> genres;
 };
 
 class Genre
@@ -136,8 +154,8 @@ public:
     Genre(const Genre& g) : id(g.id), name(g.name)
     {
         std::cout << name << " was copy-constructed\n";
-    addToBooks(g);
-    addToAuthors(g);
+        addToBooks(g);
+        addToAuthors(g);
     };
     explicit Genre(ull no, std::string n) : id(no), name(std::move(n))
     {
@@ -148,30 +166,34 @@ public:
 
     void addAuthor(Author&);
     void addBook(Book&);
-    void remAuthor(Author& );
-    void remBook(Book& );
+    void remAuthor(Author&);
+    void remBook(Book&);
     bool check(const std::string& s);
-
+    [[nodiscard]] const std::string& getName() const
+    { return name; }
+    void rename(const std::string& s)
+    { name = s; }
+    [[nodiscard]] const std::map<ull, Book*>& getBooks() const
+    { return books; } //TODO: Very bad
+    [[nodiscard]] const std::map<ull, Author*>& getAuthors() const
+    { return authors; }
 private:
-    void addToBooks(const Genre& );
-    void addToAuthors(const Genre& );
+    void addToBooks(const Genre&);
+    void addToAuthors(const Genre&);
     void remFromBooks();
     void remFromAuthors();
 
     ull id;
     std::string name;
-    std::map<ull,Book*> books;
-    std::map<ull,Author*> authors;
+    std::map<ull, Book*> books;
+    std::map<ull, Author*> authors;
 };
 
 class Data // SINGLETON for storing all the nested structures
 {
-    friend class Book;
+    friend class Book; //TODO: Move all the definitions to the cpp to cleanup
     friend class Genre;
     friend class Author;
-    friend Book* newBook(); //TODO: Remove this mess
-    friend void manageBook();
-    friend void editBookAuthor(Book* );
 public:
     Data(Data const&) = delete; //Deleted because it's a singleton. We use & instead
     void operator=(Data const&) = delete; //No copying!
@@ -183,11 +205,27 @@ public:
     void load();
     void save(); //Writes the data to the files (books.txt etc.)
     void printbooks();
+    Book* add(const Book& o)
+    {
+        auto it = sb.emplace(o.id,o);
+        return (it.second ? &it.first->second: nullptr);
+    }
+    Genre* add(const Genre& o)
+    {
+        auto it = sg.emplace(o.id,o);
+        return (it.second ? &it.first->second: nullptr);
+    }
+    Author* add(const Author& o)
+    {
+        auto it = sa.emplace(o.id,o);
+        return (it.second ? &it.first->second: nullptr);
+    }
+    size_t erase(const Book& o) {return sb.erase(o.id);}
+    size_t erase(const Genre& o) {return sg.erase(o.id);}
+    size_t erase(const Author& o) {return sa.erase(o.id);}
+
     void printCredentials(bool isadmin); //Just prints all the USERNAMES in the mu or ma
     bool delAccount(const std::string& l, const bool& isadmin);
-    void uinit(); //Reads the data from "user.txt" and puts it into the Data::mu
-    void bookinit(); //Reads the data from "books.txt" and puts it into the Data::vBooks
-    void adminit(); //Reads the data from "admin.txt" and puts it into the Data::ma
     bool passCheck(const std::string& l, const std::string& p, const bool& isadmin);
     bool loginCheck(std::string& s, bool isadmin);
     void createAccount(const std::string& l, const std::string& p, const bool& isadmin);
@@ -198,17 +236,15 @@ public:
     const std::string loginprompt = "Enter the login or \"exit\" to exit:";
     const std::string passprompt = "Enter the password or \"exit\" to exit:";
     const std::string passconfirm = "Confirm the password or enter \"exit\" to exit: ";
-
-    void genreinit();
-    void authorinit();
     Book* searchBook(ull id);
+    std::vector<Genre*> searchGenre(const std::string& s);
 private:
     Data() = default;
     static void ensureFileExists(const std::string& f);
 
-    std::map<ull,Genre> sg;
-    std::map<ull,Author> sa;
-    std::map<ull,Book> sb; //Contains all the Books in the database
+    std::map<ull, Genre> sg;
+    std::map<ull, Author> sa;
+    std::map<ull, Book> sb; //Contains all the Books in the database
     std::map<std::string, std::string> mu; // holds <login, password> (hashed)
     std::map<std::string, std::string> ma; //same
 };

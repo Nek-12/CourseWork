@@ -4,7 +4,6 @@
 #include <thread>
 #include <regex>
 #include <random>
-#include <ctime>
 void sleep(const unsigned& ms)
 {
     std::this_thread::sleep_for(std::chrono::milliseconds(ms));
@@ -12,7 +11,7 @@ void sleep(const unsigned& ms)
 
 ull genID()
 {
-    static std::default_random_engine e(time(nullptr));
+    static std::default_random_engine e(std::random_device{}());
     static std::uniform_int_distribution<ull> rng(0, ULONG_MAX-1);
     return rng(e);
 }
@@ -128,7 +127,7 @@ bool checkString(const std::string& s, char mode)
                     msgFalse("invalid characters");
             break;
         case 's':
-            if (s.size() < 3) msgFalse("too short");
+            if (s.size() < 4) msgFalse("too short");
             for (auto ch: s)
                 if (!(isalnum(ch) || ispunct(ch) || ch == ' '))
                     msgFalse("invalid characters");
