@@ -1,54 +1,55 @@
-0014
+14
 L. Tolstoy
 09.09.1828
 Russia
 
-0015
+15
 E. Hemingway
 21.07.1899
 America
 
-0016
+16
 W. Shakespeare
 26.04.1564
 England
 
-0017
+17
 M. Twain
 30.11.1835
 America
 
-0018
+18
 C. Dickens
 07.02.1812
 England
 
-0019
+19
 J. Rowling
 31.07.1965
 England
 
-0020
+20
 V. Nabokov
 22.04.1899
 Russia
 
-0021
+21
 F. Dostoyevsky
 11.11.1821
 Russia
 
-0022
+22
 S. Hawking
 08.01.1942
 England
 
-0023
+23
 O. Ovchinnikov
 30.03.1973
 Russia
 
-0024
+24
 E. Proshkin
 28.05.1970
 Russia
+

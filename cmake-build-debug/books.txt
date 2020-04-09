@@ -1,77 +1,78 @@
-465789132
+1
 War and Peace
 1865
-Novel,Historical
-L. Tolstoy
+26,38
+14
 
-465646746
+2
 Smertniki
 2011
-Novel,Fantasy,Mystery,Thriller
-E. Proshkin,O. Ovchinnikov
+26,31,33,34
+23,24
 
-478949613
+3
 Palachi
 2011
-Novel,Fantasy,Thriller
-E. Proshkin,O. Ovchinnikov
+26,31,34
+23,24
 
-547313798
+4
 Vrag "Monolita"
 2011
-Novel,Thriller,Fantasy
-O. Ovchinnikov,E. Proshkin
+26,31,34
+23,24
 
-464987423
+5
 The Old Man and The Sea
 1952
-Novel,Historical
-E. Hemingway
+26,38
+15
 
-546784354
+6
 For Whom the Bell Tolls
 1940
-Novel,Historical
-E. Hemingway
+26,38
+15
 
-795409437
+7
 The Killers
 1927
-Novel,Historical
-E. Hemingway
+26,38
+15
 
-649874137
+8
 Shakespeare: Poems
 0000
-Poetry
-W. Shakespeare
+36
+16
 
-458974318
+9
 Harry Potter and the Philosopher's Stone
 1997
-Novel,Fantasy
-J. Rowling
+26,31
+19
 
-564498799
+10
 Harry Potter and the Deathly Hallows
 2007
-Novel,Fantasy
-J.Rowling
+26,31
+19
 
-549871547
+11
 Lolita
 1955
-Novel,Romance,Drama
-V. Nabokov
+25,26,30
+20
 
-468431358
+12
 The Theory of Everything
 2002
-Science
-E. Hemingway
+29
+22
 
-654843213
+13
 A Brief History of Time
 1988
-Science
-E. Hemingway
+29
+22
+

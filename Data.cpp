@@ -46,13 +46,13 @@ void Data::printAuthors()
     t.set_cell_text_align(fort::text_align::center);
     t.set_border_style(FT_BASIC2_STYLE);
     t.column(0).set_cell_content_fg_color(fort::color::green);
-    t.column(5).set_cell_content_fg_color(fort::color::red);
+    t.column(4).set_cell_content_fg_color(fort::color::red);
     std::cout << t.to_string() << std::endl;
 }
 
 void Data::printGenres(unsigned years = getCurYear() )
 {
-    unsigned compar = getCurYear() - years;
+    unsigned diff = getCurYear() - years;
     fort::char_table t;
     std::cout << "Books grouped by genres for the past " << years << " years" << std::endl;
     t << fort::header << "Name" << "Quantity" <<"Books" << "ID" << fort::endr;
@@ -62,7 +62,7 @@ void Data::printGenres(unsigned years = getCurYear() )
         std::string books, delim;
         for (auto b: genre.second.books)
         {
-            if (b.second->year <= compar) continue;
+            if (b.second->year <= diff) continue;
             books += delim + b.second->name;
             delim = "\n";
             ++cnt;
@@ -73,7 +73,7 @@ void Data::printGenres(unsigned years = getCurYear() )
     t.set_cell_text_align(fort::text_align::center);
     t.set_border_style(FT_BASIC2_STYLE);
     t.column(0).set_cell_content_fg_color(fort::color::green);
-    t.column(2).set_cell_content_fg_color(fort::color::red);
+    t.column(3).set_cell_content_fg_color(fort::color::red);
     std::cout << t.to_string() << std::endl;
 }
 
@@ -106,7 +106,7 @@ bool Data::passCheck(const std::string& l, const std::string& p, const bool& isa
 { return ((isadmin ? ma.find(l) : mu.find(l))->second == hash(p)); }
 
 bool Data::loginCheck(std::string& s, bool isadmin)
-{ return (isadmin ? ma.find(s) != ma.end() : ma.find(s) != mu.end()); }
+{ return (isadmin ? ma.find(s) != ma.end() : mu.find(s) != mu.end()); }
 
 void Data::createAccount(const std::string& l, const std::string& p, const bool& isadmin)
 { (isadmin ? ma : mu)[l] = hash(p); }

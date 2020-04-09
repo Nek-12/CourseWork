@@ -6,6 +6,7 @@
 #include <iostream>
 #include "fort.hpp"
 #include <utility>
+//#define WINDOWS
 
 using ull = unsigned long;
 

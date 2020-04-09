@@ -1,8 +1,24 @@
 #include "header.h"
-#include <conio.h>
+#ifdef WINDOWS
+    #include <conio.h>
+#else
+# include <termios.h>
+/* get a single char from stdin    */
+int getch()
+{
+    struct termios oldattr, newattr;
+    int ch;
+    tcgetattr(0, &oldattr);
+    newattr=oldattr;
+    newattr.c_lflag &= ~( ICANON | ECHO );
+    tcsetattr( 0, TCSANOW, &newattr);
+    ch=getchar();
+    tcsetattr(0, TCSANOW, &oldattr);
+    return(ch);
+}
+#endif
 std::string path; //extern global
-inline void cls()
-{ system("cls"); }
+inline void cls() { system("cls"); }
 
 //TODO: Make the book table be displayed only by request
 //TODO: Implement case insensitivity
@@ -678,7 +694,7 @@ void createAccPrompt(bool isadmin)
     std::cout << data.loginprompt << std::endl;
     while (!readString(std::cin, l, 'n'));
     if (l == "exit") return;
-    if (!data.loginCheck(l, isadmin)) //TODO: Why is it behaving strangely
+    if (data.loginCheck(l, isadmin))
     {
         std::cerr << "Such account already exists!" << std::endl;
         sleep(WAIT_TIME_LONG);
@@ -701,7 +717,7 @@ bool delDialog(const std::string& l, bool isadmin)
     {
         cls();
         std::cout << "THIS WILL DELETE YOUR ACCOUNT AND YOU WILL BE LOGGED OFF."
-                  << " \nTYPE YOUR PASSWORD, " << l << ", TO PROCEED OR \"exit\" TO CANCEL." << std::endl;
+                  << "\nTYPE YOUR PASSWORD, " << l << ", TO PROCEED OR \"exit\" TO CANCEL." << std::endl;
         while (!readString(std::cin, p, 'p'));
         if (p == "exit") return false;
         if (data.passCheck(l, p, isadmin))
@@ -712,27 +728,29 @@ bool delDialog(const std::string& l, bool isadmin)
     if (!data.delAccount(l, isadmin))
     {
         std::cerr << "You can't delete the last account!" << std::endl;
-        sleep(WAIT_TIME_NORMAL);
+        sleep(WAIT_TIME_LONG);
         return false;
     }
     std::cout << "Deleted account  " << l << std::endl;
-    sleep(WAIT_TIME_NORMAL);
+    sleep(WAIT_TIME_LONG);
     return true; //Was deleted
 }
 
 void admConsole(std::string& adm)
 {
+    Data& data = Data::getInstance();
+    data.save();
     while (true)
     {
         cls();
-        std::cout << ":ADMIN:" << std::endl;
+        std::cout << "      :ADMIN:" << std::endl;
         std::cout << "Select an option: "
-                  << "\n1 for managing book data "
-                  << "\n2 for deleting users "
-                  << "\n3 to register an administrator"
-                  << "\n4 to change your password"
-                  << "\n0 to delete your account (careful!)"
-                  << "\nq to sign off" << std::endl;
+                  << "\n1 -> manage book data "
+                  << "\n2 -> delete users "
+                  << "\n3 -> register an administrator"
+                  << "\n4 -> change your password"
+                  << "\n0 -> delete your account (careful!)"
+                  << "\nq -> sign off" << std::endl;
         switch (getch())
         {
             case '1':
@@ -795,15 +813,17 @@ void admLogin()
 
 void usrConsole(const std::string& usr)
 {
+    Data& data = Data::getInstance();
+    data.save();
     while (true)
     {
         cls();
-        std::cout << ":USER:"
+        std::cout << "      :USER:"
                   << "\nSelect an option: "
-                  << "\n1 for managing book data "
-                  << "\n2 for changing your password"
-                  << "\n0 to delete your account"
-                  << "\nq to sign off" << std::endl;
+                  << "\n1 -> manage book data "
+                  << "\n2 -> change your password"
+                  << "\n0 -> delete your account"
+                  << "\nq -> sign off" << std::endl;
         switch (getch())
         {
             case 'q':
@@ -859,7 +879,6 @@ void usrLogin()
 
 int main(int, char* argv[]) try
 {
-//TODO: Implement autosaving.
     Data& data = Data::getInstance();
     data.load();
     path = argv[0];
