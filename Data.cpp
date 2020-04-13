@@ -2,7 +2,7 @@
 #include <fstream>
 #include <filesystem>
 
-void Data::printbooks()
+void Data::printBooks()
 {
     fort::char_table t;
     t << fort::header << "Title" << "Genres" << "Authors" << "Year" << "ID" << fort::endr;
@@ -11,8 +11,8 @@ void Data::printbooks()
         std::string authors, genres, delim;
         for (auto g: book.second.genres)
         {
-            genres += delim + g.second->name ;
-        delim = "\n";
+            genres += delim + g.second->name;
+            delim = "\n";
         }
         delim.clear();
         for (auto a: book.second.authors)
@@ -333,7 +333,7 @@ void Data::save()
     std::ofstream f(path + "user.txt");
     f << std::setfill('0');
 #ifndef NDEBUG
-    printbooks();
+    printBooks();
     printCredentials(true);
     printCredentials(false);
 #endif

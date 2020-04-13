@@ -205,7 +205,7 @@ public:
     }
     void load();
     void save(); //Writes the data to the files (books.txt etc.)
-    void printbooks();
+    void printBooks();
     Book* add(const Book& o)
     {
         auto it = sb.emplace(o.id,o);
@@ -233,10 +233,6 @@ public:
     size_t enumAccounts(bool isadmin);
     void changePass(const std::string& l, const std::string& p, const bool& isadmin);
     std::vector<Book*> searchBook(const std::string& s);
-
-    const std::string loginprompt = "Enter the login or \"exit\" to exit:";
-    const std::string passprompt = "Enter the password or \"exit\" to exit:";
-    const std::string passconfirm = "Confirm the password or enter \"exit\" to exit: ";
     std::vector<Genre*> searchGenre(const std::string& s);
     void printAuthors();
     void printGenres(unsigned);
@@ -251,3 +247,44 @@ private:
     std::map<std::string, std::string> mu; // holds <login, password> (hashed)
     std::map<std::string, std::string> ma; //same
 };
+
+
+inline const std::string LOGINPROMPT = "Enter the login or \"exit\" to exit: ";
+inline const std::string PASSPROMPT = "Enter the password or \"exit\" to exit: ";
+inline const std::string PASSCONFIRM = "Confirm the password or enter \"exit\" to exit: ";
+inline const std::string ADMIN_CONSOLE_ENTRIES = "      :ADMIN:\n"
+                                                 "Select an option: "
+                                                 "\n1 -> Manage book data "
+                                                 "\n2 -> Change your password"
+                                                 "\n3 -> Register an administrator"
+                                                 "\n4 -> Delete users "
+                                                 "\n0 -> Delete your account (careful!)"
+                                                 "\nq -> Sign off";
+inline const std::string USER_CONSOLE_ENTRIES = "      :USER:\n"
+                                                "\nSelect an option: "
+                                                "\n1 -> Manage book data "
+                                                "\n2 -> Change your password"
+                                                "\n0 -> Delete your account"
+                                                "\nq -> Sign off";
+inline const std::string ADMIN_MANAGEMENT_ENTRIES = ":ADMIN:\n"
+                                                    "Select an option: "
+                                                    "\n1 -> Search anything "
+                                                    "\n2 -> Show data "
+                                                    "\n3 -> Add a new book"
+                                                    "\n4 -> Manage a book"
+                                                    "\n5 -> Add a new author"
+                                                    "\n6 -> Manage an author "
+                                                    "\n7 -> Add a new genre "
+                                                    "\n8 -> Manage a genre "
+                                                    "\nq -> Go back";
+inline const std::string USER_MANAGEMENT_ENTRIES = ":USER:\n"
+                                                   "Select an option: "
+                                                   "\n1 -> Search anything"
+                                                   "\n2 -> Show data "
+                                                   "\nq -> Go back";
+inline const std::string SHOW_DATA_MENU_ENTRIES = "Select an option: "
+                                                  "\n1 -> Show all books "
+                                                  "\n2 -> Show all authors "
+                                                  "\n3 -> Show all genres for a given year "
+                                                  "\nq -> Go back";
+inline const std::string ANY_KEY = "Press any key to continue...";

@@ -26,10 +26,7 @@ inline void cls() { system("cls"); }
 //TODO: Recreate the readString function to add exit functionality, edit usages;
 //TODO: Add nullptrs returns for every function and checks
 //TODO: Make the "Select the option" a function template for convenient use;
-//TODO: Make books be printed by request only
-//TODO: Make menus display -> instead of "for"
 //TODO: Remove authors from genres and genres from authors
-//TODO: Implement check for duplicate account and a big warning
 bool yesNo(const std::string& msg)
 {
     std::cout << msg << " y/n" << std::endl;
@@ -78,16 +75,15 @@ unsigned select(const unsigned& limit)
 
 bool passConfirm(std::string& p)
 {
-    Data& data = Data::getInstance();
     std::string tempA, tempB;
     while (true)
     {
         cls();
-        std::cout << data.passprompt << std::endl;
+        std::cout << PASSPROMPT << std::endl;
         while (!readString(std::cin, tempA, 'p'));
         if (tempA == "exit") return false;
 
-        std::cout << data.passconfirm << std::endl;
+        std::cout << PASSCONFIRM << std::endl;
         while (!readString(std::cin, tempB, 'p'));
         if (tempB == "exit") return false;
         if (tempA == tempB)
@@ -96,25 +92,6 @@ bool passConfirm(std::string& p)
     }
     p = tempA;
     return true;
-}
-
-void showGenreStats()
-{
-    Data& data = Data::getInstance();
-    std::string y;
-    while (true)
-    {
-        cls();
-        std::cout << "Enter the time period in years: " << std::endl;
-        while(!readString(std::cin,y,'y'));
-        if (std::stoul(y) > getCurYear())
-        {
-            std::cerr << "The period you entered is invalid." << std::endl;
-            continue;
-        }
-        data.printGenres(std::stoul(y));
-        if (!yesNo("Try again?")) return;
-    }
 }
 
 std::vector<Book*> searchBook()
@@ -394,16 +371,45 @@ sleep(WAIT_TIME_NORMAL);
 
 void manageAuthor()
 {
-//    Data& data = Data::getInstance();
-//    std::string temp;
-//    auto sought = selectAuthor();
+    Data& data = Data::getInstance();
+    std::string temp;
+    auto sought = selectAuthor();
     std::cout << "Not implemented" << std::endl;
     sleep(WAIT_TIME_NORMAL);
 }
 
-void editBookGenre(Book* pBook)
+void editBookGenre(Book* pbook)
 {
-    std::cout << "Not implemented" << std::endl;
+    if (pbook == nullptr) return;
+    cls();
+    std::cout << "Select an option for book " << pbook->getName() <<
+              "\n1 -> Add genres to the book "
+              "\n2 -> Remove genres from the book"
+              "\n3 -> Edit any genre of the book"
+              "\n4 -> Go back";
+    while (true)
+    {
+        switch (getch())
+        {
+            case '1':
+                while (true)
+                {
+                    Genre* added = selectGenre();
+                    if (!yesNo("Add this genre to the book?")) return;
+                    pbook->addGenre(*added);
+                    std::cout << "Added successfully: \n" << *pbook << std::endl;
+                    if (!yesNo("Add one more?")) return;
+                    else continue;
+                }
+            case '2':
+                std::cout << "Not implemented, vector needed"; //TODO: Implement
+//                auto genres = pbook->getGenres();
+//                for (auto it = genres.begin(); it != genres.end(); ++it)
+//                    std::cout << "#" << std::distance(it, genres.begin())+1 << ":\n" << *(it->second);
+//                std::cout << "Select the genre: " << std::endl;
+//                pbook->remGenre(;
+        }
+    }
     sleep(WAIT_TIME_NORMAL);
 }
 void manageBook()
@@ -548,98 +554,77 @@ void newGenre()
     }
 }
 
-void manageGenre()
+void showData()
 {
-    while(true)
+    Data& data = Data::getInstance();
+    std::string temp;
+    cls();
+    std::cout << SHOW_DATA_MENU_ENTRIES << std::endl;
+    while (true)
     {
-        cls();
-        std::cout << "Select an option: "
-                  << "\n1 -> add a new genre "
-                  << "\n2 -> edit a genre "
-                  << "\nq -> go back" << std::endl;
         switch (getch())
         {
-            case 'q':
-                return;
             case '1':
-                newGenre();
-                break;
+                data.printBooks();
+                std::cout << ANY_KEY << std::endl;
+                getch();
+                return;
             case '2':
-                editGenres();
-                break;
-            default:
-                break;
+                data.printAuthors();
+                std::cout << ANY_KEY << std::endl;
+                getch();
+                return;
+            case '3':
+                std::cout << "Enter the time period in years: " << std::endl;
+                while (!readString(std::cin, temp, 'y'));
+                if (std::stoul(temp) > getCurYear())
+                {
+                    std::cerr << "The period you entered is invalid." << std::endl;
+                    continue;
+                }
+                data.printGenres(std::stoul(temp));
+                if (!yesNo("Try again?")) return;
         }
-
     }
 }
 
 void management(bool isadmin)
 {
-    Data& data = Data::getInstance();
-    if (isadmin)
-    {
         while (true)
         {
             cls();
-            data.printbooks();
-            std::cout << ":ADMIN:" << std::endl;
-            std::cout << "Select an option: "
-                      << "\n1 -> add a new book "
-                      << "\n2 -> manage a book "
-                      << "\n3 -> manage an author "
-                      << "\n4 -> manage a genre "
-                      << "\n5 -> search anything "
-                      << "\nq -> go back" << std::endl;
+            std::cout << (isadmin ? ADMIN_MANAGEMENT_ENTRIES : USER_MANAGEMENT_ENTRIES) << std::endl;
             switch (getch())
             {
                 case 'q':
                     return;
                 case '1':
-                    newBook();
+                    searchUI();
                     break;
                 case '2':
-                    manageBook();
+                    showData();
                     break;
                 case '3':
-                    manageAuthor();
+                    if (isadmin) newBook();
                     break;
                 case '4':
-                    manageGenre();
+                    if (isadmin) manageBook();
                     break;
                 case '5':
-                    searchUI();
+                    if (isadmin) newAuthor();
+                    break;
+                case '6':
+                    if (isadmin) manageAuthor();
+                    break;
+                case '7':
+                    if (isadmin) newGenre();
+                    break;
+                case '8':
+                    if (isadmin) editGenres();
                     break;
                 default:
                     break;
             }
-        }
-    }
-    else
-    {
-        while (true)
-        {
-            cls();
-            data.printbooks();
-            std::cout << ":USER:" << std::endl;
-            std::cout << "Select an option: "
-                      << "\n1 -> Search anything"
-                      << "\n2 -> Show genre stats "
-                      << "\nq -> Go back" << std::endl;
-            switch (getch())
-            {
-                case '1':
-                    searchUI();
-                    break;
-                case '2':
-                    showGenreStats();
-                    break;
-                case 'q':
-                    return;
-                default:
-                    break;
-            }
-        }
     }
 }
 
@@ -662,7 +647,7 @@ void manageUsr()
     {
         cls();
         data.printCredentials(false);
-        std::cout << data.loginprompt << std::endl;
+        std::cout << LOGINPROMPT << std::endl;
         while (!readString(std::cin, l, 'n'));
         if (l == "exit") return;
         if (!data.loginCheck(l, false))
@@ -683,7 +668,7 @@ void manageUsr()
     }
 }
 
-void createAccPrompt(bool isadmin)
+void createAccPrompt(const bool& isadmin)
 {
     Data& data = Data::getInstance();
     std::string l, p, temp;
@@ -691,7 +676,7 @@ void createAccPrompt(bool isadmin)
 #ifndef NDEBUG
     data.printCredentials(isadmin);
 #endif
-    std::cout << data.loginprompt << std::endl;
+    std::cout << LOGINPROMPT << std::endl;
     while (!readString(std::cin, l, 'n'));
     if (l == "exit") return;
     if (data.loginCheck(l, isadmin))
@@ -709,7 +694,7 @@ void createAccPrompt(bool isadmin)
     sleep(WAIT_TIME_LONG);
 }
 
-bool delDialog(const std::string& l, bool isadmin)
+bool delDialog(const std::string& l, const bool& isadmin)
 {
     Data& data = Data::getInstance();
     std::string p;
@@ -736,37 +721,32 @@ bool delDialog(const std::string& l, bool isadmin)
     return true; //Was deleted
 }
 
-void admConsole(std::string& adm)
+void console(const std::string& usr, const bool& isadmin)
 {
     Data& data = Data::getInstance();
     data.save();
     while (true)
     {
         cls();
-        std::cout << "      :ADMIN:" << std::endl;
-        std::cout << "Select an option: "
-                  << "\n1 -> manage book data "
-                  << "\n2 -> delete users "
-                  << "\n3 -> register an administrator"
-                  << "\n4 -> change your password"
-                  << "\n0 -> delete your account (careful!)"
-                  << "\nq -> sign off" << std::endl;
+        std::cout << (isadmin ? ADMIN_CONSOLE_ENTRIES : USER_CONSOLE_ENTRIES) << std::endl;
         switch (getch())
         {
             case '1':
-                management(true);
+                management(isadmin);
                 break;
             case '2':
-                manageUsr();
+                passChange(usr, isadmin);
                 break;
             case '3':
-                createAccPrompt(true);
+                if (isadmin) createAccPrompt(isadmin);
+                else continue;
                 break;
             case '4':
-                passChange(adm, true);
+                if (isadmin) manageUsr();
+                else continue;
                 break;
             case '0':
-                if (delDialog(adm, true)) return;
+                if (delDialog(usr, isadmin)) return;
                 else break;
             case 'q':
                 return;
@@ -776,85 +756,17 @@ void admConsole(std::string& adm)
     }
 }
 
-void admLogin()
-{
-    Data& data = Data::getInstance();
-    std::string adm, pass;
-
-    while (true)
-    {
-        cls();
-        std::cout << data.loginprompt << std::endl;
-        while (!readString(std::cin, adm, 'n'));
-        if (adm == "exit") return;
-        if (data.loginCheck(adm, true))
-            break;
-        else
-            std::cout << "User not found." << std::endl;
-        sleep(WAIT_TIME_NORMAL);
-    }
-
-    while (true)
-    {
-        cls();
-        std::cout << data.passprompt << std::endl;
-        while (!readString(std::cin, pass, 'p'));
-        if (pass == "exit") return;
-        if (data.passCheck(adm, pass, true)) break;
-        else
-            std::cout << "Wrong password." << std::endl;
-        sleep(WAIT_TIME_NORMAL);
-    }
-
-    std::cout << "Success. Redirecting..." << std::endl;
-    sleep(WAIT_TIME_NORMAL);
-    admConsole(adm);
-}
-
-void usrConsole(const std::string& usr)
-{
-    Data& data = Data::getInstance();
-    data.save();
-    while (true)
-    {
-        cls();
-        std::cout << "      :USER:"
-                  << "\nSelect an option: "
-                  << "\n1 -> manage book data "
-                  << "\n2 -> change your password"
-                  << "\n0 -> delete your account"
-                  << "\nq -> sign off" << std::endl;
-        switch (getch())
-        {
-            case 'q':
-                return;
-            case '1':
-                management(false);
-                break;
-            case '2':
-                passChange(usr, false);
-                break;
-            case '0':
-                if (delDialog(usr, false)) return;
-                else break;
-            default:
-                break;
-        }
-    }
-}
-
-void usrLogin()
+void login(const bool& isadmin)
 {
     Data& data = Data::getInstance();
     std::string usr, pass;
-
     while (true)
     {
         cls();
-        std::cout << data.loginprompt << std::endl;
+        std::cout << LOGINPROMPT << std::endl;
         while (!readString(std::cin, usr, 'n'));
         if (usr == "exit") return;
-        if (data.loginCheck(usr, false))
+        if (data.loginCheck(usr, isadmin))
             break;
         else
             std::cout << "User not found." << std::endl;
@@ -863,10 +775,10 @@ void usrLogin()
     while (true)
     {
         cls();
-        std::cout << data.passprompt << std::endl;
+        std::cout << PASSPROMPT << std::endl;
         while (!readString(std::cin, pass, 'p'));
         if (pass == "exit") return;
-        if (data.passCheck(usr, pass, false))
+        if (data.passCheck(usr, pass, isadmin))
             break;
         else
             std::cout << "Wrong password." << std::endl;
@@ -874,7 +786,7 @@ void usrLogin()
     }
     std::cout << "Success. Redirecting..." << std::endl;
     sleep(WAIT_TIME_NORMAL);
-    usrConsole(usr);
+    console(usr, isadmin);
 }
 
 int main(int, char* argv[]) try
@@ -884,7 +796,7 @@ int main(int, char* argv[]) try
     path = argv[0];
     path.erase(path.find_last_of('\\') + 1); //Makes 'path' be the path to the app folder
 #ifndef NDEBUG
-    data.printbooks();
+    data.printBooks();
     data.printAuthors();
     std::cout << std::endl;
     std::cout << path << std::endl;
@@ -908,11 +820,11 @@ int main(int, char* argv[]) try
                 workin = false;
                 break;
             case '1':
-                if (yesNo("Have you got an account?")) usrLogin();
+                if (yesNo("Have you got an account?")) login(false);
                 else createAccPrompt(false);
                 break;
             case '2':
-                admLogin();
+                login(true);
                 break;
             default:
                 break;
@@ -923,13 +835,13 @@ int main(int, char* argv[]) try
 }
 catch (std::exception& e)
 {
-    std::cerr << "Error: " << e.what();
+    std::cerr << "Critical Error: " << e.what() << "\n The program cannot continue. Press any key to exit..." << std::endl;
     getch();
     return (-2);
 }
 catch (...)
 {
-    std::cerr << "Undefined Error";
+    std::cerr << "Undefined Error. \n The program cannot continue. Press any key to exit..." << std::endl;
     getch();
     return (-1);
 }
