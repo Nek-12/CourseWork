@@ -1,6 +1,7 @@
 #include "header.h"
 #ifdef WINDOWS
     #include <conio.h>
+    inline void cls() { system("cls"); }
 #else
 # include <termios.h>
 /* get a single char from stdin    */
@@ -9,21 +10,20 @@ int getch()
     struct termios oldattr, newattr;
     int ch;
     tcgetattr(0, &oldattr);
-    newattr=oldattr;
-    newattr.c_lflag &= ~( ICANON | ECHO );
-    tcsetattr( 0, TCSANOW, &newattr);
-    ch=getchar();
+    newattr = oldattr;
+    newattr.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(0, TCSANOW, &newattr);
+    ch = getchar();
     tcsetattr(0, TCSANOW, &oldattr);
-    return(ch);
+    return (ch);
 }
+inline void cls()
+{ system("clear"); }
 #endif
 std::string path; //extern global
-inline void cls() { system("cls"); }
-
 //TODO: Move the stuff to different folders/files;
 //TODO: Recreate the readString function to add exit functionality, edit usages;
 //TODO: Add nullptrs returns for every function and checks;
-//TODO: Remove authors from genres and genres from authors
 bool yesNo(const std::string& msg)
 {
     std::cout << msg << " y/n" << std::endl;
@@ -268,7 +268,7 @@ void newAuthor()
         while (!readString(std::cin, d, 'd'));
         std::cout << "Enter the author's country" << std::endl;
         while (!readString(std::cin, d, 's'));
-        Author* pa = data.add(Author(id,n,d,c));
+        Author* pa = data.add(Author(n, d, c, id));
         while (true)
         {
             if(!yesNo("Add a book this author has written?")) break;
@@ -326,7 +326,7 @@ void newBook() //TODO: put exit everywhere
         while (!readString(std::cin, n, 's'));
         std::cout << "Enter the year the book was published" << std::endl;
         while (!readString(std::cin, y, 'y'));
-        Book* pb = data.add(Book(id,n,std::stoul(y)));
+        Book* pb = data.add(Book(n, std::stoul(y), id));
         while (true)
         {
             if(!yesNo("Add an author to the book?")) break;
@@ -361,7 +361,7 @@ void editBookAuthor(Book* b)
 //    if (pa == nullptr) return;
 //    b->addAuthor(*pa);
 //    std::cout << "Changed successfully." << std::endl;
-//    sleep(WAIT_TIME_MID);
+//    sleep(WAIT_TIME_SMALL);
 std::cout << "Not implemented" << std::endl;
 sleep(WAIT_TIME_NORMAL);
 }
@@ -481,16 +481,13 @@ void manageBook()
 void editGenres()
 {
     std::string temp;
-    unsigned cnt = 0;
     Genre* pgenre = selectGenre();
     Book* pbook = nullptr;
     std::cout << *pgenre << std::endl;
     std::cout << "Select an option: "
               << "\n1 -> rename this genre "
-              << "\n2 -> remove this genre from books"
-              << "\n3 -> add this genre to books "
+              << "\n2 -> add this genre to books "
               << "\nq -> go back" << std::endl;
-    auto it = pgenre->getBooks().begin();
     switch(getch())
     {
         case '1':
@@ -498,18 +495,6 @@ void editGenres()
             while (!readString(std::cin,temp,'s'));
             pgenre->rename(temp);
             std::cout << "Renamed to " << temp << std::endl;
-            sleep(WAIT_TIME_NORMAL);
-            return;
-        case '2':
-            for (auto& b: pgenre->getBooks())
-            {
-                ++cnt;
-                std::cout << "#" << cnt << ":\n" << *b.second << std::endl;
-            }
-            std::cout << "Select which book to remove: " << std::endl;
-            std::advance(it, select(pgenre->getBooks().size())-1);
-            pgenre->remBook(*it->second); //TODO: Test
-            std::cout << "Removed successfully " << std::endl;
             sleep(WAIT_TIME_NORMAL);
             return;
         case '3':
@@ -532,7 +517,7 @@ void newGenre()
     std::cout << "Enter the new genre's name" << std::endl;
     while (!readString(std::cin, temp, 's'));
     ull id = inputID();
-    Genre* added = data.add(Genre(id, temp));
+    Genre* added = data.add(Genre(temp, id));
     if (!added)
     {
         std::cerr << "Such genre already exists." << std::endl;
@@ -767,7 +752,7 @@ void login(const bool& isadmin)
             break;
         else
             std::cout << "User not found." << std::endl;
-        sleep(WAIT_TIME_MID);
+        sleep(WAIT_TIME_SMALL);
     }
     while (true)
     {
@@ -779,7 +764,7 @@ void login(const bool& isadmin)
             break;
         else
             std::cout << "Wrong password." << std::endl;
-        sleep(WAIT_TIME_MID);
+        sleep(WAIT_TIME_SMALL);
     }
     std::cout << "Success. Redirecting..." << std::endl;
     sleep(WAIT_TIME_NORMAL);
@@ -801,7 +786,7 @@ int main(int, char* argv[]) try
     std::cout << std::endl;
     data.printCredentials(true);
     std::cout << std::endl;
-    system("pause");
+    getch();
 #endif
     bool workin = true;
     while (workin)

@@ -6,7 +6,7 @@
 Book::~Book()
 {
 #ifndef NDEBUG
-    std::cout << "Book " << this->name << " Destroyed" << std::endl;
+    std::cout << "Book " << getName() << " Destroyed" << std::endl;
 #endif
     remFromAuthors();
     remFromGenres();
@@ -14,139 +14,70 @@ Book::~Book()
 
 void Book::addAuthor(Author& a)
 {
-    authors.insert(std::make_pair(a.id,&a));
-    a.books.insert(std::make_pair(this->id,this));
+    authors.insert(&a);
+    a.books.insert(this);
 }
 void Book::addGenre(Genre& g)
 {
-    genres.insert(std::make_pair(g.id,&g));
-    g.books.insert(std::make_pair(this->id,this));
+    genres.insert(&g);
+    g.books.insert(this);
 }
 void Book::remAuthor(Author& a)
 {
-    authors.erase(a.id);
-    a.books.erase(this->id);
+    authors.erase(&a);
+    a.books.erase(this);
 }
 void Book::remGenre(Genre& g)
 {
-    genres.erase(g.id);
-    g.books.erase(this->id);
-}
-std::ostream &operator<<(std::ostream &os, const Book& b)
-{
-    os << b.id << "\n" << b.name << "\n" << std::setfill('0') << std::setw(4) << b.year << "\n";
-    std::string delim;
-    for (auto& g: b.genres)
-    {
-        os << delim << g.second->name;
-        delim = ',';
-    }
-    os << "\n";
-    delim.clear();
-    for (auto& a: b.authors)
-    {
-        os << delim << a.second->name;
-        delim = ',';
-    }
-    os << "\n" << std::setfill(' ') << std::endl;
-    return os;
+    genres.erase(&g);
+    g.books.erase(this);
 }
 
 void Book::addToGenres(const Book& b)
 {
-    for (auto g: b.genres)
-        g.second->addBook(*this);
+    for (const auto& g: b.genres)
+        g->addBook(*this);
 }
 void Book::addToAuthors(const Book& b)
 {
-    for (auto a: b.authors)
-        a.second->addBook(*this);
+    for (const auto& a: b.authors)
+        a->addBook(*this);
 }
 void Book::remFromGenres()
 {
-    for (auto g: genres)
-        g.second->remBook(*this);
+    for (const auto& g: genres)
+        g->remBook(*this);
 }
 void Book::remFromAuthors()
 {
-    for (auto a: authors)
-        a.second->remBook(*this);
+    for (const auto& a: authors)
+        a->remBook(*this);
 }
-bool Book::check(const std::string& s)
+std::string Book::to_string() const
 {
-    std::string ls = lowercase(s);
-    if (lowercase(name).find(ls) != std::string::npos || s == std::to_string(year) || s == std::to_string(id) ) return true;
+    std::string ret = std::to_string(id()) + '\n' + getName() + '\n' + std::to_string(year);
+    std::string delim = "\n";
     for (const auto& el: genres)
-        if (lowercase(el.second->name).find(ls) != std::string::npos) return true;
+    {
+        ret += delim + el->getName();
+        delim = ",";
+    }
+    delim = "\n";
     for (const auto& el: authors)
-        if (lowercase(el.second->name).find(ls) != std::string::npos) return true;
-    return false;
+    {
+        ret += delim + el->getName();
+        delim = ",";
+    }
+    return ret;
 }
-
-Genre::~Genre()
-{
-#ifndef NDEBUG
-    std::cout << "Genre " << this->name << " Destroyed" << std::endl;
-#endif
-    remFromAuthors();
-    remFromBooks();
-}
-
-void Genre::addToBooks(const Genre& g)
-{
-    for (auto b: g.books)
-        b.second->addGenre(*this);
-}
-void Genre::addToAuthors(const Genre& g)
-{
-    for (auto b: g.books)
-        b.second->addGenre(*this);
-}
-void Genre::remFromBooks()
-{
-    for (auto b: books)
-        b.second->remGenre(*this);
-}
-void Genre::remFromAuthors()
-{
-    for (auto a: authors)
-        a.second->remGenre(*this);
-}
-
-void Genre::addAuthor(Author& a)
-{
-    authors.insert(std::make_pair(a.id,&a));
-    a.genres.insert(std::make_pair(this->id,this));
-}
-void Genre::addBook(Book& b)
-{
-    books.insert(std::make_pair(b.id,&b));
-    b.genres.insert(std::make_pair(this->id,this));
-}
-void Genre::remAuthor(Author& a)
-{
-    authors.erase(a.id);
-    a.genres.erase(this->id);
-}
-void Genre::remBook(Book& b)
-{
-    books.erase(b.id);
-    b.genres.erase(this->id);
-}
-std::ostream& operator<<(std::ostream &os, const Genre& g)
-{
-    os << g.id << "\n" << g.name << "\n";
-    return os;
-}
-
-bool Genre::check(const std::string& s)
+bool Book::check(const std::string& s) const
 {
     std::string ls = lowercase(s);
-    if (lowercase(name).find(ls) != std::string::npos || s == std::to_string(id) ) return true;
-    for (auto el: books)
-        if (lowercase(el.second->name).find(ls) != std::string::npos) return true;
-    for (auto el: authors)
-        if (lowercase(el.second->name).find(ls) != std::string::npos) return true;
+    if (lowercase(getName()).find(ls) != std::string::npos || s == std::to_string(year) || s == std::to_string(id())) return true;
+    for (const auto& el: genres)
+        if (lowercase(el->getName()).find(ls) != std::string::npos) return true;
+    for (const auto& el: authors)
+        if (lowercase(el->getName()).find(ls) != std::string::npos) return true;
     return false;
 }
 
@@ -154,67 +85,110 @@ bool Genre::check(const std::string& s)
 
 Author::~Author()
 {
-    std::cout << "Author " << this->name << " Destroyed" << std::endl;
+    std::cout << "Author " << this->getName() << " Destroyed" << std::endl;
     remFromBooks();
-    remFromGenres();
 }
 
 void Author::addToBooks(const Author& a)
 {
-    for (auto b: a.books)
-        b.second->addAuthor(*this);
-}
-void Author::addToGenres(const Author& a)
-{
-    for (auto g: a.genres)
-        g.second->addAuthor(*this);
-}
-void Author::remFromBooks()
-{
-    for (auto b: books)
-        b.second->remAuthor(*this);
-}
-void Author::remFromGenres()
-{
-    for (auto g: genres)
-        g.second->remAuthor(*this);
+    for (const auto& b: a.books)
+        b->addAuthor(*this);
 }
 
-void Author::addGenre(Genre& g)
+void Author::remFromBooks()
 {
-    genres.insert(std::make_pair(g.id,&g));
-    g.authors.insert(std::make_pair(this->id,this));
+    for (const auto& b: books)
+        b->remAuthor(*this);
 }
+
 void Author::addBook(Book& b)
 {
-    books.insert(std::make_pair(b.id,&b));
-    b.authors.insert(std::make_pair(this->id,this));
+    books.insert(&b);
+    b.authors.insert(this);
 }
-void Author::remGenre(Genre& g)
-{
-    genres.erase(g.id);
-    g.authors.erase(this->id);
-}
+
 void Author::remBook(Book& b)
 {
-    books.erase(b.id);
-    b.authors.erase(this->id);
+    books.erase(&b);
+    b.authors.erase(this);
 }
-std::ostream& operator<<(std::ostream &os, const Author& a)
-{
-    os << a.id << "\n" << a.name << "\n" << a.date << "\n" << a.country << "\n";
-    return os;
-}
-bool Author::check(const std::string& s)
+bool Author::check(const std::string& s) const
 {
     std::string ls = lowercase(s);
-    if (lowercase(name).find(ls) != std::string::npos
-        || s == std::to_string(id) || lowercase(date).find(ls) != std::string::npos
-        || lowercase(country).find(ls) != std::string::npos ) return true;
-    for (auto el: books)
-        if (lowercase(el.second->name).find(ls) != std::string::npos) return true;
-    for (auto el: genres)
-        if (lowercase(el.second->name).find(ls) != std::string::npos) return true;
+    if (lowercase(getName()).find(ls) != std::string::npos
+        || s == std::to_string(id()) || lowercase(date).find(ls) != std::string::npos
+        || lowercase(country).find(ls) != std::string::npos)
+        return true;
+    for (const auto& el: books)
+        if (lowercase(el->getName()).find(ls) != std::string::npos) return true;
     return false;
 }
 
+std::string Author::to_string() const
+{
+    std::string ret = std::to_string(id()) + '\n' + getName() + '\n' + date + '\n' + country;
+    std::string delim = "\n";
+    for (const auto& el: books)
+    {
+        ret += delim + el->getName();
+        delim = ",";
+    }
+    return ret;
+}
+
+//GENRE
+
+Genre::~Genre()
+{
+#ifndef NDEBUG
+    std::cout << "Genre " << this->getName() << " Destroyed" << std::endl;
+#endif
+    remFromBooks();
+}
+void Genre::addToBooks(const Genre& g)
+{
+    for (const auto& b: g.books)
+        b->addGenre(*this);
+}
+void Genre::remFromBooks()
+{
+    for (const auto& b: books)
+        b->remGenre(*this);
+}
+void Genre::addBook(Book& b)
+{
+    books.insert(&b);
+    b.genres.insert(this);
+}
+
+void Genre::remBook(Book& b)
+{
+    books.erase(&b);
+    b.genres.erase(this);
+}
+std::ostream& operator<<(std::ostream& os, const Genre& g)
+{
+    os << g.id() << "\n" << g.getName() << "\n";
+    return os;
+}
+
+bool Genre::check(const std::string& s) const
+{
+    std::string ls = lowercase(s);
+    if (lowercase(getName()).find(ls) != std::string::npos || s == std::to_string(id())) return true;
+    for (auto el: books)
+        if (lowercase(el->getName()).find(ls) != std::string::npos) return true;
+    return false;
+}
+
+std::string Genre::to_string() const
+{
+    std::string ret = std::to_string(id()) + '\n' + getName();
+    std::string delim = "\n";
+    for (const auto& el: books)
+    {
+        ret += delim + el->getName();
+        delim = ",";
+    }
+    return ret;
+}

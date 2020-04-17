@@ -1,5 +1,4 @@
 #include "header.h"
-#include <iostream>
 #include "sha256.h"
 #include <thread>
 #include <regex>

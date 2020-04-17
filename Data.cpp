@@ -6,21 +6,21 @@ void Data::printBooks()
 {
     fort::char_table t;
     t << fort::header << "Title" << "Genres" << "Authors" << "Year" << "ID" << fort::endr;
-    for (const auto& book: sb)
+    for (const auto& book: mbooks)
     {
         std::string authors, genres, delim;
         for (auto g: book.second.genres)
         {
-            genres += delim + g.second->name;
+            genres += delim + g->getName();
             delim = "\n";
         }
         delim.clear();
         for (auto a: book.second.authors)
         {
-            authors += delim + a.second->name;
+            authors += delim + a->getName();
             delim = "\n";
         }
-            t << book.second.name << genres << authors << book.second.year << book.second.id << fort::endr;
+        t << book.second.getName() << genres << authors << book.second.year << book.second.id() << fort::endr;
     }
     t.set_cell_text_align(fort::text_align::center);
     t.set_border_style(FT_BASIC2_STYLE);
@@ -32,16 +32,16 @@ void Data::printAuthors()
 {
     fort::char_table t;
     t << fort::header << "Name" << "Books" << "Birthdate" << "Country" << "ID" << fort::endr;
-    for (const auto& author: sa)
+    for (const auto& author: mauthors)
     {
         std::string books, delim;
         delim.clear();
         for (auto a: author.second.books)
         {
-            books += delim + a.second->name;
+            books += delim + a->getName();
             delim = "\n";
         }
-        t << author.second.name << books << author.second.date << author.second.country << author.second.id << fort::endr;
+        t << author.second.getName() << books << author.second.date << author.second.country << author.second.id() << fort::endr;
     }
     t.set_cell_text_align(fort::text_align::center);
     t.set_border_style(FT_BASIC2_STYLE);
@@ -56,19 +56,19 @@ void Data::printGenres(unsigned years = getCurYear() )
     fort::char_table t;
     std::cout << "Books grouped by genres for the past " << years << " years" << std::endl;
     t << fort::header << "Name" << "Quantity" <<"Books" << "ID" << fort::endr;
-    for (const auto& genre: sg)
+    for (const auto& genre: mgenres)
     {
         unsigned long cnt = 0;
         std::string books, delim;
         for (auto b: genre.second.books)
         {
-            if (b.second->year <= diff) continue;
-            books += delim + b.second->name;
+            if (b->year <= diff) continue;
+            books += delim + b->getName();
             delim = "\n";
             ++cnt;
         }
         delim.clear();
-        t << genre.second.name << cnt << books << genre.second.id << fort::endr;
+        t << genre.second.getName() << cnt << books << genre.second.id() << fort::endr;
     }
     t.set_cell_text_align(fort::text_align::center);
     t.set_border_style(FT_BASIC2_STYLE);
@@ -81,15 +81,15 @@ bool Data::delAccount(const std::string& l, const bool& isadmin)
 {
     if (isadmin)
     {
-        auto sought = ma.find(l);
-        if (sought == ma.end() || mu.size() < 2) return false;
-        ma.erase(sought);
+        auto sought = admins.find(l);
+        if (sought == admins.end() || users.size() < 2) return false;
+        admins.erase(sought);
     }
     else
     {
-        auto sought = mu.find(l);
-        if (sought == mu.end()) return false;
-        mu.erase(sought);
+        auto sought = users.find(l);
+        if (sought == users.end()) return false;
+        users.erase(sought);
     }
     return true;
 }
@@ -97,25 +97,25 @@ bool Data::delAccount(const std::string& l, const bool& isadmin)
 void Data::printCredentials(bool isAdmin)
 {
     std::cout << (isAdmin ? "Admin" : "User") << " credentials: " << std::endl;
-    for (const auto& el: (isAdmin ? ma : mu))
+    for (const auto& el: (isAdmin ? admins : users))
         std::cout << el.first << "\n";
     std::cout << std::endl;
 }
 
 bool Data::passCheck(const std::string& l, const std::string& p, const bool& isadmin)
-{ return ((isadmin ? ma.find(l) : mu.find(l))->second == hash(p)); }
+{ return ((isadmin ? admins.find(l) : users.find(l))->second == hash(p)); }
 
-bool Data::loginCheck(std::string& s, bool isadmin)
-{ return (isadmin ? ma.find(s) != ma.end() : mu.find(s) != mu.end()); }
+bool Data::loginCheck(const std::string& s, const bool& isadmin)
+{ return (isadmin ? admins.find(s) != admins.end() : users.find(s) != users.end()); }
 
 void Data::createAccount(const std::string& l, const std::string& p, const bool& isadmin)
-{ (isadmin ? ma : mu)[l] = hash(p); }
+{ (isadmin ? admins : users)[l] = hash(p); }
 
-size_t Data::enumAccounts(bool isadmin)
-{ return (isadmin ? ma.size() : mu.size()); }
+size_t Data::enumAccounts(const bool& isadmin)
+{ return (isadmin ? admins.size() : users.size()); }
 
 void Data::changePass(const std::string& l, const std::string& p, const bool& isadmin)
-{ (isadmin ? ma : mu )[l] = hash(p); }
+{ (isadmin ? admins : users)[l] = hash(p); }
 
 void Data::ensureFileExists(const std::string& f)
 {
@@ -131,7 +131,7 @@ void Data::ensureFileExists(const std::string& f)
 std::vector<Book*> Data::searchBook(const std::string& s)
 {
     std::vector<Book*> ret;
-    for (auto& book : sb)
+    for (auto& book : mbooks)
         if (book.second.check(s)) ret.push_back(&book.second);
     return ret;
 }
@@ -139,7 +139,7 @@ std::vector<Book*> Data::searchBook(const std::string& s)
 std::vector<Genre*> Data::searchGenre(const std::string& s)
 {
     std::vector<Genre*> ret;
-    for (auto& g : sg)
+    for (auto& g : mgenres)
         if (g.second.check(s)) ret.push_back(&g.second);
     return ret;
 }
@@ -147,10 +147,11 @@ std::vector<Genre*> Data::searchGenre(const std::string& s)
 std::vector<Author*> Data::searchAuthor(const std::string& s)
 {
     std::vector<Author*> ret;
-    for (auto& a : sa)
+    for (auto& a : mauthors)
         if (a.second.check(s)) ret.push_back(&a.second);
     return ret;
 }
+
 
 void Data::load() try
 {
@@ -161,9 +162,9 @@ void Data::load() try
     while (f) //Starts parsing the file. Paragraphs are divided by a blank line
     {
         if (empty()) break;
-        if (!readString(f, tempA, 'n')) throw std::invalid_argument("File: " + name + " couldn't read line: " + tempA);
-        if (!readString(f, tempB, 'n')) throw std::invalid_argument("File: " + name + " couldn't read line: " + tempB);
-        mu[tempA] = tempB; //read pass, login and add them to the map. Duplicates removed.
+        if (!readString(f, tempA, 'n')) throw std::invalid_argument("File: " + name + " couldn't read login");
+        if (!readString(f, tempB, 'n')) throw std::invalid_argument("File: " + name + " couldn't read password");
+        users[tempA] = tempB; //read pass, login and add them to the map. Duplicates removed.
         if (!std::getline(f, tempC)) break;
         if (!tempC.empty() && tempC != " ")
             throw std::invalid_argument("File " + name + " read error, check delimiters.");
@@ -178,20 +179,20 @@ void Data::load() try
     {
         if (empty()) break;
         if (f.eof()) break;
-        if (!readString(f, tempA, 'n')) throw std::invalid_argument("File: " + name + " couldn't read line: " + tempA);
-        if (!readString(f, tempB, 'n')) throw std::invalid_argument("File: " + name + " couldn't read line: " + tempB);
-        ma[tempA] = tempB; //read pass, login and add them to the map. Duplicates removed.
+        if (!readString(f, tempA, 'n')) throw std::invalid_argument("File: " + name + " couldn't read login");
+        if (!readString(f, tempB, 'n')) throw std::invalid_argument("File: " + name + " couldn't read password");
+        admins[tempA] = tempB; //read pass, login and add them to the map. Duplicates removed.
         if (!std::getline(f, tempC)) break;
         if (!tempC.empty() && tempC != " ")
             throw std::invalid_argument("File " + name + " read error, check delimiters.");
         //continues to read if f is good;
     }
     std::cout << "Successfully read admins" << std::endl;
-    if (ma.empty())
+    if (admins.empty())
     {
         std::cerr << "Warning! We  couldn't find any valid administrator accounts. \n"
                      "Created a new one: admin | admin" << std::endl;
-        ma["admin"] = hash("admin");
+        admins["admin"] = hash("admin");
     }
     name = "genres.txt";
     f.close();
@@ -200,9 +201,9 @@ void Data::load() try
     while (f)
     {
         if (empty()) break;
-        if (!readString(f, tempA, 'i')) throw std::invalid_argument("File: " + name + " couldn't read line: " + tempA);
-        if (!readString(f, tempB, 's')) throw std::invalid_argument("File: " + name + " couldn't read line: " + tempB);
-        sg.emplace(std::make_pair(std::stoul(tempA), Genre(std::stoul(tempA), tempB)));
+        if (!readString(f, tempA, 'i')) throw std::invalid_argument("File: " + name + " couldn't read ID");
+        if (!readString(f, tempB, 's')) throw std::invalid_argument("File: " + name + " couldn't read name");
+        mgenres.emplace(std::make_pair(std::stoul(tempA), Genre(tempB, std::stoul(tempA))));
         getline(f, tempC); //Ignores 1 line.
     }
     std::cout << "Successfully read genres" << std::endl;
@@ -213,11 +214,11 @@ void Data::load() try
     while (f)
     { //id, name, date, country
         if (empty()) break;
-        if (!readString(f, tempA, 'i')) throw std::invalid_argument("File: " + name + " couldn't read id: " + tempA);
-        if (!readString(f, tempB, 's')) throw std::invalid_argument("File: " + name + " couldn't read name: " + tempB);
-        if (!readString(f, tempC, 'd')) throw std::invalid_argument("File: " + name + " couldn't read date: " + tempC);
-        if (!readString(f, tempD, 's')) throw std::invalid_argument("File: " + name + " couldn't read country: " + tempD);
-                sa.emplace(std::make_pair(std::stoul(tempA), Author(std::stoul(tempA), tempB, tempC, tempD)));
+        if (!readString(f, tempA, 'i')) throw std::invalid_argument("File: " + name + " couldn't read id");
+        if (!readString(f, tempB, 's')) throw std::invalid_argument("File: " + name + " couldn't read name");
+        if (!readString(f, tempC, 'd')) throw std::invalid_argument("File: " + name + " couldn't read date");
+        if (!readString(f, tempD, 's')) throw std::invalid_argument("File: " + name + " couldn't read country");
+        mauthors.emplace(std::make_pair(std::stoul(tempA), Author(tempB, tempC, tempD, std::stoul(tempA))));
         getline(f, tempC); //Ignores 1 line.
     }
     std::cout << "Successfully read authors" << std::endl;
@@ -226,47 +227,48 @@ void Data::load() try
     ensureFileExists(name);
     f.open(path + name);
 #ifndef NDEBUG
-    std::cout << "Current sb state: " << std::endl;
-    for (auto& el: sb)
+    std::cout << "Current books state: " << std::endl;
+    for (auto& el: mbooks)
         std::cout << "key: " << el.first << "\n" << el.second << std::endl;
-    std::cout << "Current sg state: " << std::endl;
-    for (auto& el: sg)
+    std::cout << "Current genres state: " << std::endl;
+    for (auto& el: mgenres)
         std::cout << "key: " << el.first << "\n" << el.second << std::endl;
-    std::cout << "Current sa state: " << std::endl;
-    for (auto& el: sa)
+    std::cout << "Current authors state: " << std::endl;
+    for (auto& el: mauthors)
         std::cout << "key: " << el.first << "\n" << el.second << std::endl;
 #endif
     while (f)
     { //id, title, year, temp, entry
         if (empty()) break;
         std::cout << "Starting to parse a new book " << std::endl;
-        if (!readString(f, tempA, 'i')) throw std::invalid_argument("File: " + name + " couldn't read id: " + tempA);
-        if (!readString(f, tempB, 's')) throw std::invalid_argument("File: " + name + " couldn't read title: " + tempB);
-        if (!readString(f, tempC, 'y')) throw std::invalid_argument("File: " + name + " couldn't read year: " + tempC);
+        if (!readString(f, tempA, 'i')) throw std::invalid_argument("File: " + name + " couldn't read id");
+        if (!readString(f, tempB, 's')) throw std::invalid_argument("File: " + name + " couldn't read title");
+        if (!readString(f, tempC, 'y')) throw std::invalid_argument("File: " + name + " couldn't read year");
 #ifndef NDEBUG
         std::cout << "emplace_back " << tempA << ' ' << tempB << ' ' << tempC << std::endl;
 #endif
-        auto curbook = sb.emplace(std::make_pair(std::stoul(tempA), Book(std::stoul(tempA), tempB, std::stoul(tempC))));
+        auto curbook = mbooks.emplace(std::make_pair(std::stoul(tempA), Book(tempB, std::stoul(tempC), std::stoul(tempA))));
 #ifndef NDEBUG
         std::cout << "emplace_back finished\n";
 #endif
         if (!curbook.second) throw std::runtime_error("Duplicate on emplace book");
         //Place genres
-        if (!readString(f, tempA, 's')) throw std::invalid_argument("File: " + name + " couldn't read book's genres: " + tempA);
+        if (!readString(f, tempA, 's')) throw std::invalid_argument("File: " + name + " couldn't read book's genres");
         std::stringstream ss(tempA); //tempA - line with genres, tempD - genre;
         while (getline(ss, tempD, ','))
         {
-            if (!checkString(tempD, 'i')) throw std::invalid_argument("File: " + name + " couldn't read book's genre ID: " + tempD);
-            auto sought = sg.find(std::stoul(tempD));
+            if (!checkString(tempD, 'i')) throw std::invalid_argument("File: " + name + " couldn't read book's genre ID");
+            auto sought = mgenres.find(std::stoul(tempD));
 #ifndef NDEBUG
-            std::cout << "sought.first is: " << (sought != sg.end() ? std::to_string(sought->first) : "NULL") << std::endl;
+            std::cout << "sought.first is: " << (sought != mgenres.end() ? std::to_string(sought->first) : "NULL") << std::endl;
 #endif
-            if (sought == sg.end()) //If we didn't find anything
+            if (sought == mgenres.end()) //If we didn't find anything
             {
 #ifndef NDEBUG
                 std::cout << "Executing new genre creation" << std::endl;
 #endif
-                sg.emplace(std::make_pair(std::stoul(tempD), Genre(std::stoul(tempD), "Unknown genre"))).first->second.addBook(
+                mgenres.emplace(std::make_pair(std::stoul(tempD),
+                                               Genre("Unknown genre", std::stoul(tempD)))).first->second.addBook(
                         curbook.first->second); //create a new genre and bind it to the book
             }   //The book is bound to the genre too
             else
@@ -280,20 +282,21 @@ void Data::load() try
         }
         std::cout << "Successfully linked books with genres\n";
         //Place authors
-        if (!readString(f, tempA, 's')) throw std::invalid_argument("File: " + name + " couldn't read book's authors: " + tempA);
+        if (!readString(f, tempA, 's')) throw std::invalid_argument("File: " + name + " couldn't read book's authors");
         ss.clear();
         ss.str(tempA); //author's line, tempD is author's ID;
         while (getline(ss, tempD, ','))
         {
-            if (!checkString(tempD, 'i')) throw std::invalid_argument("File: " + name + " couldn't read book's author ID " + tempD);
-            auto sought = sa.find(std::stoul(tempD));
-            std::cout << "sought.first is: " << (sought != sa.end() ? std::to_string(sought->first) : "NULL") << std::endl;
-            if (sought == sa.end())
+            if (!checkString(tempD, 'i')) throw std::invalid_argument("File: " + name + " couldn't read book's author ID ");
+            auto author = mauthors.find(std::stoul(tempD));
+            std::cout << "sought.first is: " << (author != mauthors.end() ? std::to_string(author->first) : "NULL") << std::endl;
+            if (author == mauthors.end())
             {
 #ifndef NDEBUG
                 std::cout << "Executing new author creation" << std::endl;
 #endif
-                sa.emplace(std::make_pair(std::stoul(tempD), Author(std::stoul(tempD), "Unknown author"))).first->second.addBook(
+                mauthors.emplace(std::make_pair(std::stoul(tempD),
+                                                Author("Unknown author", "Unknown", "Unknown", std::stoul(tempD)))).first->second.addBook(
                         curbook.first->second);
             }
             else
@@ -301,7 +304,7 @@ void Data::load() try
 #ifndef NDEBUG
                 std::cout << "Executing adding pointer" << std::endl;
 #endif
-                sought->second.addBook(curbook.first->second);
+                author->second.addBook(curbook.first->second);
             }
             tempD.clear();
         }
@@ -312,19 +315,17 @@ void Data::load() try
     }
 #ifndef NDEBUG
     std::cout << "Successfully read books" << std::endl;
-    system("pause");
+    getch();
 #endif
 }
 catch (const std::exception& e)
 {
-    std::cerr << "Critical error while reading files. The program cannot continue. \n"
-    << "Error: " << e.what() << std::endl;
     throw;
 }
 catch (...)
 {
     std::cerr << "Unknown error while reading files. The program cannot continue." << std::endl;
-   throw;
+    throw;
 }
 void Data::save()
 {
@@ -336,35 +337,43 @@ void Data::save()
     printCredentials(true);
     printCredentials(false);
 #endif
-    for (auto& el: mu)
+    for (auto& el: users)
         f << el.first << "\n" << el.second << "\n" << std::endl;
-    f.close(); f.open(path + "admin.txt");
-    for (auto& el: ma)
+    f.close();
+    f.open(path + "admin.txt");
+    f << std::setfill('0');
+    for (auto& el: admins)
         f << el.first << "\n" << el.second << "\n" << std::endl;
-    f.close(); f.open(path + "genres.txt");
-    for (auto& el: sg)
-        f <<  std::setw(9) << el.first  << '\n' << el.second.name << '\n' << std::endl;
-    f.close(); f.open(path + "authors.txt");
-    for (auto& el: sa)
-        f <<  std::setw(9) << el.first << '\n' << el.second.name << '\n' << el.second.date << '\n'  << el.second.country << '\n' <<std::endl;
-    f.close(); f.open(path + "books.txt");
-    for (auto& b: sb)
+    f.close();
+    f.open(path + "genres.txt");
+    f << std::setfill('0');
+    for (auto& el: mgenres)
+        f << std::setw(9) << el.first << '\n' << el.second.getName() << '\n' << std::endl;
+    f.close();
+    f.open(path + "authors.txt");
+    f << std::setfill('0');
+    for (auto& el: mauthors)
+        f << std::setw(9) << el.first << '\n' << el.second.getName() << '\n' << el.second.date << '\n' << el.second.country << '\n'
+          << std::endl;
+    f.close();
+    f.open(path + "books.txt");
+    f << std::setfill('0');
+    for (auto& b: mbooks)
+    {
+        f << std::setw(9) << b.first << "\n" << b.second.getName() << "\n" << std::setw(4) << b.second.year << "\n";
+        std::string delim;
+        for (auto& g: b.second.genres)
         {
-            f << std::setw(9) << b.first << "\n" << b.second.name << "\n" << std::setw(4) << b.second.year << "\n";
-            std::string delim;
-            for (auto& g: b.second.genres)
-            {
-                f << delim << std::setw(9) << g.second->id;
-                delim = ',';
-            }
-            f << "\n";
-            delim.clear();
+            f << delim << std::setw(9) << g->id();
+            delim = ',';
+        }
+        f << "\n";
+        delim.clear();
             for (auto& a: b.second.authors)
             {
-                f << delim << std::setw(9) << a.second->id;
+                f << delim << std::setw(9) << a->id();
                 delim = ',';
             }
             f << "\n" << std::setfill(' ') << std::endl;
         }
-    //The destructor will close the files for me
 }
