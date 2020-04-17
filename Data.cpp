@@ -151,7 +151,6 @@ std::vector<Author*> Data::searchAuthor(const std::string& s)
         if (a.second.check(s)) ret.push_back(&a.second);
     return ret;
 }
-//TODO: Overload searchGenre by ID or remove
 
 void Data::load() try
 {
@@ -237,7 +236,7 @@ void Data::load() try
     for (auto& el: sa)
         std::cout << "key: " << el.first << "\n" << el.second << std::endl;
 #endif
-    while (f) //TODO: Add checks for the authorinit and genreinit
+    while (f)
     { //id, title, year, temp, entry
         if (empty()) break;
         std::cout << "Starting to parse a new book " << std::endl;
@@ -282,7 +281,7 @@ void Data::load() try
         std::cout << "Successfully linked books with genres\n";
         //Place authors
         if (!readString(f, tempA, 's')) throw std::invalid_argument("File: " + name + " couldn't read book's authors: " + tempA);
-        ss.clear(); //TODO: is this needed?
+        ss.clear();
         ss.str(tempA); //author's line, tempD is author's ID;
         while (getline(ss, tempD, ','))
         {
@@ -306,7 +305,7 @@ void Data::load() try
             }
             tempD.clear();
         }
-        getline(f, tempA); //Ignores 1 line. TODO:Test
+        getline(f, tempA); //Ignores 1 line.
 #ifndef NDEBUG
         std::cout << "Linked book " << tempB << std::endl;
 #endif

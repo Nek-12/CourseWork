@@ -20,12 +20,9 @@ int getch()
 std::string path; //extern global
 inline void cls() { system("cls"); }
 
-//TODO: Make the book table be displayed only by request
-//TODO: Implement case insensitivity
 //TODO: Move the stuff to different folders/files;
 //TODO: Recreate the readString function to add exit functionality, edit usages;
-//TODO: Add nullptrs returns for every function and checks
-//TODO: Make the "Select the option" a function template for convenient use;
+//TODO: Add nullptrs returns for every function and checks;
 //TODO: Remove authors from genres and genres from authors
 bool yesNo(const std::string& msg)
 {
@@ -432,7 +429,7 @@ void manageBook()
                 if (yesNo("Delete this record?"))
                 {
                     std::cout << "Erased this book and removed all references." << std::endl;
-                    data.erase(*pbook); //TODO: The pointer is invalidated isn't it
+                    data.erase(*pbook);
                     sleep(WAIT_TIME_NORMAL);
                     return;
                 }

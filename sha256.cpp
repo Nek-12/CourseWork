@@ -10,7 +10,6 @@
 #ifndef _MSC_VER
 //#include <endian.h>
 #endif
-//TODO: Test
 
 /// same as reset()
 SHA256::SHA256()

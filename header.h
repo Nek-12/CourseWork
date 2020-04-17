@@ -20,7 +20,6 @@ enum
 
 //TODO: Update comments
 //TODO: Add move-constuctors for huge perf gain
-//TODO: Write a log class and put everything into it;
 
 extern std::string path; //Path to the program folder, see main.cpp -> int main()
 

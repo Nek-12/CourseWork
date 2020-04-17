@@ -8,28 +8,28 @@
 		<Option virtualFolders="CMake Files\;"/>
 		<Build>
 			<Target title="all">
-				<Option working_dir="/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/cmake-build-debug"/>
+				<Option working_dir="/home/nek/Dev/CW/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j8 -f &quot;/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
-					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j8 -f &quot;/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j8 -f &quot;/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/nek/Dev/CW/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/nek/Dev/CW/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/nek/Dev/CW/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/nek/Dev/CW/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="rebuild_cache">
-				<Option working_dir="/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/cmake-build-debug"/>
+				<Option working_dir="/home/nek/Dev/CW/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j8 -f &quot;/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
-					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j8 -f &quot;/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j8 -f &quot;/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/nek/Dev/CW/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/nek/Dev/CW/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/nek/Dev/CW/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/nek/Dev/CW/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="CW">
-				<Option output="/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/CW" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/cmake-build-debug"/>
+				<Option output="/home/nek/Dev/CW/cmake-build-debug/CW" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/nek/Dev/CW/cmake-build-debug"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
 				<Option compiler="gcc"/>
@@ -43,15 +43,15 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j8 -f &quot;/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 CW"/>
-					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j8 -f &quot;/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j8 -f &quot;/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/nek/Dev/CW/cmake-build-debug/Makefile&quot;  VERBOSE=1 CW"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/nek/Dev/CW/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/nek/Dev/CW/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/nek/Dev/CW/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="CW/fast">
-				<Option output="/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/CW" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/cmake-build-debug"/>
+				<Option output="/home/nek/Dev/CW/cmake-build-debug/CW" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/nek/Dev/CW/cmake-build-debug"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
 				<Option compiler="gcc"/>
@@ -65,54 +65,54 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j8 -f &quot;/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 CW/fast"/>
-					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j8 -f &quot;/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j8 -f &quot;/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/nek/Dev/CW/cmake-build-debug/Makefile&quot;  VERBOSE=1 CW/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/nek/Dev/CW/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/nek/Dev/CW/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/nek/Dev/CW/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="edit_cache">
-				<Option working_dir="/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/cmake-build-debug"/>
+				<Option working_dir="/home/nek/Dev/CW/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j8 -f &quot;/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
-					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j8 -f &quot;/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j8 -f &quot;/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/nek/Dev/CW/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/nek/Dev/CW/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/nek/Dev/CW/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/nek/Dev/CW/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/Data.cpp">
+		<Unit filename="/home/nek/Dev/CW/Data.cpp">
 			<Option target="CW"/>
 		</Unit>
-		<Unit filename="/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/booker.cpp">
+		<Unit filename="/home/nek/Dev/CW/booker.cpp">
 			<Option target="CW"/>
 		</Unit>
-		<Unit filename="/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/fort.c">
+		<Unit filename="/home/nek/Dev/CW/fort.c">
 			<Option target="CW"/>
 		</Unit>
-		<Unit filename="/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/fort.h">
+		<Unit filename="/home/nek/Dev/CW/fort.h">
 			<Option target="CW"/>
 		</Unit>
-		<Unit filename="/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/fort.hpp">
+		<Unit filename="/home/nek/Dev/CW/fort.hpp">
 			<Option target="CW"/>
 		</Unit>
-		<Unit filename="/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/func.cpp">
+		<Unit filename="/home/nek/Dev/CW/func.cpp">
 			<Option target="CW"/>
 		</Unit>
-		<Unit filename="/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/header.h">
+		<Unit filename="/home/nek/Dev/CW/header.h">
 			<Option target="CW"/>
 		</Unit>
-		<Unit filename="/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/main.cpp">
+		<Unit filename="/home/nek/Dev/CW/main.cpp">
 			<Option target="CW"/>
 		</Unit>
-		<Unit filename="/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/sha256.cpp">
+		<Unit filename="/home/nek/Dev/CW/sha256.cpp">
 			<Option target="CW"/>
 		</Unit>
-		<Unit filename="/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/sha256.h">
+		<Unit filename="/home/nek/Dev/CW/sha256.h">
 			<Option target="CW"/>
 		</Unit>
-		<Unit filename="/home/nek/WIN/Users/ender/Archive/Coding/CourseWork/CMakeLists.txt">
+		<Unit filename="/home/nek/Dev/CW/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
 		</Unit>
 	</Project>
