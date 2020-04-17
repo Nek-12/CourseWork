@@ -360,6 +360,11 @@ void Data::save()
     f << std::setfill('0');
     for (auto& b: mbooks)
     {
+        if (b.second.authors.empty() || b.second.genres.empty())
+        {
+            std::cerr << "Warning! The book \n" << b.second << "\n Has missing data! It wasn't saved!" << std::endl;
+            continue;
+        }
         f << std::setw(MAX_ID_LENGTH) << b.first << "\n" << b.second.getName() << "\n" << std::setw(4) << b.second.year << "\n";
         std::string delim;
         for (auto& g: b.second.genres)

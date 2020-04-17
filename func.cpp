@@ -134,7 +134,7 @@ bool checkString(const std::string& s, char mode)
         case 'd':
             return (checkDate(s));
         case 'i':
-            if (s.size() > 9) return msgFalse("too long for a number");
+            if (s.size() > MAX_ID_LENGTH) return msgFalse("too long for a number");
             for (auto ch: s)
                 if(!isdigit(ch))
                     return msgFalse("invalid characters in a number");

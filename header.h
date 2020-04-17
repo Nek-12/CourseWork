@@ -42,7 +42,7 @@ class Genre;
 ull genID();
 void cls();
 unsigned getCurYear();
-bool checkString(const std::string&, char);
+bool checkString(const std::string&, char mode);
 std::string lowercase(const std::string&);
 void sleep(const unsigned&); // milliseconds to sleep
 std::string hash(const std::string& s); //uses sha256.cpp and sha256.h for encrypting passwords, outputs hashed string
