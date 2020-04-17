@@ -11,7 +11,7 @@ void sleep(const unsigned& ms)
 ull genID()
 {
     static std::default_random_engine e(std::random_device{}());
-    static std::uniform_int_distribution<ull> rng(0, ULONG_MAX-1);
+    static std::uniform_int_distribution<ull> rng(0, MAX_ID);
     return rng(e);
 }
 

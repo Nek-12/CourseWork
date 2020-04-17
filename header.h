@@ -1,4 +1,7 @@
 //#define NDEBUG
+#define WINDOWS
+#define MAX_ID ULONG_MAX
+#define MAX_ID_LENGTH 10
 #pragma once
 
 #include <map>
@@ -7,10 +10,14 @@
 #include <iostream>
 #include <set>
 #include "fort.hpp"
-//#define WINDOWS
-#ifndef WINDOWS
+
+#ifdef WINDOWS
+#include <conio.h>
+#else
+#include <termios.h>
 int getch();
 #endif
+
 
 using ull = unsigned long;
 
@@ -47,7 +54,7 @@ class Entry
 {
     friend std::ostream& operator<<(std::ostream& os, const Entry& e)
     {
-        os << e.to_string();
+        os << e.to_string() << "\n";
         return os;
     }//Uses to_string that is virtual, applicable for any entry
     friend bool operator==(const Entry& lhs, const Entry& rhs)
@@ -157,6 +164,7 @@ private:
 
 class Genre : public Entry
 {
+    friend std::ostream& operator<<(std::ostream& os, const Genre& g);
     friend class Book;
     friend class Data;
 public:

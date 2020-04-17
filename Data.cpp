@@ -348,32 +348,33 @@ void Data::save()
     f.open(path + "genres.txt");
     f << std::setfill('0');
     for (auto& el: mgenres)
-        f << std::setw(9) << el.first << '\n' << el.second.getName() << '\n' << std::endl;
+        f << std::setw(MAX_ID_LENGTH) << el.first << '\n' << el.second.getName() << '\n' << std::endl;
     f.close();
     f.open(path + "authors.txt");
     f << std::setfill('0');
     for (auto& el: mauthors)
-        f << std::setw(9) << el.first << '\n' << el.second.getName() << '\n' << el.second.date << '\n' << el.second.country << '\n'
+        f << std::setw(MAX_ID_LENGTH) << el.first << '\n' << el.second.getName() << '\n' << el.second.date << '\n' << el.second.country << '\n'
           << std::endl;
     f.close();
     f.open(path + "books.txt");
     f << std::setfill('0');
     for (auto& b: mbooks)
     {
-        f << std::setw(9) << b.first << "\n" << b.second.getName() << "\n" << std::setw(4) << b.second.year << "\n";
+        f << std::setw(MAX_ID_LENGTH) << b.first << "\n" << b.second.getName() << "\n" << std::setw(4) << b.second.year << "\n";
         std::string delim;
         for (auto& g: b.second.genres)
         {
-            f << delim << std::setw(9) << g->id();
+            f << delim << std::setw(MAX_ID_LENGTH) << g->id();
             delim = ',';
         }
         f << "\n";
         delim.clear();
-            for (auto& a: b.second.authors)
-            {
-                f << delim << std::setw(9) << a->id();
-                delim = ',';
-            }
-            f << "\n" << std::setfill(' ') << std::endl;
+        for (auto& a: b.second.authors)
+        {
+            f << delim << std::setw(MAX_ID_LENGTH) << a->id();
+            delim = ',';
         }
+        f << "\n" << std::endl;
+    }
+    f << std::setfill(' ');
 }

@@ -1,10 +1,7 @@
 #include "header.h"
 #ifdef WINDOWS
-    #include <conio.h>
     inline void cls() { system("cls"); }
 #else
-# include <termios.h>
-/* get a single char from stdin    */
 int getch()
 {
     struct termios oldattr, newattr;
@@ -17,8 +14,7 @@ int getch()
     tcsetattr(0, TCSANOW, &oldattr);
     return (ch);
 }
-inline void cls()
-{ system("clear"); }
+inline void cls() { system("clear"); }
 #endif
 std::string path; //extern global
 //TODO: Move the stuff to different folders/files;
@@ -382,8 +378,7 @@ void editBookGenre(Book* pbook)
     std::cout << "Select an option for book " << pbook->getName() <<
               "\n1 -> Add genres to the book "
               "\n2 -> Remove genres from the book"
-              "\n3 -> Edit any genre of the book"
-              "\n4 -> Go back";
+              "\nq -> Go back" << std::endl;
     while (true)
     {
         switch (getch())
@@ -405,6 +400,11 @@ void editBookGenre(Book* pbook)
 //                    std::cout << "#" << std::distance(it, genres.begin())+1 << ":\n" << *(it->second);
 //                std::cout << "Select the genre: " << std::endl;
 //                pbook->remGenre(;
+                sleep(WAIT_TIME_NORMAL);
+            case'q':
+                return;
+            default:
+                break;
         }
     }
     sleep(WAIT_TIME_NORMAL);
