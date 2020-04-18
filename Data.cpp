@@ -66,7 +66,7 @@ void Data::printGenres(unsigned years)
         std::string books, delim;
         for (auto b: genre.second.books)
         {
-            if (b->year <= diff) continue;
+            if (b->year != 0 && b->year <= diff) continue;
             books += delim + b->getName();
             delim = "\n";
             ++cnt;
@@ -346,24 +346,35 @@ void Data::save()
     f << std::setfill('0');
     for (auto& b: mbooks)
     {
-        if (b.second.authors.empty() || b.second.genres.empty())
-        {
-            std::cerr << "Warning! The book \n" << b.second << "\n Has missing data! It wasn't saved!" << std::endl;
-            continue;
-        }
-        f << std::setw(MAX_ID_LENGTH) << b.first << "\n" << b.second.getName() << "\n" << std::setw(4) << b.second.year << "\n";
         std::string delim;
-        for (auto& g: b.second.genres)
+        f << std::setw(MAX_ID_LENGTH) << b.first << "\n" << b.second.getName() << "\n" << std::setw(4) << b.second.year << "\n";
+        if (!b.second.authors.empty())
         {
-            f << delim << std::setw(MAX_ID_LENGTH) << g->id();
-            delim = ',';
+            for (auto& g: b.second.genres)
+            {
+                f << delim << std::setw(MAX_ID_LENGTH) << g->id();
+                delim = ',';
+            }
+        }
+        else
+        {
+            std::cerr << "Warning! The book \n" << b.second << "\n Has zero authors! The data will be generated automatically!" << std::endl;
+            f << genID();
         }
         f << "\n";
         delim.clear();
-        for (auto& a: b.second.authors)
+        if (!b.second.genres.empty())
         {
-            f << delim << std::setw(MAX_ID_LENGTH) << a->id();
-            delim = ',';
+            for (auto& a: b.second.authors)
+            {
+                f << delim << std::setw(MAX_ID_LENGTH) << a->id();
+                delim = ',';
+            }
+        }
+        else
+        {
+            std::cerr << "Warning! The book \n" << b.second << "\n Has zero genres! The data will be generated automatically!" << std::endl;
+            f << genID();
         }
         f << "\n" << std::endl;
     }

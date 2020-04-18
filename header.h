@@ -1,6 +1,17 @@
 //#define NDEBUG
+using ull = unsigned long;
 #define MAX_ID ULONG_MAX
-#define MAX_ID_LENGTH 10
+constexpr ull FIND_MAX_LENGTH(ull a)
+{
+    ull i = 0;
+    while (a!=0)
+    {
+        a/=10;
+        i++;
+    }
+    return i;
+}
+#define MAX_ID_LENGTH FIND_MAX_LENGTH(MAX_ID)
 #pragma once
 
 #include <map>
@@ -16,9 +27,6 @@
 #include <termios.h>
 int getch();
 #endif
-
-
-using ull = unsigned long;
 
 enum
 {
@@ -135,7 +143,7 @@ public:
         addToBooks(a);
         std::cout << getName() << " was copy-constructed\n";
     };
-    explicit Author(const std::string& n, std::string d, std::string c, const ull& id = genID()) : //TODO: Bad
+    explicit Author(const std::string& n, std::string d, std::string c, const ull& id = genID()) :
             Entry(n, id), country(std::move(c)), date(std::move(d))
     {
         std::cout << getName() << " was created\n";

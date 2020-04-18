@@ -45,14 +45,16 @@ bool checkDate(const std::string& s)
         int day = std::stoi(res.str(1));
         int month = std::stoi(res.str(3));
         int year = std::stoi(res.str(5));
-        if (!day || !month || !year) return msgFalse("zero is not a valid value");
         if (res.str(2) != res.str(4)) return msgFalse("Divisors don't match:" + res.str(2) + " < =/= > " + res.str(4));
-
+        if (!day || !month || !year)
+        {
+            std::cerr << "The date is unknown." << std::endl;
+            return true;
+        }
         if (year > (nowTm->tm_year + 1900))
             return msgFalse("The book was created in the future year: " + std::to_string(year));
         else if ((year == nowTm->tm_year + 1900) && month > nowTm->tm_mon + 1)
             return msgFalse("The book was created in the future month: " + std::to_string(month));
-
         if (month > 12)
             return msgFalse("More than 12 months");
         switch (month)
@@ -117,13 +119,13 @@ bool checkString(const std::string& s, char mode)
     {
         case 'p':
         case 'n':
-            if (s.size() < 3) return msgFalse("too short for a word");
+            if (s.size() < 3 || s.size() > 75 ) return msgFalse("too short/long for a word");
             for (auto ch: s)
                 if (!(isalnum(ch) || ch == '.' || ch == '-' || ch == '_' || ch == '\''))
                     return msgFalse("invalid characters");
             break;
         case 's':
-            if (s.size() < 2) return msgFalse("too short for a line");
+            if (s.size() < 2) return msgFalse("too short/long for a line");
             for (auto ch: s)
                 if (!(isalnum(ch) || ispunct(ch) || ch == ' '))
                     return msgFalse("invalid characters");
@@ -165,6 +167,7 @@ std::string getPassword()
             std::cout << '*'; //TODO: Test on Windows
         }
     }
+    std::cout << std::endl;
     return password;
 }
 

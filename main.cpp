@@ -20,6 +20,7 @@ std::string path; //extern global
 //TODO: Move the stuff to different folders/files;
 //TODO: Recreate the readString function to add exit functionality, edit usages;
 //@@@TODO: Add nullptrs returns for every function and CHECK EVERY POINTER!@@@
+//TODO: Fix: When adding/editing books, there is no check that GENRE or AUTHOR with that ID is present and vice versa
 
 Book* newBook();
 Genre* newGenre();
@@ -276,7 +277,7 @@ Author* newAuthor()
     std::cout << "Enter the author's birthdate" << std::endl;
     while (!readString(std::cin, d, 'd'));
     std::cout << "Enter the author's country" << std::endl;
-    while (!readString(std::cin, d, 's'));
+    while (!readString(std::cin, c, 's'));
     Author* pa = data.add(Author(n, d, c, id));
     if (!pa)
     {
@@ -291,10 +292,11 @@ Author* newAuthor()
         else
         {
             pa->addBook(*pb);
-            std::cout << "Added " << pb->getName() << "to author " << n << "'s list of books" << std::endl;
+            std::cout << "Added " << pb->getName() << " to author " << n << "'s list of books" << std::endl;
         }
     }
     std::cout << "Successfully added author "<< n << std::endl;
+    sleep(WAIT_TIME_NORMAL);
     return pa;
 }
 
@@ -322,7 +324,7 @@ Book* newBook() //TODO: put exit everywhere
         else
         {
             added->addAuthor(*pa);
-            std::cout << "Added " << pa->getName() << "to the book " << added->getName() << std::endl;
+            std::cout << "Added " << pa->getName() << " to the book " << added->getName() << std::endl;
         }
     }
     while (true)
@@ -331,9 +333,10 @@ Book* newBook() //TODO: put exit everywhere
         Genre* pg = selectGenre();
         if (!pg) break;
         added->addGenre(*pg);
-        std::cout << "Added " << pg->getName() << "to the book " << added->getName() << std::endl;
+        std::cout << "Added " << pg->getName() << " to the book " << added->getName() << std::endl;
     }
     std::cout << "Successfully added your book" << std::endl;
+    sleep(WAIT_TIME_NORMAL);
     return added;
 }
 
@@ -359,10 +362,11 @@ Genre* newGenre()
         else
         {
             added->addBook(*pb);
-            std::cout << "Added " << pb->getName() << "to the genre " << added->getName() << std::endl;
+            std::cout << "Added " << pb->getName() << " to the genre " << added->getName() << std::endl;
         }
     }
     std::cout << "Successfully added your genre" << std::endl;
+    sleep(WAIT_TIME_NORMAL);
     return added;
 }
 
@@ -495,7 +499,7 @@ void manageAuthor()
                             while (!readString(std::cin, temp, 's'));
                             pauthor->setCountry(temp);
                             std::cout << "Changed successfully." << std::endl;
-                            return;
+                            break;
                         case '4':
                             editAuthorBooks(pauthor);
                             break;
@@ -641,7 +645,7 @@ void editGenres()
                 std::cout << "Renamed to " << temp << std::endl;
                 sleep(WAIT_TIME_NORMAL);
                 return;
-            case '3':
+            case '2':
                 pbook = selectBook();
                 if (!pbook) return;
                 if (yesNo("Add genre " + pgenre->getName() + " to the book " + pbook->getName() + " ?"))
@@ -685,6 +689,10 @@ void showData()
                 }
                 data.printGenres(std::stoul(temp));
                 if (!yesNo("Try again?")) return;
+            case 'q':
+                return;
+            default:
+                break;
         }
     }
 }
