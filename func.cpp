@@ -45,15 +45,16 @@ bool checkDate(const std::string& s)
         int day = std::stoi(res.str(1));
         int month = std::stoi(res.str(3));
         int year = std::stoi(res.str(5));
-        if (res.str(2) != res.str(4)) msgFalse("Divisors don't match:" + res.str(2) + " < =/= > " + res.str(4));
+        if (!day || !month || !year) return msgFalse("zero is not a valid value");
+        if (res.str(2) != res.str(4)) return msgFalse("Divisors don't match:" + res.str(2) + " < =/= > " + res.str(4));
 
         if (year > (nowTm->tm_year + 1900))
-            msgFalse("The book was created in the future year: " + std::to_string(year));
+            return msgFalse("The book was created in the future year: " + std::to_string(year));
         else if ((year == nowTm->tm_year + 1900) && month > nowTm->tm_mon + 1)
-            msgFalse("The book was created in the future month: " + std::to_string(month));
+            return msgFalse("The book was created in the future month: " + std::to_string(month));
 
         if (month > 12)
-            msgFalse("More than 12 months");
+            return msgFalse("More than 12 months");
         switch (month)
         {
             case 1:
@@ -64,42 +65,38 @@ bool checkDate(const std::string& s)
             case 10:
             case 12:
                 if (day > 31)
-                    msgFalse("More than 31 days");
+                    return msgFalse("More than 31 days");
                 else
                     return true;
-                break;
             case 4:
             case 6:
             case 9:
             case 11:
                 if (day > 30)
-                    msgFalse("More than 30 days");
+                    return msgFalse("More than 30 days");
                 else
                     return true;
-                break;
             case 2:
                 if (year % 400 == 0 || (year % 100 != 0 && year % 4 == 0))
                 {
                     if (day > 29)
-                        msgFalse("More than 29 days");
+                        return msgFalse("More than 29 days");
                     else
                         return true;
                 }
                 else
                 {
                     if (day > 28)
-                        msgFalse("More than 28 days");
+                        return msgFalse("More than 28 days");
                     else
                         return true;
                 }
-                break;
             default:
                 throw std::invalid_argument("Default case when parsing month");
         }
     }
     else
-        msgFalse("Wrong date formatting");
-    return false;
+        return msgFalse("Wrong date formatting");
 }
 
 bool checkYear(const std::string& s)
@@ -152,9 +149,9 @@ std::string getPassword()
 {
     std::string password;
     int a;
-    while ((a = getch()) != 13)
+    while ((a = getch()) != 10)
     {
-        if (a == 8)
+        if (a == 127)
         {
             if (password.empty()) continue;
 
@@ -165,7 +162,7 @@ std::string getPassword()
         else
         {
             password += (char)a;
-            std::cout << '*';
+            std::cout << '*'; //TODO: Test on Windows
         }
     }
     return password;

@@ -187,7 +187,7 @@ Author* selectAuthor()
         {
             std::cerr << "Nothing found." << std::endl;
             if (yesNo("Try again?")) continue;
-            else if (yesNo("Add a new book then?")) return newAuthor();
+            else if (yesNo("Add a new author then?")) return newAuthor();
             else return nullptr;
         }
         else

@@ -205,11 +205,6 @@ void Genre::remBook(Book& b)
     books.erase(&b);
     b.genres.erase(this);
 }
-std::ostream& operator<<(std::ostream& os, const Genre& g)
-{
-    os << g.id() << "\n" << g.getName() << "\n";
-    return os;
-}
 
 bool Genre::check(const std::string& s) const
 {
@@ -229,6 +224,5 @@ std::string Genre::to_string() const
     t.set_border_style(FT_BASIC2_STYLE);
     t.column(0).set_cell_content_fg_color(fort::color::green);
     t.column(2).set_cell_content_fg_color(fort::color::red);
-    std::cout << t.to_string() << std::endl;
     return t.to_string();
 }

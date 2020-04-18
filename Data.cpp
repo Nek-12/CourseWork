@@ -51,6 +51,11 @@ void Data::printAuthors()
 }
 void Data::printGenres(unsigned years)
 {
+    if (years == 0)
+    {
+        std::cout << "No books found" << std::endl;
+        return;
+    }
     unsigned diff = getCurYear() - years;
     fort::char_table t;
     std::cout << "Books grouped by genres for the past " << years << " years" << std::endl;
