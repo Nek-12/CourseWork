@@ -774,9 +774,11 @@ void login(const bool& isadmin)
 int main(int, char* argv[]) try
 {
     Data& data = Data::getInstance();
-    data.load();
     path = argv[0];
+    std::cout << path << std::endl;
     path.erase(path.find_last_of('\\') + 1); //Makes 'path' be the path to the app folder
+    std::cout << path << std::endl;
+    data.load();
 #ifndef NDEBUG
     data.printBooks();
     data.printAuthors();

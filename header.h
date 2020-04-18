@@ -1,5 +1,5 @@
 //#define NDEBUG
-#define WINDOWS
+//#define WINDOWS
 #define MAX_ID ULONG_MAX
 #define MAX_ID_LENGTH 10
 #pragma once
@@ -42,7 +42,7 @@ class Genre;
 ull genID();
 void cls();
 unsigned getCurYear();
-bool checkString(const std::string&, char mode);
+bool checkString(const std::string&, char);
 std::string lowercase(const std::string&);
 void sleep(const unsigned&); // milliseconds to sleep
 std::string hash(const std::string& s); //uses sha256.cpp and sha256.h for encrypting passwords, outputs hashed string
@@ -54,7 +54,7 @@ class Entry
 {
     friend std::ostream& operator<<(std::ostream& os, const Entry& e)
     {
-        os << e.to_string() << "\n";
+        os << e.to_string();
         return os;
     }//Uses to_string that is virtual, applicable for any entry
     friend bool operator==(const Entry& lhs, const Entry& rhs)
@@ -164,7 +164,6 @@ private:
 
 class Genre : public Entry
 {
-    friend std::ostream& operator<<(std::ostream& os, const Genre& g);
     friend class Book;
     friend class Data;
 public:
