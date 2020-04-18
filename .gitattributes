@@ -1,1 +1,3 @@
 *.c linguist-detectable=false
+fort.hpp linguist-detectable=false
+fort.h linguist-detectable=false
