@@ -20,6 +20,11 @@ std::string path; //extern global
 //TODO: Move the stuff to different folders/files;
 //TODO: Recreate the readString function to add exit functionality, edit usages;
 //@@@TODO: Add nullptrs returns for every function and CHECK EVERY POINTER!@@@
+
+Book* newBook();
+Genre* newGenre();
+Author* newAuthor();
+
 bool yesNo(const std::string& msg)
 {
     std::cout << msg << " y/n" << std::endl;
@@ -124,6 +129,7 @@ Book* selectBook()
         {
             std::cerr << "Nothing found." << std::endl;
             if (yesNo("Try again?")) continue;
+            else if (yesNo("Add a new book then?")) return newBook();
             else return nullptr;
         }
         else
@@ -152,6 +158,7 @@ Genre* selectGenre()
         {
             std::cerr << "Nothing found." << std::endl;
             if (yesNo("Try again?")) continue;
+            else if (yesNo("Add a new genre then?")) return newGenre();
             else return nullptr;
         }
         else
@@ -167,6 +174,35 @@ Genre* selectGenre()
     for (auto it = sought.begin(); it != sought.end(); ++it)
         std::cout << "#" << it+1 - sought.begin() << ":\n" << **it;
     std::cout << "Select the genre: " << std::endl;
+    return sought[select(sought.size()) - 1];
+}
+
+Author* selectAuthor()
+{
+    std::vector<Author*> sought;
+    while(true)
+    {
+        sought = searchAuthor();
+        if (sought.empty())
+        {
+            std::cerr << "Nothing found." << std::endl;
+            if (yesNo("Try again?")) continue;
+            else if (yesNo("Add a new book then?")) return newAuthor();
+            else return nullptr;
+        }
+        else
+        {
+            std::cout << "Found: " << std::endl;
+            for (auto el: sought)
+                std::cout << *el << std::endl;
+            if (yesNo("Try again?")) continue;
+            else break;
+        }
+    }
+    cls();
+    for (auto it = sought.begin(); it != sought.end(); ++it)
+        std::cout << "#" << it+1 - sought.begin() << ":\n" << **it;
+    std::cout << "Select the author's #: " << std::endl;
     return sought[select(sought.size()) - 1];
 }
 
@@ -229,130 +265,252 @@ void searchUI()
     }
 }
 
-void newAuthor()
+Author* newAuthor()
 {
     Data& data = Data::getInstance();
+    cls();
+    std::string n, d, c;
+    ull id = inputID();
+    std::cout << "Enter author's credentials" << std::endl;
+    while (!readString(std::cin, n, 's'));
+    std::cout << "Enter the author's birthdate" << std::endl;
+    while (!readString(std::cin, d, 'd'));
+    std::cout << "Enter the author's country" << std::endl;
+    while (!readString(std::cin, d, 's'));
+    Author* pa = data.add(Author(n, d, c, id));
+    if (!pa)
+    {
+        std::cout << "Such author already exists" << std::endl;
+        return nullptr;
+    }
     while (true)
     {
-        cls();
-        std::string n, d, c;
-        ull id = inputID();
-        std::cout << "Enter author's credentials" << std::endl;
-        while (!readString(std::cin, n, 's'));
-        std::cout << "Enter the author's birthdate" << std::endl;
-        while (!readString(std::cin, d, 'd'));
-        std::cout << "Enter the author's country" << std::endl;
-        while (!readString(std::cin, d, 's'));
-        Author* pa = data.add(Author(n, d, c, id));
-        while (true)
-        {
-            if(!yesNo("Add a book this author has written?")) break;
-            Book* pb = selectBook();
-            if (pb == nullptr) return;
-            else
-            {
-                pa->addBook(*pb);
-                std::cout << "Added " << pb->getName() << "to author " << n << "'s list of books" << std::endl;
-            }
-        }
-        std::cout << "Successfully added author "<< n << std::endl;
-        if (!yesNo("Add another one?")) return;
-    }
-}
-
-
-Author* selectAuthor()
-{
-    std::vector<Author*> sought;
-    while(true)
-    {
-        sought = searchAuthor();
-        if (sought.empty())
-        {
-            std::cerr << "Nothing found." << std::endl;
-            if (yesNo("Try again?")) continue;
-            else return nullptr;
-        }
+        if(!yesNo("Add a book this author has written?")) break;
+        Book* pb = selectBook();
+        if (!pb) break;
         else
         {
-            std::cout << "Found: " << std::endl;
-            for (auto el: sought)
-                std::cout << *el << std::endl;
-            if (yesNo("Try again?")) continue;
-            else break;
+            pa->addBook(*pb);
+            std::cout << "Added " << pb->getName() << "to author " << n << "'s list of books" << std::endl;
         }
     }
-    cls();
-    for (auto it = sought.begin(); it != sought.end(); ++it)
-        std::cout << "#" << it+1 - sought.begin() << ":\n" << **it;
-    std::cout << "Select the author's #: " << std::endl;
-    return sought[select(sought.size()) - 1];
+    std::cout << "Successfully added author "<< n << std::endl;
+    return pa;
 }
 
 Book* newBook() //TODO: put exit everywhere
 {
     Data& data = Data::getInstance();
+    cls();
+    std::string n, a, y;
+    ull id = inputID();
+    std::cout << "Enter the title of the book" << std::endl;
+    while (!readString(std::cin, n, 's'));
+    std::cout << "Enter the year the book was published" << std::endl;
+    while (!readString(std::cin, y, 'y'));
+    Book* added = data.add(Book(n, std::stoul(y), id));
+    if (!added)
+    {
+        std::cerr << "Such book already exists" << std::endl;
+        return nullptr;
+    }
     while (true)
     {
-        cls();
-        std::string n, a, y;
-        ull id = inputID();
-        std::cout << "Enter the title of the book" << std::endl;
-        while (!readString(std::cin, n, 's'));
-        std::cout << "Enter the year the book was published" << std::endl;
-        while (!readString(std::cin, y, 'y'));
-        Book* pb = data.add(Book(n, std::stoul(y), id));
-        if (!pb)
+        if(!yesNo("Add an author to this book?")) break;
+        Author* pa = selectAuthor();
+        if (!pa) break;
+        else
         {
-            std::cerr << "Such book already exists" << std::endl;
-            return nullptr;
+            added->addAuthor(*pa);
+            std::cout << "Added " << pa->getName() << "to the book " << added->getName() << std::endl;
         }
-        while (true)
+    }
+    while (true)
+    {
+        if(!yesNo("Add a genre to this book?")) break;
+        Genre* pg = selectGenre();
+        if (!pg) break;
+        added->addGenre(*pg);
+        std::cout << "Added " << pg->getName() << "to the book " << added->getName() << std::endl;
+    }
+    std::cout << "Successfully added your book" << std::endl;
+    return added;
+}
+
+Genre* newGenre()
+{
+    Data& data = Data::getInstance();
+    std::string temp;
+    std::cout << "Enter the new genre's name" << std::endl;
+    while (!readString(std::cin, temp, 's'));
+    ull id = inputID();
+    Genre* added = data.add(Genre(temp, id));
+    if (!added)
+    {
+        std::cerr << "Such genre already exists." << std::endl;
+        sleep(WAIT_TIME_NORMAL);
+        return nullptr;
+    }
+    while (true)
+    {
+        if(!yesNo("Add a book to this genre?")) break;
+        Book* pb = selectBook();
+        if (!pb) break;
+        else
         {
-            if(!yesNo("Add an author to the book?")) break;
-            Author* pa = selectAuthor();
-            if (!pa) return nullptr;
-            else
-            {
-                pb->addAuthor(*pa);
-                std::cout << "Added " << pa->getName() << "to the book " << n << std::endl;
-            }
+            added->addBook(*pb);
+            std::cout << "Added " << pb->getName() << "to the genre " << added->getName() << std::endl;
         }
-        while (true)
+    }
+    std::cout << "Successfully added your genre" << std::endl;
+    return added;
+}
+
+void editBookAuthor(Book* pbook)
+{
+    if (pbook == nullptr) return;
+    cls();
+    std::cout << "Select an option for book " << pbook->getName() <<
+              "\n1 -> Add authors to the book "
+              "\n2 -> Remove authors from the book"
+              "\nq -> Go back" << std::endl;
+    while (true)
+    {
+        switch (getch())
         {
-            if(!yesNo("Add a genre to the book?")) break;
-            Genre* pg = selectGenre();
-            if (pg == nullptr) return;
-            else
-            {
-                pb->addGenre(*pg);
-                std::cout << "Added " << pg->getName() << "to the book " << n << std::endl;
-            }
+            case '1':
+                while (true)
+                {
+                    Author* added = selectAuthor();
+                    if (!added) return;
+                    if (!yesNo("Add this genre to the book?")) return;
+                    pbook->addAuthor(*added);
+                    std::cout << "Added successfully" << std::endl;
+                    if (!yesNo("Add one more?")) return;
+                    else continue;
+                }
+            case '2':
+                std::cout << *pbook << std::endl;
+                std::cout << "Select an author: " << std::endl;
+                pbook->remAuthor(select(pbook->enumAuthors()-1));
+                std::cout << "Removed successfully" << std::endl;
+                sleep(WAIT_TIME_NORMAL);
+            case'q':
+                return;
+            default:
+                break;
         }
-        std::cout << "Successfully added your book" << std::endl;
-        if (!yesNo("Add another one?")) return;
     }
 }
 
-void editBookAuthor(Book* b)
+void editAuthorBooks(Author* pauthor)
 {
-//    std::string temp;
-//    Author* pa = selectAuthor();
-//    if (pa == nullptr) return;
-//    b->addAuthor(*pa);
-//    std::cout << "Changed successfully." << std::endl;
-//    sleep(WAIT_TIME_SMALL);
-std::cout << "Not implemented" << std::endl;
-sleep(WAIT_TIME_NORMAL);
+    if (pauthor == nullptr) return;
+    cls();
+    std::cout << "Select an option for the author " << pauthor->getName() <<
+              "\n1 -> Add books to the author "
+              "\n2 -> Remove books from the author"
+              "\nq -> Go back" << std::endl;
+    while (true)
+    {
+        switch (getch())
+        {
+            case '1':
+                while (true)
+                {
+                    Book* added = selectBook();
+                    if (!added) return;
+                    if (!yesNo("Add this book? ")) return;
+                    pauthor->addBook(*added);
+                    std::cout << "Added successfully" << std::endl;
+                    if (!yesNo("Add one more?")) return;
+                    else continue;
+                }
+            case '2':
+                std::cout << *pauthor << std::endl;
+                std::cout << "Select a book: " << std::endl;
+                pauthor->remBook(select(pauthor->enumBooks()-1));
+                std::cout << "Removed successfully" << std::endl;
+                sleep(WAIT_TIME_NORMAL);
+            case'q':
+                return;
+            default:
+                break;
+        }
+    }
 }
 
 void manageAuthor()
 {
     Data& data = Data::getInstance();
     std::string temp;
-    auto sought = selectAuthor();
-    std::cout << "Not implemented" << std::endl;
-    sleep(WAIT_TIME_NORMAL);
+    Author* pauthor = selectAuthor();
+    if (!pauthor) return;
+    while (true)
+    {
+        cls();
+        std::cout << *pauthor;
+        std::cout << "What to do with this record? "
+                     "\n1 -> delete  "
+                     "\n2 -> edit "
+                     "\nq -> nothing " << std::endl;
+        switch (getch())
+        {
+            case '1':
+                if (yesNo("Delete this record?"))
+                {
+                    std::cout << "Erased this book and removed all references." << std::endl;
+                    data.erase(*pauthor);
+                    sleep(WAIT_TIME_NORMAL);
+                    return;
+                }
+                else return;
+            case '2':
+                while (true)
+                {
+                    cls();
+                    std::cout << *pauthor;
+                    std::cout << "What would you like to edit? "
+                                 "\n1 -> Name"
+                                 "\n2 -> Birthdate"
+                                 "\n3 -> Country"
+                                 "\n4 -> Books"
+                                 "\nq -> Nothing" << std::endl;
+                    switch (getch())
+                    {
+                        case '1':
+                            std::cout << "Enter the new name for the author: " << std::endl;
+                            while (!readString(std::cin, temp, 's'));
+                            pauthor->rename(temp);
+                            std::cout << "Changed successfully." << std::endl;
+                            break;
+                        case '2':
+                            std::cout << "Enter the new birthdate: " << std::endl;
+                            while (!readString(std::cin, temp, 'd'));
+                            pauthor->setDate(temp);
+                            std::cout << "Changed successfully." << std::endl;
+                            break;
+                        case '3':
+                            std::cout << "Enter the new country: " << std::endl;
+                            while (!readString(std::cin, temp, 's'));
+                            pauthor->setCountry(temp);
+                            std::cout << "Changed successfully." << std::endl;
+                            return;
+                        case '4':
+                            editAuthorBooks(pauthor);
+                            break;
+                        case 'q':
+                            return;
+                        default :
+                            break;
+                    }
+                }
+            case 'q':
+                return;
+            default :
+                break;
+        }
+    }
 }
 
 void editBookGenre(Book* pbook)
@@ -371,6 +529,7 @@ void editBookGenre(Book* pbook)
                 while (true)
                 {
                     Genre* added = selectGenre();
+                    if (!added) return;
                     if (!yesNo("Add this genre to the book?")) return;
                     pbook->addGenre(*added);
                     std::cout << "Added successfully: \n" << *pbook << std::endl;
@@ -484,11 +643,7 @@ void editGenres()
                 return;
             case '3':
                 pbook = selectBook();
-                if (!pbook)
-                {
-                    if (yesNo("Add a new book then?")) newBook();
-                    else return; //TODO: Test
-                }
+                if (!pbook) return;
                 if (yesNo("Add genre " + pgenre->getName() + " to the book " + pbook->getName() + " ?"))
                     pgenre->addBook(*pbook);
                 return;
@@ -497,37 +652,6 @@ void editGenres()
             default:
                 break;
         }
-    }
-}
-
-void newGenre()
-{
-    Data& data = Data::getInstance();
-    std::string temp;
-    std::cout << "Enter the new genre's name" << std::endl;
-    while (!readString(std::cin, temp, 's'));
-    ull id = inputID();
-    Genre* added = data.add(Genre(temp, id));
-    if (!added)
-    {
-        std::cerr << "Such genre already exists." << std::endl;
-        sleep(WAIT_TIME_NORMAL);
-        return;
-    }
-    if (!yesNo("Do you want to add this genre to any books?")) return;
-    while (true)
-    {
-        Book* pbook = selectBook();
-        if (!pbook)
-        {
-            if (yesNo("Do you want a new book then?")) newBook();
-            return; //TODO: Test recursion
-        }
-        if (!yesNo("Add this genre to the book?")) return;
-        pbook->addGenre(*added);
-        std::cout << "Added successfully: \n" << *pbook << std::endl;
-        if (!yesNo("Add one more?")) return;
-        else continue;
     }
 }
 

@@ -27,6 +27,13 @@ void Book::remAuthor(Author& a)
     authors.erase(&a);
     a.books.erase(this);
 }
+void Book::remAuthor(const size_t& pos)
+{
+    if (pos >= authors.size()) throw std::invalid_argument("Deleting genre past the end of book " + getName());
+    auto it = authors.begin();
+    std::advance(it, pos);
+    authors.erase(it);
+}
 void Book::remGenre(Genre& g)
 {
     genres.erase(&g);
@@ -127,6 +134,13 @@ void Author::remBook(Book& b)
 {
     books.erase(&b);
     b.authors.erase(this);
+}
+void Author::remBook(const size_t& pos)
+{
+    if (pos >= books.size()) throw std::invalid_argument("Deleting genre past the end of book " + getName());
+    auto it = books.begin();
+    std::advance(it, pos);
+    books.erase(it);
 }
 bool Author::check(const std::string& s) const
 {

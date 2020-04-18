@@ -112,6 +112,7 @@ public:
 
     void setYear(unsigned int y)
     { year = y; }
+    void remAuthor(const size_t& pos);
 private:
     void addToGenres(const Book&);
     void addToAuthors(const Book&);
@@ -142,8 +143,12 @@ public:
 
     void addBook(Book&);
     void remBook(Book&);
+    void setCountry(const std::string& c) { country = c; }
+    void setDate(const std::string& c) { date = c; }
+    [[nodiscard]] size_t enumBooks() const { return books.size(); }
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] bool check(const std::string& s) const override;
+    void remBook(const size_t& pos);
 private:
     void addToBooks(const Author&);
     void remFromBooks();
