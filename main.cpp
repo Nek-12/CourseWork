@@ -1,5 +1,5 @@
 #include "header.h"
-#ifdef WINDOWS
+#ifndef __linux__
     inline void cls() { system("cls"); }
 #else
 int getch()
@@ -19,7 +19,7 @@ inline void cls() { system("clear"); }
 std::string path; //extern global
 //TODO: Move the stuff to different folders/files;
 //TODO: Recreate the readString function to add exit functionality, edit usages;
-//TODO: Add nullptrs returns for every function and checks;
+//@@@TODO: Add nullptrs returns for every function and CHECK EVERY POINTER!@@@
 bool yesNo(const std::string& msg)
 {
     std::cout << msg << " y/n" << std::endl;
@@ -64,27 +64,6 @@ unsigned select(const unsigned& limit)
         }
         else return ret;
     }
-}
-
-bool passConfirm(std::string& p)
-{
-    std::string tempA, tempB;
-    while (true)
-    {
-        cls();
-        std::cout << PASSPROMPT << std::endl;
-        while (!readString(std::cin, tempA, 'p'));
-        if (tempA == "exit") return false;
-
-        std::cout << PASSCONFIRM << std::endl;
-        while (!readString(std::cin, tempB, 'p'));
-        if (tempB == "exit") return false;
-        if (tempA == tempB)
-            break;
-        std::cerr << "Your passwords don't match." << std::endl;
-    }
-    p = tempA;
-    return true;
 }
 
 std::vector<Book*> searchBook()
@@ -207,7 +186,7 @@ void searchUI()
         switch(getch())
         {
             case'1':
-                books = searchBook(); //TODO: We need templates
+                books = searchBook();
                 if (books.empty())
                     std::cout << "Nothing found." << std::endl;
                 else
@@ -310,7 +289,7 @@ Author* selectAuthor()
     return sought[select(sought.size()) - 1];
 }
 
-void newBook() //TODO: put exit everywhere
+Book* newBook() //TODO: put exit everywhere
 {
     Data& data = Data::getInstance();
     while (true)
@@ -323,11 +302,16 @@ void newBook() //TODO: put exit everywhere
         std::cout << "Enter the year the book was published" << std::endl;
         while (!readString(std::cin, y, 'y'));
         Book* pb = data.add(Book(n, std::stoul(y), id));
+        if (!pb)
+        {
+            std::cerr << "Such book already exists" << std::endl;
+            return nullptr;
+        }
         while (true)
         {
             if(!yesNo("Add an author to the book?")) break;
             Author* pa = selectAuthor();
-            if (pa == nullptr) return;
+            if (!pa) return nullptr;
             else
             {
                 pb->addAuthor(*pa);
@@ -394,12 +378,10 @@ void editBookGenre(Book* pbook)
                     else continue;
                 }
             case '2':
-                std::cout << "Not implemented, vector needed"; //TODO: Implement
-//                auto genres = pbook->getGenres();
-//                for (auto it = genres.begin(); it != genres.end(); ++it)
-//                    std::cout << "#" << std::distance(it, genres.begin())+1 << ":\n" << *(it->second);
-//                std::cout << "Select the genre: " << std::endl;
-//                pbook->remGenre(;
+                std::cout << *pbook << std::endl;
+                std::cout << "Select the genre: " << std::endl;
+                pbook->remGenre(select(pbook->enumGenres()-1));
+                std::cout << "Removed successfully" << std::endl;
                 sleep(WAIT_TIME_NORMAL);
             case'q':
                 return;
@@ -482,31 +464,39 @@ void editGenres()
 {
     std::string temp;
     Genre* pgenre = selectGenre();
+    if (!pgenre) return;
     Book* pbook = nullptr;
     std::cout << *pgenre << std::endl;
     std::cout << "Select an option: "
               << "\n1 -> rename this genre "
               << "\n2 -> add this genre to books "
               << "\nq -> go back" << std::endl;
-    switch(getch())
+    while(true)
     {
-        case '1':
-            std::cout << "Enter the new genre's title" << std::endl;
-            while (!readString(std::cin,temp,'s'));
-            pgenre->rename(temp);
-            std::cout << "Renamed to " << temp << std::endl;
-            sleep(WAIT_TIME_NORMAL);
-            return;
-        case '3':
-            pbook = selectBook();
-            if (!yesNo("Add genre " + pgenre->getName() + " to the book " + pbook->getName() + " ?")) return;
-            else
-                pgenre->addBook(*pbook);
-            break;
-        case 'q':
-            return;
-        default:
-            break;
+        switch (getch())
+        {
+            case '1':
+                std::cout << "Enter the new genre's title" << std::endl;
+                while (!readString(std::cin, temp, 's'));
+                pgenre->rename(temp);
+                std::cout << "Renamed to " << temp << std::endl;
+                sleep(WAIT_TIME_NORMAL);
+                return;
+            case '3':
+                pbook = selectBook();
+                if (!pbook)
+                {
+                    if (yesNo("Add a new book then?")) newBook();
+                    else return; //TODO: Test
+                }
+                if (yesNo("Add genre " + pgenre->getName() + " to the book " + pbook->getName() + " ?"))
+                    pgenre->addBook(*pbook);
+                return;
+            case 'q':
+                return;
+            default:
+                break;
+        }
     }
 }
 
@@ -528,6 +518,11 @@ void newGenre()
     while (true)
     {
         Book* pbook = selectBook();
+        if (!pbook)
+        {
+            if (yesNo("Do you want a new book then?")) newBook();
+            return; //TODO: Test recursion
+        }
         if (!yesNo("Add this genre to the book?")) return;
         pbook->addGenre(*added);
         std::cout << "Added successfully: \n" << *pbook << std::endl;
@@ -562,7 +557,7 @@ void showData()
                 if (std::stoul(temp) > getCurYear())
                 {
                     std::cerr << "The period you entered is invalid." << std::endl;
-                    continue;
+                    return;
                 }
                 data.printGenres(std::stoul(temp));
                 if (!yesNo("Try again?")) return;
@@ -608,6 +603,27 @@ void management(bool isadmin)
                     break;
             }
     }
+}
+
+bool passConfirm(std::string& p)
+{
+    std::string tempA, tempB;
+    while (true)
+    {
+        cls();
+        std::cout << PASSPROMPT << std::endl;
+        while (!readString(std::cin, tempA, 'p'));
+        if (tempA == "exit") return false;
+
+        std::cout << PASSCONFIRM << std::endl;
+        while (!readString(std::cin, tempB, 'p'));
+        if (tempB == "exit") return false;
+        if (tempA == tempB)
+            break;
+        std::cerr << "Your passwords don't match." << std::endl;
+    }
+    p = tempA;
+    return true;
 }
 
 bool passChange(const std::string& l, const bool& isadmin)
@@ -782,6 +798,7 @@ int main(int, char* argv[]) try
 #ifndef NDEBUG
     data.printBooks();
     data.printAuthors();
+    data.printGenres();
     std::cout << std::endl;
     std::cout << path << std::endl;
     data.printCredentials(false);

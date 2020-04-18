@@ -126,7 +126,7 @@ bool checkString(const std::string& s, char mode)
                     return msgFalse("invalid characters");
             break;
         case 's':
-            if (s.size() < 2) return msgFalse("too short for a string");
+            if (s.size() < 2) return msgFalse("too short for a line");
             for (auto ch: s)
                 if (!(isalnum(ch) || ispunct(ch) || ch == ' '))
                     return msgFalse("invalid characters");
@@ -148,11 +148,36 @@ bool checkString(const std::string& s, char mode)
     return true;
 }
 
+std::string getPassword()
+{
+    std::string password;
+    int a;
+    while ((a = getch()) != 13)
+    {
+        if (a == 8)
+        {
+            if (password.empty()) continue;
+
+            password.erase(password.size() - 1, password.size());
+
+            std::cout << '\b' << ' ' << '\b';
+        }
+        else
+        {
+            password += (char)a;
+            std::cout << '*';
+        }
+    }
+    return password;
+}
+
 bool readString(std::istream& is, std::string& ret, char mode = 'n')
  // 's' for strings with spaces, 'n' for normal, 'd' for date, 'p' for password
 {
     std::string s;
-    if (!std::getline(is, s)) return false;
+    if (mode == 'p')
+        s = getPassword();
+    else if (!std::getline(is, s)) return false;
 
     if (checkString(s, mode))
     {

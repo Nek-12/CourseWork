@@ -49,8 +49,7 @@ void Data::printAuthors()
     t.column(4).set_cell_content_fg_color(fort::color::red);
     std::cout << t.to_string() << std::endl;
 }
-
-void Data::printGenres(unsigned years = getCurYear() )
+void Data::printGenres(unsigned years)
 {
     unsigned diff = getCurYear() - years;
     fort::char_table t;
@@ -76,7 +75,6 @@ void Data::printGenres(unsigned years = getCurYear() )
     t.column(3).set_cell_content_fg_color(fort::color::red);
     std::cout << t.to_string() << std::endl;
 }
-
 bool Data::delAccount(const std::string& l, const bool& isadmin)
 {
     if (isadmin)
@@ -93,7 +91,6 @@ bool Data::delAccount(const std::string& l, const bool& isadmin)
     }
     return true;
 }
-
 void Data::printCredentials(bool isAdmin)
 {
     std::cout << (isAdmin ? "Admin" : "User") << " credentials: " << std::endl;
@@ -101,22 +98,6 @@ void Data::printCredentials(bool isAdmin)
         std::cout << el.first << "\n";
     std::cout << std::endl;
 }
-
-bool Data::passCheck(const std::string& l, const std::string& p, const bool& isadmin)
-{ return ((isadmin ? admins.find(l) : users.find(l))->second == hash(p)); }
-
-bool Data::loginCheck(const std::string& s, const bool& isadmin)
-{ return (isadmin ? admins.find(s) != admins.end() : users.find(s) != users.end()); }
-
-void Data::createAccount(const std::string& l, const std::string& p, const bool& isadmin)
-{ (isadmin ? admins : users)[l] = hash(p); }
-
-size_t Data::enumAccounts(const bool& isadmin)
-{ return (isadmin ? admins.size() : users.size()); }
-
-void Data::changePass(const std::string& l, const std::string& p, const bool& isadmin)
-{ (isadmin ? admins : users)[l] = hash(p); }
-
 void Data::ensureFileExists(const std::string& f)
 {
     if (!std::filesystem::exists(path + f))

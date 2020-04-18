@@ -32,7 +32,13 @@ void Book::remGenre(Genre& g)
     genres.erase(&g);
     g.books.erase(this);
 }
-
+void Book::remGenre(const size_t& pos)
+{
+    if (pos >= genres.size()) throw std::invalid_argument("Deleting genre past the end of book " + getName());
+    auto it = genres.begin();
+    std::advance(it, pos);
+    genres.erase(it);
+}
 void Book::addToGenres(const Book& b)
 {
     for (const auto& g: b.genres)
@@ -55,20 +61,30 @@ void Book::remFromAuthors()
 }
 std::string Book::to_string() const
 {
-    std::string ret = std::to_string(id()) + '\n' + getName() + '\n' + std::to_string(year);
-    std::string delim = "\n";
+    fort::char_table t;
+    t << fort::header << "Title" << "Genres" << "Authors" << "Year" << "ID" << fort::endr;
+    std::string delim;
+    std::stringstream g, a;
+    size_t i = 0;
     for (const auto& el: genres)
     {
-        ret += delim + el->getName();
-        delim = ",";
+        i++;
+        g << delim << i << ". " << el->getName();
+        delim = "\n";
     }
-    delim = "\n";
+    delim.clear(); i = 0;
     for (const auto& el: authors)
     {
-        ret += delim + el->getName();
-        delim = ",";
+        i++;
+        a << delim << i << ". " << el->getName();
+        delim = "\n";
     }
-    return ret;
+    t << getName() << g.str() << a.str() << year << id() << fort::endr;
+    t.set_cell_text_align(fort::text_align::center);
+    t.set_border_style(FT_BASIC2_STYLE);
+    t.column(0).set_cell_content_fg_color(fort::color::green);
+    t.column(4).set_cell_content_fg_color(fort::color::red);
+    return t.to_string();
 }
 bool Book::check(const std::string& s) const
 {
@@ -126,14 +142,23 @@ bool Author::check(const std::string& s) const
 
 std::string Author::to_string() const
 {
-    std::string ret = std::to_string(id()) + '\n' + getName() + '\n' + date + '\n' + country;
-    std::string delim = "\n";
+    fort::char_table t;
+    t << fort::header << "Name" << "Books" << "Birthdate" << "Country" << "ID" << fort::endr;
+    std::string delim;
+    std::stringstream b;
+    size_t i = 0;
     for (const auto& el: books)
     {
-        ret += delim + el->getName();
-        delim = ",";
+        i++;
+        b << delim << i << ". " << el->getName();
+        delim = "\n";
     }
-    return ret;
+    t << getName() << b.str() << date << country << id() << fort::endr;
+    t.set_cell_text_align(fort::text_align::center);
+    t.set_border_style(FT_BASIC2_STYLE);
+    t.column(0).set_cell_content_fg_color(fort::color::green);
+    t.column(4).set_cell_content_fg_color(fort::color::red);
+    return t.to_string();
 }
 
 //GENRE
@@ -183,12 +208,13 @@ bool Genre::check(const std::string& s) const
 
 std::string Genre::to_string() const
 {
-    std::string ret = std::to_string(id()) + '\n' + getName();
-    std::string delim = "\n";
-    for (const auto& el: books)
-    {
-        ret += delim + el->getName();
-        delim = ",";
-    }
-    return ret;
+    fort::char_table t;
+    t << fort::header << "Name" << "Book quantity" << "ID" << fort::endr;
+        t << getName() << books.size() << id() << fort::endr;
+    t.set_cell_text_align(fort::text_align::center);
+    t.set_border_style(FT_BASIC2_STYLE);
+    t.column(0).set_cell_content_fg_color(fort::color::green);
+    t.column(2).set_cell_content_fg_color(fort::color::red);
+    std::cout << t.to_string() << std::endl;
+    return t.to_string();
 }

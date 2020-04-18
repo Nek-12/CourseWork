@@ -1,5 +1,4 @@
 //#define NDEBUG
-//#define WINDOWS
 #define MAX_ID ULONG_MAX
 #define MAX_ID_LENGTH 10
 #pragma once
@@ -11,7 +10,7 @@
 #include <set>
 #include "fort.hpp"
 
-#ifdef WINDOWS
+#ifndef __linux__
 #include <conio.h>
 #else
 #include <termios.h>
@@ -39,6 +38,7 @@ class Book;
 class Author;
 class Genre;
 
+std::string getPassword();
 ull genID();
 void cls();
 unsigned getCurYear();
@@ -73,10 +73,9 @@ public:
     void rename(const std::string& s)
     { name = s; }
     [[nodiscard]] virtual std::string to_string() const = 0;
-    //virtual void print() = 0;
     [[nodiscard]] virtual bool check(const std::string& s) const = 0;
 protected:
-    Entry(const Entry& e) = default;//TODO: Remove copying functionality?
+    Entry(const Entry& e) = default;
     explicit Entry(std::string n, const ull& id) : no(id), name(std::move(n))
     {}
 private:
@@ -101,21 +100,16 @@ public:
     {
         std::cout << getName() << " was created \n";
     };
-
     void addAuthor(Author&);
     void addGenre(Genre&);
     void remAuthor(Author&);
     void remGenre(Genre&);
-    //void print() override;
+    void remGenre(const size_t& pos);
     [[nodiscard]] bool check(const std::string& s) const override;
     [[nodiscard]] std::string to_string() const override;
+    [[nodiscard]] size_t enumAuthors() const { return authors.size(); }
+    [[nodiscard]] size_t enumGenres() const { return genres.size(); }
 
-//    std::map<ull, Author*>& getAuthors()
-//    { return authors; } //TODO: Very bad
-//    std::map<ull, Genre*>& getGenres()
-//    { return genres; }
-//    [[nodiscard]] unsigned int getYear() const
-//    { return year; }
     void setYear(unsigned int y)
     { year = y; }
 private:
@@ -148,11 +142,8 @@ public:
 
     void addBook(Book&);
     void remBook(Book&);
-    //void print();
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] bool check(const std::string& s) const override;
-//    std::map<ull, Book*>& getBooks()
-//    { return books; } //TODO: Very bad
 private:
     void addToBooks(const Author&);
     void remFromBooks();
@@ -208,7 +199,12 @@ public:
     void save(); //Writes the data to the files (books.txt etc.)
     void printBooks();
     void printAuthors();
-    void printGenres(unsigned);
+    void printGenres(unsigned = getCurYear());
+    void printCredentials(bool isadmin);
+    std::vector<Book*> searchBook(const std::string& s);
+    std::vector<Genre*> searchGenre(const std::string& s);
+    std::vector<Author*> searchAuthor(const std::string& s);
+
     Book* add(const Book& o)
     {
         auto it = mbooks.emplace(o.id(), o);
@@ -224,22 +220,20 @@ public:
         auto it = mauthors.emplace(o.id(), o);
         return (it.second ? &it.first->second : nullptr);
     }
-    size_t erase(const Book& o)
-    { return mbooks.erase(o.id()); }
-    size_t erase(const Genre& o)
-    { return mgenres.erase(o.id()); }
-    size_t erase(const Author& o)
-    { return mauthors.erase(o.id()); }
-    void printCredentials(bool isadmin); //Just prints all the usernames
+    bool erase(const Book& o) { return mbooks.erase(o.id()); }
+    bool erase(const Genre& o) { return mgenres.erase(o.id()); }
+    bool erase(const Author& o) { return mauthors.erase(o.id()); }
     bool delAccount(const std::string& l, const bool& isadmin);
-    bool passCheck(const std::string& l, const std::string& p, const bool& isadmin);
-    bool loginCheck(const std::string& s, const bool& isadmin);
-    void createAccount(const std::string& l, const std::string& p, const bool& isadmin);
-    size_t enumAccounts(const bool& isadmin);
-    void changePass(const std::string& l, const std::string& p, const bool& isadmin);
-    std::vector<Book*> searchBook(const std::string& s);
-    std::vector<Genre*> searchGenre(const std::string& s);
-    std::vector<Author*> searchAuthor(const std::string& s);
+    bool passCheck(const std::string& l, const std::string& p, const bool& isadmin)
+    { return ((isadmin ? admins.find(l) : users.find(l))->second == hash(p)); }
+    bool loginCheck(const std::string& s, const bool& isadmin)
+    { return (isadmin ? admins.find(s) != admins.end() : users.find(s) != users.end()); }
+    void createAccount(const std::string& l, const std::string& p, const bool& isadmin)
+    { (isadmin ? admins : users)[l] = hash(p); }
+    size_t enumAccounts(const bool& isadmin)
+    { return (isadmin ? admins.size() : users.size()); }
+    void changePass(const std::string& l, const std::string& p, const bool& isadmin)
+    { (isadmin ? admins : users)[l] = hash(p); }
 private:
     Data() = default;
     static void ensureFileExists(const std::string& f);
