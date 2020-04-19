@@ -1,5 +1,5 @@
 #include "header.h"
-#include "sha256.h"
+#include "sha256.h" //Encryption
 #include <regex>
 #include <random>
 void pause()
@@ -10,51 +10,52 @@ void pause()
 
 ull genID()
 {
-    static std::default_random_engine e(std::random_device{}());
-    static std::uniform_int_distribution<ull> rng(0, MAX_ID);
-    return rng(e);
+    static std::default_random_engine e(std::random_device{}()); //Initialize a random engine from system random device
+    static std::uniform_int_distribution<ull> rng(0, MAX_ID); //Generate numbers for IDs from 0 to a large system value
+    return rng(e); //use random engine
 }
 
 std::string hash(const std::string& s)
 {
     SHA256 sha256;
-    return sha256(s);
+    return sha256(s); //returns hashed string, you can now never decrypt the password back
 }
 
 unsigned getCurYear()
 {
-    time_t t = time(nullptr);
-    tm* nowTm = localtime(&t);
-    return (unsigned)nowTm->tm_year + 1900;
+    time_t t = time(nullptr); //get system time
+    tm* nowTm = localtime(&t); //format it according to the region
+    return (unsigned)nowTm->tm_year + 1900; //return the year. It works in any year, not just in 2020. Wait for 2075 to confirm.
 }
 
 bool checkDate(const std::string& s)
 {
-    std::regex reg(R"((\d{1,2})([-. /])(\d{1,2})([-. /])(\d{4}))");
+    std::regex reg(R"((\d{1,2})([-. /])(\d{1,2})([-. /])(\d{4}))"); //Initialize the regular expression
     std::smatch res;
-    auto msgFalse = [& s](const std::string& what)
+    auto msgFalse = [& s](const std::string& what) //lambda
     {
         std::cerr << "The date " << s << " is invalid: " << what << std::endl;
         return false;
     };
 
-    if (std::regex_match(s, res, reg))
+    if (std::regex_match(s, res, reg)) //If the format is right
     {
         time_t t = time(nullptr);
         tm* nowTm = localtime(&t);
         int day = std::stoi(res.str(1));
         int month = std::stoi(res.str(3));
-        int year = std::stoi(res.str(5));
+        int year = std::stoi(res.str(5)); //Divide into values
         if (res.str(2) != res.str(4)) return msgFalse("Divisors don't match:" + res.str(2) + " < =/= > " + res.str(4));
-        if (!day || !month || !year)
+        if (day == 0 && month == 0 && year == 0)
         {
             std::cerr << "The date is unknown." << std::endl;
-            return true;
+            return true; //We are allowed to input 0.0.0000 and it's considered unknown date
         }
+        //Start checking year,month,day
         if (year > (nowTm->tm_year + 1900))
-            return msgFalse("The book was created in the future year: " + std::to_string(year));
+            return msgFalse("This year is in the future: " + std::to_string(year));
         else if ((year == nowTm->tm_year + 1900) && month > nowTm->tm_mon + 1)
-            return msgFalse("The book was created in the future month: " + std::to_string(month));
+            return msgFalse("This month is in the future: " + std::to_string(month));
         if (month > 12)
             return msgFalse("More than 12 months");
         switch (month)
@@ -109,7 +110,7 @@ bool checkYear(const std::string& s)
     return (std::stoul(s) < getCurYear() );
 }
 
-bool checkString(const std::string& s, char mode)
+bool checkString(const std::string& s, char mode) //The all-in-one input checker function. All rights reserved : )
 {
     auto msgFalse = [& s](const std::string& msg)
             { std::cerr << "The value " << s << " is invalid: \n" << msg << std::endl; return false; };
@@ -117,28 +118,28 @@ bool checkString(const std::string& s, char mode)
         return msgFalse("No data?");
     switch (mode)
     {
-        case 'p':
-        case 'n':
+        case 'p': //Password contains the same chars as a normal string (word)
+        case 'n': //No spaces allowed
             if (s.size() < 3 || s.size() > 75 ) return msgFalse("too short/long for a word");
             for (auto ch: s)
                 if (!(isalnum(ch) || ch == '.' || ch == '-' || ch == '_' || ch == '\''))
                     return msgFalse("invalid characters");
             break;
-        case 's':
+        case 's': //Line (s) has less strict restrictions and can contain spaces
             if (s.size() < 2) return msgFalse("too short/long for a line");
             for (auto ch: s)
                 if (!(isalnum(ch) || ispunct(ch) || ch == ' '))
                     return msgFalse("invalid characters");
             break;
-        case 'd':
+        case 'd': //Delegates
             return (checkDate(s));
-        case 'i':
+        case 'i': //I stands for integer, or ID only digits, no negatives.
             if (s.size() > MAX_ID_LENGTH) return msgFalse("too long for a number");
             for (auto ch: s)
                 if(!isdigit(ch))
                     return msgFalse("invalid characters in a number");
             break;
-        case 'y':
+        case 'y': //Delegates
             if (!checkYear(s)) return msgFalse("invalid year");
             break;
         default:
@@ -147,26 +148,26 @@ bool checkString(const std::string& s, char mode)
     return true;
 }
 
-std::string getPassword()
+std::string getPassword() //Input password, hide it with *'s
 {
     std::string password;
     int a;
-    while ((a = getch()) != CARRIAGE_RETURN_CHAR)
-    {
-        if (a == BACKSPACE_CHAR)
-        {
+    while ((a = getch()) != CARRIAGE_RETURN_CHAR) //Differs on linux and windows
+    { //While ENTER is not pressed
+        if (a == BACKSPACE_CHAR) //same
+        { //If Backspace
             if (password.empty()) continue;
-            password.pop_back();
-            std::cout << '\b' << ' ' << '\b';
+            password.pop_back(); //remove char
+            std::cout << '\b' << ' ' << '\b'; //replace a star with a space
         }
         else
         {
-            password += (char)a;
-            std::cout << '*';
+            password += (char)a; //Add this char
+            std::cout << '*'; //But output the star
         }
     }
     std::cout << std::endl;
-    return password;
+    return password; //Then we input check this string
 }
 
 bool readString(std::istream& is, std::string& ret, char mode = 'n')
@@ -174,15 +175,15 @@ bool readString(std::istream& is, std::string& ret, char mode = 'n')
 {
     std::string s;
     if (mode == 'p')
-        s = getPassword();
-    else if (!std::getline(is, s)) return false;
+        s = getPassword(); //Display start
+    else if (!std::getline(is, s)) return false; //Display chars
 
     if (checkString(s, mode))
     {
-        ret = s;
+        ret = s; //This guarantees that the string is NOT changed unless the input is good. I could just return bool.
         return true;
     }
-    else return false;
+    return false;
 }
 
 std::string lowercase(const std::string& s)
@@ -197,7 +198,7 @@ ull stoid(const std::string& s)
 {
 #ifndef __linux__
     return std::stoull(s);
-#else
+#else //This function depends on the platform. See header.h for details
     return std::stoul(s);
 #endif
 }

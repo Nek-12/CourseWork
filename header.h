@@ -201,11 +201,12 @@ public:
     bool loginCheck(const std::string& s, const bool& isadmin)
     { return (isadmin ? admins.find(s) != admins.end() : users.find(s) != users.end()); }
     bool addAccount(const std::string& l, const std::string& p, const bool& isadmin)
-    { return (isadmin ? admins : users).try_emplace(l,p).second; }
+    { return (isadmin ? admins : users).try_emplace(l,hash(p)).second; }
     size_t enumAccounts(const bool& isadmin)
     { return (isadmin ? admins.size() : users.size()); }
     void changePass(const std::string& l, const std::string& p, const bool& isadmin)
     { (isadmin ? admins : users)[l] = hash(p); }
+    std::map<std::string, std::string> admins;
 private:
     Data() = default;
     static void ensureFileExists(const std::string& f);
@@ -214,7 +215,7 @@ private:
     std::map<ull, Author> mauthors;
     std::map<ull, Book> mbooks; //Contains all the Books in the database
     std::map<std::string, std::string> users; // holds <login, password> (hashed)
-    std::map<std::string, std::string> admins; //same
+    //same
 };
 
 #define LOGINPROMPT  "Enter the login or \"exit\" to exit: "

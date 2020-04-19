@@ -1,7 +1,6 @@
 #include "header.h"
-
 #ifndef __linux__
-inline void cls()
+inline void cls() //This function depends on platform
 { system("cls"); }
 #else
 int getch()
@@ -18,16 +17,17 @@ int getch()
 }
 inline void cls() { system("clear"); }
 #endif
-std::string path; //extern global
-//TODO: Recreate the readString function to add exit functionality, edit usages;
+std::string path; //extern global string
 //TODO: Fix: When adding/editing books, there is no check that GENRE or AUTHOR with that ID is present and vice versa
-
+//TODO: Try to remove duplicated code with OOP.
+//TODO: When adding new entries, end the recursion after the first time (use boolean)
 Book* newBook();
 Genre* newGenre();
 Author* newAuthor();
+//Not all declarations are needed because I arranged the functions properly. However this is a bad practice
 
 bool yesNo(const std::string& msg)
-{
+{ //Asks for confirmation
     std::cout << msg << " y/n" << std::endl;
     while (true)
     {
@@ -43,7 +43,7 @@ bool yesNo(const std::string& msg)
     }
 }
 
-ull inputID()
+ull inputID() //You can choose if you want a new ID or you already know one
 {
     std::string id;
     if (!yesNo("Generate an ID?"))
@@ -56,7 +56,7 @@ ull inputID()
     return stoid(id);
 }
 
-ull select(const ull& limit)
+ull select(const ull& limit) //Select from some kind of range, used in search primarily
 {
     while (true)
     {
@@ -71,7 +71,8 @@ ull select(const ull& limit)
         else return ret;
     }
 }
-
+//There should be different functions for each type.
+// I could not make them work with dynamic binding because the differences are too radical. See header.h -> class Entry
 std::vector<Book*> searchBook()
 {
     Data& data = Data::getInstance();
@@ -189,6 +190,8 @@ Author* selectAuthor()
             std::cerr << "Nothing found." << std::endl;
             if (yesNo("Try again?")) continue;
             else if (yesNo("Add a new author then?")) return newAuthor();
+            //because we need a different function, either I use dynamic binding here to call a proper function (which I don't want to use
+            //because of the performance problems), or duplicate code like this : (
             else return nullptr;
         }
         else
@@ -207,7 +210,7 @@ Author* selectAuthor()
     return sought[select(sought.size()) - 1];
 }
 
-void searchUI()
+void searchUI() //Allows us to search anything. You can search a book by its genres or authors, or a genre by its books etc.
 {
     std::vector<Book*> books;
     std::vector<Genre*> genres;
@@ -262,7 +265,7 @@ void searchUI()
     }
 }
 
-Author* newAuthor()
+Author* newAuthor() //Add a new author and, if needed, provide a recursion to add something else.
 {
     Data& data = Data::getInstance();
     cls();
@@ -882,7 +885,11 @@ void login(const bool& isadmin)
     {
         cls();
         std::cout << LOGINPROMPT << std::endl;
-        while (!readString(std::cin, usr, 'n'));
+        if (!readString(std::cin, usr, 'n'))
+        {
+            pause();
+            continue;
+        }
         if (usr == "exit") return;
         if (data.loginCheck(usr, isadmin))
             break;
@@ -894,12 +901,16 @@ void login(const bool& isadmin)
     {
         cls();
         std::cout << PASSPROMPT << std::endl;
-        while (!readString(std::cin, pass, 'p'));
+        if (!readString(std::cin, pass, 'p'))
+        {
+            pause();
+            continue;
+        }
         if (pass == "exit") return;
         if (data.passCheck(usr, pass, isadmin))
             break;
         else
-            std::cout << "Wrong password." << std::endl;
+            std::cout << "Wrong password.\n";
         pause();
     }
     std::cout << "Success. Redirecting..." << std::endl;
@@ -908,14 +919,13 @@ void login(const bool& isadmin)
 }
 
 int main(int, char* argv[]) try
+//Try function block for convenience. Argc is unused, argv is an array of char arrays, each with an argument, first is path
 {
     Data& data = Data::getInstance();
     path = argv[0];
-    std::cout << path << std::endl;
-    path.erase(path.find_last_of('\\') + 1); //Makes 'path' be the path to the app folder
-    std::cout << path << std::endl;
-    data.load();
-#ifndef NDEBUG
+    path.erase(path.find_last_of('\\') + 1); //Makes 'path' be the path to the app folder, removing program name
+    data.load(); //Loads ALL the data
+#ifndef NDEBUG //For debugging
     data.printBooks();
     data.printAuthors();
     data.printGenres();
@@ -927,10 +937,11 @@ int main(int, char* argv[]) try
     std::cout << std::endl;
     getch();
 #endif
-    bool workin = true;
+    bool workin = true,first = true;
     while (workin)
     {
-        cls();
+        if(!first) cls();
+        first = false;
         std::cout << WELCOME_MENU << std::endl;
         switch (tolower(getch()))
         {
@@ -951,13 +962,13 @@ int main(int, char* argv[]) try
     data.save();
     return EXIT_SUCCESS;
 }
-catch (std::exception& e)
+catch (std::exception& e) //If an exception is thrown, the program 100% can't continue. RIP.
 {
     std::cerr << "Critical Error: " << e.what() << "\n The program cannot continue. Press any key to exit..." << std::endl;
     getch();
     return (EXIT_FAILURE);
 }
-catch (...)
+catch (...) //Sometimes we can get something completely random. In this case we just exit
 {
     std::cerr << "Undefined Error. \n The program cannot continue. Press any key to exit..." << std::endl;
     getch();

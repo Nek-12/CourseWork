@@ -149,7 +149,7 @@ void Data::load() try
         if (empty()) break;
         if (!readString(f, tempA, 'n')) throw std::invalid_argument("File: " + name + " couldn't read login");
         if (!readString(f, tempB, 'n')) throw std::invalid_argument("File: " + name + " couldn't read password");
-        addAccount(tempA, tempB, false);
+        users.try_emplace(tempA, tempB);
         if (!std::getline(f, tempC)) break;
         if (!tempC.empty() && tempC != " ")
             throw std::invalid_argument("File " + name + " read error, check delimiters.");
@@ -161,12 +161,12 @@ void Data::load() try
     ensureFileExists(name);
     f.open(path + name);
     while (f) //Starts parsing the file. Paragraphs are divided by a blank line
-    {
+    { //ADMIN
         if (empty()) break;
         if (f.eof()) break;
         if (!readString(f, tempA, 'n')) throw std::invalid_argument("File: " + name + " couldn't read login");
         if (!readString(f, tempB, 'n')) throw std::invalid_argument("File: " + name + " couldn't read password");
-        addAccount(tempA, tempB, true);
+        admins.try_emplace(tempA,tempB);
         if (!std::getline(f, tempC)) break;
         if (!tempC.empty() && tempC != " ")
             throw std::invalid_argument("File " + name + " read error, check delimiters.");
@@ -177,7 +177,7 @@ void Data::load() try
     {
         std::cerr << "Warning! We  couldn't find any valid administrator accounts. \n"
                      "Created a new one: admin | admin" << std::endl;
-        addAccount("admin", "admin", true);
+        addAccount("admin","admin", true);
     }
     name = "genres.txt";
     f.close();
@@ -265,7 +265,9 @@ void Data::load() try
             }
             tempD.clear();
         }
-        std::cout << "Successfully linked books with genres\n";
+#ifndef NDEBUG
+        std::cout << "Successfully linked book with genres\n";
+#endif
         //Place authors
         if (!readString(f, tempA, 's')) throw std::invalid_argument("File: " + name + " couldn't read book's authors");
         ss.clear();
@@ -298,10 +300,7 @@ void Data::load() try
         std::cout << "Linked book " << tempB << std::endl;
 #endif
     }
-#ifndef NDEBUG
     std::cout << "Successfully read books" << std::endl;
-    getch();
-#endif
 }
 catch (const std::exception& e)
 {
@@ -316,7 +315,6 @@ void Data::save()
 {
     std::cout << "Saving..." << std::endl;
     std::ofstream f(path + "user.txt");
-    f << std::setfill('0');
 #ifndef NDEBUG
     printBooks();
     printCredentials(true);
@@ -326,7 +324,6 @@ void Data::save()
         f << el.first << "\n" << el.second << "\n" << std::endl;
     f.close();
     f.open(path + "admin.txt");
-    f << std::setfill('0');
     for (auto& el: admins)
         f << el.first << "\n" << el.second << "\n" << std::endl;
     f.close();
