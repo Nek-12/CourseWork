@@ -1,4 +1,5 @@
 //#define NDEBUG
+#pragma once
 using ull = unsigned long;
 #define MAX_ID ULONG_MAX
 constexpr ull FIND_MAX_LENGTH(ull a)
@@ -12,7 +13,6 @@ constexpr ull FIND_MAX_LENGTH(ull a)
     return i;
 }
 #define MAX_ID_LENGTH FIND_MAX_LENGTH(MAX_ID)
-#pragma once
 
 #include <map>
 #include <utility>
@@ -36,7 +36,6 @@ enum
 };
 
 //TODO: Update comments
-//TODO: Add move-constuctors for huge perf gain
 
 extern std::string path; //Path to the program folder, see main.cpp -> int main()
 
@@ -46,6 +45,7 @@ class Book;
 class Author;
 class Genre;
 
+ull stoid(const std::string& s);
 std::string getPassword();
 ull genID();
 void cls();
@@ -69,7 +69,8 @@ class Entry
     { return lhs.id() == rhs.id(); } //applicable to any entry because of dynamic binding
 public:
     Entry() = delete; //No blank entries
-    Entry& operator=(const Entry&) = delete; //No copying the same entry
+    Entry(const Entry& e) = delete; //No copies
+    Entry& operator=(const Entry&) = delete; //No assigning
     virtual ~Entry() = default;
     explicit operator ull() const
     { return no; } //for convenience
@@ -83,9 +84,11 @@ public:
     [[nodiscard]] virtual std::string to_string() const = 0;
     [[nodiscard]] virtual bool check(const std::string& s) const = 0;
 protected:
-    Entry(const Entry& e) = default;
+    Entry(Entry&& e) noexcept : no(e.no), name(std::move(e.name)) {}
     explicit Entry(std::string n, const ull& id) : no(id), name(std::move(n))
-    {}
+    {
+        std::cout << getName() << " was created \n";
+    }
 private:
     ull no; //unique id
     std::string name;
@@ -98,16 +101,9 @@ class Book : public Entry
     friend class Data;
 public:
     ~Book() override;
-    Book(const Book& b) : Entry(b.getName(), b.id()), year(b.year)
-    {
-        addToGenres(b);
-        addToAuthors(b);
-        std::cout << getName() << " was copy-constructed\n";
-    };
-    explicit Book(const std::string& t, const unsigned& y = 0, const ull& n = genID()) : Entry(t, n), year(y)
-    {
-        std::cout << getName() << " was created \n";
-    };
+    Book(const Book& b) = delete;
+    Book(Book&& b) noexcept;
+    explicit Book(const std::string& t, const unsigned& y = 0, const ull& n = genID()) : Entry(t, n), year(y) {}
     void addAuthor(Author&);
     void addGenre(Genre&);
     void remAuthor(Author&);
@@ -122,10 +118,6 @@ public:
     { year = y; }
     void remAuthor(const size_t& pos);
 private:
-    void addToGenres(const Book&);
-    void addToAuthors(const Book&);
-    void remFromGenres();
-    void remFromAuthors();
 
     unsigned year = 0;
     std::set<Author*> authors;
@@ -138,16 +130,9 @@ class Author : public Entry
     friend class Data;
 public:
     ~Author() override;
-    Author(const Author& a) : Entry(a.getName(), a.id()), country(a.country), date(a.date)
-    {
-        addToBooks(a);
-        std::cout << getName() << " was copy-constructed\n";
-    };
+    Author(Author&& a) noexcept;
     explicit Author(const std::string& n, std::string d, std::string c, const ull& id = genID()) :
-            Entry(n, id), country(std::move(c)), date(std::move(d))
-    {
-        std::cout << getName() << " was created\n";
-    };
+            Entry(n, id), country(std::move(c)), date(std::move(d)) {}
 
     void addBook(Book&);
     void remBook(Book&);
@@ -158,9 +143,6 @@ public:
     [[nodiscard]] bool check(const std::string& s) const override;
     void remBook(const size_t& pos);
 private:
-    void addToBooks(const Author&);
-    void remFromBooks();
-
     std::string country;
     std::string date;
     std::set<Book*> books;
@@ -171,26 +153,14 @@ class Genre : public Entry
     friend class Book;
     friend class Data;
 public:
-    explicit Genre(std::string n, ull id = genID()) : Entry(std::move(n), id)
-    {}
+    explicit Genre(std::string n, ull id = genID()) : Entry(std::move(n), id) {}
     ~Genre() override;
-    Genre(const Genre& g) : Entry(g.getName(), g.id())
-    {
-        std::cout << getName() << " was copy-constructed\n";
-        addToBooks(g);
-    };
-
+    Genre(Genre&& g) noexcept;
     void addBook(Book&);
     void remBook(Book&);
     [[nodiscard]] std::string to_string() const override;
-    //void print();
     [[nodiscard]] bool check(const std::string& s) const override;
-//    [[nodiscard]] const std::map<ull, Book*>& getBooks() const
-//    { return books; } //TODO: Very bad
 private:
-    void addToBooks(const Genre&);
-    void remFromBooks();
-
     std::set<Book*> books;
 };
 
@@ -217,20 +187,22 @@ public:
     std::vector<Book*> searchBook(const std::string& s);
     std::vector<Genre*> searchGenre(const std::string& s);
     std::vector<Author*> searchAuthor(const std::string& s);
-
-    Book* add(const Book& o)
+    template <typename ...Args>
+    Book* addBook(const Args& ...args)
     {
-        auto it = mbooks.emplace(o.id(), o);
+        auto it = mbooks.try_emplace(args...);
         return (it.second ? &it.first->second : nullptr);
     }
-    Genre* add(const Genre& o)
+    template <typename ...Args>
+    Author* addAuthor(const Args& ...args)
     {
-        auto it = mgenres.emplace(o.id(), o);
+        auto it = mauthors.try_emplace(args...);
         return (it.second ? &it.first->second : nullptr);
     }
-    Author* add(const Author& o)
+    template <typename ...Args>
+    Genre* addGenre(const Args& ...args)
     {
-        auto it = mauthors.emplace(o.id(), o);
+        auto it = mgenres.try_emplace(args...);
         return (it.second ? &it.first->second : nullptr);
     }
     bool erase(const Book& o) { return mbooks.erase(o.id()); }
@@ -241,8 +213,8 @@ public:
     { return ((isadmin ? admins.find(l) : users.find(l))->second == hash(p)); }
     bool loginCheck(const std::string& s, const bool& isadmin)
     { return (isadmin ? admins.find(s) != admins.end() : users.find(s) != users.end()); }
-    void createAccount(const std::string& l, const std::string& p, const bool& isadmin)
-    { (isadmin ? admins : users)[l] = hash(p); }
+    void addAccount(const std::string& l, const std::string& p, const bool& isadmin)
+    { (isadmin ? admins : users)[l] = hash(p); } //TODO: Not consistent with other. Add checks for duplicates and bool return
     size_t enumAccounts(const bool& isadmin)
     { return (isadmin ? admins.size() : users.size()); }
     void changePass(const std::string& l, const std::string& p, const bool& isadmin)

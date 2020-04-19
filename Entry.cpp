@@ -1,4 +1,3 @@
-#include <iomanip>
 #include "header.h"
 
 //BOOK
@@ -8,8 +7,10 @@ Book::~Book()
 #ifndef NDEBUG
     std::cout << "Book " << getName() << " Destroyed" << std::endl;
 #endif
-    remFromAuthors();
-    remFromGenres();
+    for (const auto& g: genres)
+        g->remBook(*this);
+    for (const auto& a: authors)
+        a->remBook(*this);
 }
 
 void Book::addAuthor(Author& a)
@@ -45,26 +46,6 @@ void Book::remGenre(const size_t& pos)
     auto it = genres.begin();
     std::advance(it, pos);
     genres.erase(it);
-}
-void Book::addToGenres(const Book& b)
-{
-    for (const auto& g: b.genres)
-        g->addBook(*this);
-}
-void Book::addToAuthors(const Book& b)
-{
-    for (const auto& a: b.authors)
-        a->addBook(*this);
-}
-void Book::remFromGenres()
-{
-    for (const auto& g: genres)
-        g->remBook(*this);
-}
-void Book::remFromAuthors()
-{
-    for (const auto& a: authors)
-        a->remBook(*this);
 }
 std::string Book::to_string() const
 {
@@ -103,25 +84,32 @@ bool Book::check(const std::string& s) const
         if (lowercase(el->getName()).find(ls) != std::string::npos) return true;
     return false;
 }
+Book::Book(Book&& b) noexcept: Entry(std::move(b)), year(b.year), authors (std::move(b.authors)), genres(std::move(b.genres))
+{
+    for (const auto& a: authors)
+    {
+        a->addBook(*this);
+        a->remBook(b);
+    }
+    for (const auto& g:genres)
+    {
+        g->addBook(*this);
+        g->remBook(b);
+    }
+#ifndef NDEBUG
+    std::cout << getName() << " was moved\n";
+#endif
+}
 
 //AUTHOR
 
 Author::~Author()
 {
-    std::cout << "Author " << this->getName() << " Destroyed" << std::endl;
-    remFromBooks();
-}
-
-void Author::addToBooks(const Author& a)
-{
-    for (const auto& b: a.books)
-        b->addAuthor(*this);
-}
-
-void Author::remFromBooks()
-{
     for (const auto& b: books)
         b->remAuthor(*this);
+#ifndef NDEBUG
+    std::cout << "Author " << this->getName() << " Destroyed" << std::endl;
+#endif
 }
 
 void Author::addBook(Book& b)
@@ -174,6 +162,15 @@ std::string Author::to_string() const
     t.column(4).set_cell_content_fg_color(fort::color::red);
     return t.to_string();
 }
+Author::Author(Author&& a) noexcept: Entry(std::move(a)), country(std::move(a.country)), date(std::move(a.date)), books(std::move(a.books))
+{
+    for (const auto& b:books)
+    {
+        b->addAuthor(*this);
+        b->remAuthor(a);
+    } //TODO: Do I need moving at all?
+    std::cout << getName() << " was moved\n";
+}
 
 //GENRE
 
@@ -182,15 +179,6 @@ Genre::~Genre()
 #ifndef NDEBUG
     std::cout << "Genre " << this->getName() << " Destroyed" << std::endl;
 #endif
-    remFromBooks();
-}
-void Genre::addToBooks(const Genre& g)
-{
-    for (const auto& b: g.books)
-        b->addGenre(*this);
-}
-void Genre::remFromBooks()
-{
     for (const auto& b: books)
         b->remGenre(*this);
 }
@@ -225,4 +213,15 @@ std::string Genre::to_string() const
     t.column(0).set_cell_content_fg_color(fort::color::green);
     t.column(2).set_cell_content_fg_color(fort::color::red);
     return t.to_string();
+}
+Genre::Genre(Genre&& g) noexcept: Entry(std::move(g)), books(std::move(g.books))
+{
+    for (const auto& b:books)
+    {
+        b->addGenre(*this);
+        b->remGenre(g);
+    } //TODO: Do I need moving at all?
+#ifndef NDEBUG
+    std::cout << getName() << " was moved\n";
+#endif
 }

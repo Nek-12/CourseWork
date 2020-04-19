@@ -85,7 +85,7 @@
 		<Unit filename="/home/nek/Dev/CW/Data.cpp">
 			<Option target="CW"/>
 		</Unit>
-		<Unit filename="/home/nek/Dev/CW/booker.cpp">
+		<Unit filename="/home/nek/Dev/CW/Entry.cpp">
 			<Option target="CW"/>
 		</Unit>
 		<Unit filename="/home/nek/Dev/CW/fort.c">
@@ -95,9 +95,6 @@
 			<Option target="CW"/>
 		</Unit>
 		<Unit filename="/home/nek/Dev/CW/fort.hpp">
-			<Option target="CW"/>
-		</Unit>
-		<Unit filename="/home/nek/Dev/CW/func.cpp">
 			<Option target="CW"/>
 		</Unit>
 		<Unit filename="/home/nek/Dev/CW/header.h">
@@ -110,6 +107,9 @@
 			<Option target="CW"/>
 		</Unit>
 		<Unit filename="/home/nek/Dev/CW/sha256.h">
+			<Option target="CW"/>
+		</Unit>
+		<Unit filename="/home/nek/Dev/CW/utility.cpp">
 			<Option target="CW"/>
 		</Unit>
 		<Unit filename="/home/nek/Dev/CW/CMakeLists.txt">

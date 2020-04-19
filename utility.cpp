@@ -195,3 +195,7 @@ std::string lowercase(const std::string& s)
     return ret;
 }
 
+ull stoid(const std::string& s)
+{
+    return std::stoul(s);
+}

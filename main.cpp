@@ -53,7 +53,7 @@ ull inputID()
     }
     else
         return genID();
-    return std::stoul(id);
+    return stoid(id);
 }
 
 unsigned select(const unsigned& limit)
@@ -62,7 +62,7 @@ unsigned select(const unsigned& limit)
     {
         std::string s;
         while (!readString(std::cin, s, 'i'));
-        unsigned  ret = std::stoul(s);
+        unsigned  ret = stoid(s);
         if (ret > limit || ret == 0)
         {
             std::cerr << "You have selected bad value. Try again: " << std::endl;
@@ -72,7 +72,7 @@ unsigned select(const unsigned& limit)
     }
 }
 
-std::vector<Book*> searchBook()
+std::vector<Book*> searchBook() //TODO: USE CHAR ARGUMENT AND DYNAMIC BINDING
 {
     Data& data = Data::getInstance();
     while (true)
@@ -278,7 +278,7 @@ Author* newAuthor()
     while (!readString(std::cin, d, 'd'));
     std::cout << "Enter the author's country" << std::endl;
     while (!readString(std::cin, c, 's'));
-    Author* pa = data.add(Author(n, d, c, id));
+    Author* pa = data.addAuthor(id,n, d, c, id);
     if (!pa)
     {
         std::cout << "Such author already exists" << std::endl;
@@ -310,7 +310,7 @@ Book* newBook() //TODO: put exit everywhere
     while (!readString(std::cin, n, 's'));
     std::cout << "Enter the year the book was published" << std::endl;
     while (!readString(std::cin, y, 'y'));
-    Book* added = data.add(Book(n, std::stoul(y), id));
+    Book* added = data.addBook(id, n, stoid(y), id);
     if (!added)
     {
         std::cerr << "Such book already exists" << std::endl;
@@ -347,7 +347,7 @@ Genre* newGenre()
     std::cout << "Enter the new genre's name" << std::endl;
     while (!readString(std::cin, temp, 's'));
     ull id = inputID();
-    Genre* added = data.add(Genre(temp, id));
+    Genre* added = data.addGenre(id,temp, id);
     if (!added)
     {
         std::cerr << "Such genre already exists." << std::endl;
@@ -463,7 +463,7 @@ void manageAuthor()
             case '1':
                 if (yesNo("Delete this record?"))
                 {
-                    std::cout << "Erased this book and removed all references." << std::endl;
+                    std::cout << "Erased this author and removed all references." << std::endl;
                     data.erase(*pauthor);
                     sleep(WAIT_TIME_NORMAL);
                     return;
@@ -601,7 +601,7 @@ void manageBook()
                         case '2':
                             std::cout << "Enter the new publishing year of the book: " << std::endl;
                             while (!readString(std::cin, temp, 'y'));
-                            pbook->setYear(std::stoul(temp));
+                            pbook->setYear(stoid(temp));
                             std::cout << "Changed successfully." << std::endl;
                             break;
                         case '3':
@@ -623,29 +623,40 @@ void manageBook()
         }
     }
 }
-void editGenres()
+void manageGenre()
 {
+    Data& data = Data::getInstance();
     std::string temp;
     Genre* pgenre = selectGenre();
     if (!pgenre) return;
     Book* pbook = nullptr;
     std::cout << *pgenre << std::endl;
     std::cout << "Select an option: "
-              << "\n1 -> rename this genre "
-              << "\n2 -> add this genre to books "
+              << "\n1 -> delete this genre "
+              << "\n2 -> rename this genre "
+              << "\n3 -> add this genre to books "
               << "\nq -> go back" << std::endl;
     while(true)
     {
         switch (getch())
         {
             case '1':
+                if (yesNo("Delete this record?"))
+                {
+                    std::cout << "Erased this genre and removed all references." << std::endl;
+                    data.erase(*pgenre);
+                    sleep(WAIT_TIME_NORMAL);
+                    return;
+                }
+                else return;
+            case '2':
                 std::cout << "Enter the new genre's title" << std::endl;
                 while (!readString(std::cin, temp, 's'));
                 pgenre->rename(temp);
                 std::cout << "Renamed to " << temp << std::endl;
                 sleep(WAIT_TIME_NORMAL);
                 return;
-            case '2':
+            case '3':
                 pbook = selectBook();
                 if (!pbook) return;
                 if (yesNo("Add genre " + pgenre->getName() + " to the book " + pbook->getName() + " ?"))
@@ -682,12 +693,12 @@ void showData()
             case '3':
                 std::cout << "Enter the time period in years: " << std::endl;
                 while (!readString(std::cin, temp, 'y'));
-                if (std::stoul(temp) > getCurYear())
+                if (stoid(temp) > getCurYear())
                 {
                     std::cerr << "The period you entered is invalid." << std::endl;
                     return;
                 }
-                data.printGenres(std::stoul(temp));
+                data.printGenres(stoid(temp));
                 if (!yesNo("Try again?")) return;
             case 'q':
                 return;
@@ -729,7 +740,7 @@ void management(bool isadmin)
                     if (isadmin) newGenre();
                     break;
                 case '8':
-                    if (isadmin) editGenres();
+                    if (isadmin) manageGenre();
                     break;
                 default:
                     break;
@@ -816,7 +827,7 @@ void createAccPrompt(const bool& isadmin)
         return;
     }
     if (!passConfirm(p)) return;
-    data.createAccount(l, p, isadmin);
+    data.addAccount(l, p, isadmin);
     std::cout << "Successfully created account " << l << " ! Going back..." << std::endl;
 #ifndef NDEBUG
     data.printCredentials(isadmin);
@@ -943,7 +954,7 @@ int main(int, char* argv[]) try
     while (workin)
     {
         cls();
-        std::cout << "\nWelcome. "
+        std::cout << "Welcome. "
                      "\n1 -> user sign in "
                      "\n2 -> admin sign in "
                      "\nq -> exit" << std::endl;
