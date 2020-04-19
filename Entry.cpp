@@ -168,8 +168,10 @@ Author::Author(Author&& a) noexcept: Entry(std::move(a)), country(std::move(a.co
     {
         b->addAuthor(*this);
         b->remAuthor(a);
-    } //TODO: Do I need moving at all?
+    }
+#ifndef NDEBUG
     std::cout << getName() << " was moved\n";
+#endif
 }
 
 //GENRE
@@ -220,7 +222,7 @@ Genre::Genre(Genre&& g) noexcept: Entry(std::move(g)), books(std::move(g.books))
     {
         b->addGenre(*this);
         b->remGenre(g);
-    } //TODO: Do I need moving at all?
+    }
 #ifndef NDEBUG
     std::cout << getName() << " was moved\n";
 #endif

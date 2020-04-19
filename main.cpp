@@ -17,7 +17,6 @@ int getch()
 inline void cls() { system("clear"); }
 #endif
 std::string path; //extern global
-//TODO: Move the stuff to different folders/files;
 //TODO: Recreate the readString function to add exit functionality, edit usages;
 //@@@TODO: Add nullptrs returns for every function and CHECK EVERY POINTER!@@@
 //TODO: Fix: When adding/editing books, there is no check that GENRE or AUTHOR with that ID is present and vice versa
@@ -72,7 +71,7 @@ unsigned select(const unsigned& limit)
     }
 }
 
-std::vector<Book*> searchBook() //TODO: USE CHAR ARGUMENT AND DYNAMIC BINDING
+std::vector<Book*> searchBook()
 {
     Data& data = Data::getInstance();
     while (true)
@@ -552,7 +551,6 @@ void editBookGenre(Book* pbook)
                 break;
         }
     }
-    sleep(WAIT_TIME_NORMAL);
 }
 void manageBook()
 {
@@ -674,6 +672,7 @@ void showData()
 {
     Data& data = Data::getInstance();
     std::string temp;
+    unsigned y = 0;
     cls();
     std::cout << SHOW_DATA_MENU_ENTRIES << std::endl;
     while (true)
@@ -693,12 +692,13 @@ void showData()
             case '3':
                 std::cout << "Enter the time period in years: " << std::endl;
                 while (!readString(std::cin, temp, 'y'));
-                if (stoid(temp) > getCurYear())
+                y = stoid(temp);
+                if (y > getCurYear() || y == 0)
                 {
                     std::cerr << "The period you entered is invalid." << std::endl;
                     return;
                 }
-                data.printGenres(stoid(temp));
+                data.printGenres(y);
                 if (!yesNo("Try again?")) return;
             case 'q':
                 return;
@@ -776,7 +776,7 @@ bool passChange(const std::string& l, const bool& isadmin)
     if (!passConfirm(p)) return false;
     data.changePass(l, p, isadmin);
     std::cout << "Your password was changed successfully." << std::endl;
-    sleep(WAIT_TIME_LONG);
+    sleep(WAIT_TIME_NORMAL);
     return true;
 }
 
@@ -799,7 +799,7 @@ void manageUsr()
             std::cout << "Deleted account " << l << std::endl;
             if (data.enumAccounts(false) == 0)
             {
-                std::cout << "No accounts left. " << std::endl;
+                std::cout << "No accounts left. Exiting." << std::endl;
                 sleep(WAIT_TIME_NORMAL);
                 return;
             }

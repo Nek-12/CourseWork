@@ -1,4 +1,4 @@
-//#define NDEBUG
+#define NDEBUG
 #pragma once
 #include <map>
 #include <utility>
@@ -21,7 +21,7 @@ using ull = unsigned long;
 #include <termios.h>
 int getch();
 #endif
-#define MAX_ID_LENGTH 20
+#define MAX_ID_LENGTH 19
 
 enum
 {
@@ -82,7 +82,9 @@ protected:
     Entry(Entry&& e) noexcept : no(e.no), name(std::move(e.name)) {}
     explicit Entry(std::string n, const ull& id) : no(id), name(std::move(n))
     {
+#ifndef NDEBUG
         std::cout << getName() << " was created \n";
+#endif
     }
 private:
     ull no; //unique id
