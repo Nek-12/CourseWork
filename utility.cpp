@@ -151,20 +151,18 @@ std::string getPassword()
 {
     std::string password;
     int a;
-    while ((a = getch()) != 10)
+    while ((a = getch()) != CARRIAGE_RETURN_CHAR)
     {
-        if (a == 127)
+        if (a == BACKSPACE_CHAR)
         {
             if (password.empty()) continue;
-
-            password.erase(password.size() - 1, password.size());
-
+            password.pop_back();
             std::cout << '\b' << ' ' << '\b';
         }
         else
         {
             password += (char)a;
-            std::cout << '*'; //TODO: Test on Windows
+            std::cout << '*';
         }
     }
     std::cout << std::endl;
@@ -197,5 +195,9 @@ std::string lowercase(const std::string& s)
 
 ull stoid(const std::string& s)
 {
+#ifndef __linux__
+    return std::stoull(s);
+#else
     return std::stoul(s);
+#endif
 }

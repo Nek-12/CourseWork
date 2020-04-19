@@ -1,19 +1,5 @@
 //#define NDEBUG
 #pragma once
-using ull = unsigned long;
-#define MAX_ID ULONG_MAX
-constexpr ull FIND_MAX_LENGTH(ull a)
-{
-    ull i = 0;
-    while (a!=0)
-    {
-        a/=10;
-        i++;
-    }
-    return i;
-}
-#define MAX_ID_LENGTH FIND_MAX_LENGTH(MAX_ID)
-
 #include <map>
 #include <utility>
 #include <vector>
@@ -23,10 +9,19 @@ constexpr ull FIND_MAX_LENGTH(ull a)
 
 #ifndef __linux__
 #include <conio.h>
+#define CARRIAGE_RETURN_CHAR 13
+#define BACKSPACE_CHAR 8
+using ull = unsigned long long;
+#define MAX_ID ULONG_LONG_MAX
 #else
+using ull = unsigned long;
+#define MAX_ID ULONG_MAX
+#define CARRIAGE_RETURN_CHAR 10
+#define BACKSPACE_CHAR 127
 #include <termios.h>
 int getch();
 #endif
+#define MAX_ID_LENGTH 20
 
 enum
 {
