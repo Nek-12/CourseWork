@@ -1,6 +1,8 @@
 #include "header.h"
+
 #ifndef __linux__
-    inline void cls() { system("cls"); }
+inline void cls()
+{ system("cls"); }
 #else
 int getch()
 {
@@ -18,7 +20,6 @@ inline void cls() { system("clear"); }
 #endif
 std::string path; //extern global
 //TODO: Recreate the readString function to add exit functionality, edit usages;
-//@@@TODO: Add nullptrs returns for every function and CHECK EVERY POINTER!@@@
 //TODO: Fix: When adding/editing books, there is no check that GENRE or AUTHOR with that ID is present and vice versa
 
 Book* newBook();
@@ -48,20 +49,20 @@ ull inputID()
     if (!yesNo("Generate an ID?"))
     {
         std::cout << "Enter the ID: ";
-        while(!readString(std::cin, id, 'i'));
+        while (!readString(std::cin, id, 'i'));
     }
     else
         return genID();
     return stoid(id);
 }
 
-unsigned select(const unsigned& limit)
+ull select(const ull& limit)
 {
-    while(true)
+    while (true)
     {
         std::string s;
         while (!readString(std::cin, s, 'i'));
-        unsigned  ret = stoid(s);
+        ull ret = stoid(s);
         if (ret > limit || ret == 0)
         {
             std::cerr << "You have selected bad value. Try again: " << std::endl;
@@ -122,7 +123,7 @@ std::vector<Author*> searchAuthor()
 Book* selectBook()
 {
     std::vector<Book*> sought;
-    while(true)
+    while (true)
     {
         sought = searchBook();
         if (sought.empty())
@@ -143,7 +144,7 @@ Book* selectBook()
     }
     cls();
     for (auto it = sought.begin(); it != sought.end(); ++it)
-        std::cout << "#" << it+1 - sought.begin() << ":\n" << **it;
+        std::cout << "#" << it + 1 - sought.begin() << ":\n" << **it;
     std::cout << "Select the book's #: " << std::endl;
     return sought[select(sought.size()) - 1];
 }
@@ -151,7 +152,7 @@ Book* selectBook()
 Genre* selectGenre()
 {
     std::vector<Genre*> sought;
-    while(true)
+    while (true)
     {
         sought = searchGenre();
         if (sought.empty())
@@ -172,7 +173,7 @@ Genre* selectGenre()
     }
     cls();
     for (auto it = sought.begin(); it != sought.end(); ++it)
-        std::cout << "#" << it+1 - sought.begin() << ":\n" << **it;
+        std::cout << "#" << it + 1 - sought.begin() << ":\n" << **it;
     std::cout << "Select the genre: " << std::endl;
     return sought[select(sought.size()) - 1];
 }
@@ -180,7 +181,7 @@ Genre* selectGenre()
 Author* selectAuthor()
 {
     std::vector<Author*> sought;
-    while(true)
+    while (true)
     {
         sought = searchAuthor();
         if (sought.empty())
@@ -201,7 +202,7 @@ Author* selectAuthor()
     }
     cls();
     for (auto it = sought.begin(); it != sought.end(); ++it)
-        std::cout << "#" << it+1 - sought.begin() << ":\n" << **it;
+        std::cout << "#" << it + 1 - sought.begin() << ":\n" << **it;
     std::cout << "Select the author's #: " << std::endl;
     return sought[select(sought.size()) - 1];
 }
@@ -214,14 +215,10 @@ void searchUI()
     while (true)
     {
         cls();
-        std::cout << "Select an option: "
-                  << "\n1 -> search for a book "
-                  << "\n2 -> search for a genre"
-                  << "\n3 -> search for an author "
-                  << "\nq -> go back" << std::endl;
-        switch(getch())
+        std::cout << SEARCH_UI_OPTIONS << std::endl;
+        switch (getch())
         {
-            case'1':
+            case '1':
                 books = searchBook();
                 if (books.empty())
                     std::cout << "Nothing found." << std::endl;
@@ -277,7 +274,7 @@ Author* newAuthor()
     while (!readString(std::cin, d, 'd'));
     std::cout << "Enter the author's country" << std::endl;
     while (!readString(std::cin, c, 's'));
-    Author* pa = data.addAuthor(id,n, d, c, id);
+    Author* pa = data.addAuthor(id, n, d, c, id);
     if (!pa)
     {
         std::cout << "Such author already exists" << std::endl;
@@ -285,7 +282,7 @@ Author* newAuthor()
     }
     while (true)
     {
-        if(!yesNo("Add a book this author has written?")) break;
+        if (!yesNo("Add a book this author has written?")) break;
         Book* pb = selectBook();
         if (!pb) break;
         else
@@ -294,12 +291,12 @@ Author* newAuthor()
             std::cout << "Added " << pb->getName() << " to author " << n << "'s list of books" << std::endl;
         }
     }
-    std::cout << "Successfully added author "<< n << std::endl;
-    sleep(WAIT_TIME_NORMAL);
+    std::cout << "Successfully added author " << n << std::endl;
+    pause();
     return pa;
 }
 
-Book* newBook() //TODO: put exit everywhere
+Book* newBook()
 {
     Data& data = Data::getInstance();
     cls();
@@ -317,7 +314,7 @@ Book* newBook() //TODO: put exit everywhere
     }
     while (true)
     {
-        if(!yesNo("Add an author to this book?")) break;
+        if (!yesNo("Add an author to this book?")) break;
         Author* pa = selectAuthor();
         if (!pa) break;
         else
@@ -328,14 +325,14 @@ Book* newBook() //TODO: put exit everywhere
     }
     while (true)
     {
-        if(!yesNo("Add a genre to this book?")) break;
+        if (!yesNo("Add a genre to this book?")) break;
         Genre* pg = selectGenre();
         if (!pg) break;
         added->addGenre(*pg);
         std::cout << "Added " << pg->getName() << " to the book " << added->getName() << std::endl;
     }
     std::cout << "Successfully added your book" << std::endl;
-    sleep(WAIT_TIME_NORMAL);
+    pause();
     return added;
 }
 
@@ -346,16 +343,16 @@ Genre* newGenre()
     std::cout << "Enter the new genre's name" << std::endl;
     while (!readString(std::cin, temp, 's'));
     ull id = inputID();
-    Genre* added = data.addGenre(id,temp, id);
+    Genre* added = data.addGenre(id, temp, id);
     if (!added)
     {
         std::cerr << "Such genre already exists." << std::endl;
-        sleep(WAIT_TIME_NORMAL);
+        pause();
         return nullptr;
     }
     while (true)
     {
-        if(!yesNo("Add a book to this genre?")) break;
+        if (!yesNo("Add a book to this genre?")) break;
         Book* pb = selectBook();
         if (!pb) break;
         else
@@ -365,7 +362,7 @@ Genre* newGenre()
         }
     }
     std::cout << "Successfully added your genre" << std::endl;
-    sleep(WAIT_TIME_NORMAL);
+    pause();
     return added;
 }
 
@@ -395,10 +392,10 @@ void editBookAuthor(Book* pbook)
             case '2':
                 std::cout << *pbook << std::endl;
                 std::cout << "Select an author: " << std::endl;
-                pbook->remAuthor(select(pbook->enumAuthors()-1));
+                pbook->remAuthor(select(pbook->enumAuthors() - 1));
                 std::cout << "Removed successfully" << std::endl;
-                sleep(WAIT_TIME_NORMAL);
-            case'q':
+                pause();
+            case 'q':
                 return;
             default:
                 break;
@@ -432,10 +429,10 @@ void editAuthorBooks(Author* pauthor)
             case '2':
                 std::cout << *pauthor << std::endl;
                 std::cout << "Select a book: " << std::endl;
-                pauthor->remBook(select(pauthor->enumBooks()-1));
+                pauthor->remBook(select(pauthor->enumBooks() - 1));
                 std::cout << "Removed successfully" << std::endl;
-                sleep(WAIT_TIME_NORMAL);
-            case'q':
+                pause();
+            case 'q':
                 return;
             default:
                 break;
@@ -453,10 +450,7 @@ void manageAuthor()
     {
         cls();
         std::cout << *pauthor;
-        std::cout << "What to do with this record? "
-                     "\n1 -> delete  "
-                     "\n2 -> edit "
-                     "\nq -> nothing " << std::endl;
+        std::cout << RECORD_EDITING_OPTIONS << std::endl;
         switch (getch())
         {
             case '1':
@@ -464,7 +458,7 @@ void manageAuthor()
                 {
                     std::cout << "Erased this author and removed all references." << std::endl;
                     data.erase(*pauthor);
-                    sleep(WAIT_TIME_NORMAL);
+                    pause();
                     return;
                 }
                 else return;
@@ -473,12 +467,7 @@ void manageAuthor()
                 {
                     cls();
                     std::cout << *pauthor;
-                    std::cout << "What would you like to edit? "
-                                 "\n1 -> Name"
-                                 "\n2 -> Birthdate"
-                                 "\n3 -> Country"
-                                 "\n4 -> Books"
-                                 "\nq -> Nothing" << std::endl;
+                    std::cout << MANAGE_BOOK_OPTIONS << std::endl;
                     switch (getch())
                     {
                         case '1':
@@ -542,10 +531,10 @@ void editBookGenre(Book* pbook)
             case '2':
                 std::cout << *pbook << std::endl;
                 std::cout << "Select the genre: " << std::endl;
-                pbook->remGenre(select(pbook->enumGenres()-1));
+                pbook->remGenre(select(pbook->enumGenres() - 1));
                 std::cout << "Removed successfully" << std::endl;
-                sleep(WAIT_TIME_NORMAL);
-            case'q':
+                pause();
+            case 'q':
                 return;
             default:
                 break;
@@ -562,10 +551,7 @@ void manageBook()
     {
         cls();
         std::cout << *pbook;
-        std::cout << "What to do with this record? "
-                     "\n1 -> delete  "
-                     "\n2 -> edit "
-                     "\nq -> nothing " << std::endl;
+        std::cout << RECORD_EDITING_OPTIONS << std::endl;
         switch (getch())
         {
             case '1':
@@ -573,7 +559,7 @@ void manageBook()
                 {
                     std::cout << "Erased this book and removed all references." << std::endl;
                     data.erase(*pbook);
-                    sleep(WAIT_TIME_NORMAL);
+                    pause();
                     return;
                 }
                 else return;
@@ -582,12 +568,7 @@ void manageBook()
                 {
                     cls();
                     std::cout << *pbook;
-                    std::cout << "What would you like to edit? "
-                                 "\n1 -> Title"
-                                 "\n2 -> Publishing year"
-                                 "\n3 -> Authors"
-                                 "\n4 -> Genres"
-                                 "\nq -> Nothing" << std::endl;
+                    std::cout << EDIT_BOOK_OPTIONS << std::endl;
                     switch (getch())
                     {
                         case '1':
@@ -629,12 +610,8 @@ void manageGenre()
     if (!pgenre) return;
     Book* pbook = nullptr;
     std::cout << *pgenre << std::endl;
-    std::cout << "Select an option: "
-              << "\n1 -> delete this genre "
-              << "\n2 -> rename this genre "
-              << "\n3 -> add this genre to books "
-              << "\nq -> go back" << std::endl;
-    while(true)
+    std::cout << MANAGE_GENRE_OPTIONS << std::endl;
+    while (true)
     {
         switch (getch())
         {
@@ -643,7 +620,7 @@ void manageGenre()
                 {
                     std::cout << "Erased this genre and removed all references." << std::endl;
                     data.erase(*pgenre);
-                    sleep(WAIT_TIME_NORMAL);
+                    pause();
                     return;
                 }
                 else return;
@@ -652,7 +629,7 @@ void manageGenre()
                 while (!readString(std::cin, temp, 's'));
                 pgenre->rename(temp);
                 std::cout << "Renamed to " << temp << std::endl;
-                sleep(WAIT_TIME_NORMAL);
+                pause();
                 return;
             case '3':
                 pbook = selectBook();
@@ -681,13 +658,11 @@ void showData()
         {
             case '1':
                 data.printBooks();
-                std::cout << ANY_KEY << std::endl;
-                getch();
+                pause();
                 return;
             case '2':
                 data.printAuthors();
-                std::cout << ANY_KEY << std::endl;
-                getch();
+                pause();
                 return;
             case '3':
                 std::cout << "Enter the time period in years: " << std::endl;
@@ -696,10 +671,12 @@ void showData()
                 if (y > getCurYear() || y == 0)
                 {
                     std::cerr << "The period you entered is invalid." << std::endl;
+                    pause();
                     return;
                 }
                 data.printGenres(y);
-                if (!yesNo("Try again?")) return;
+                pause();
+                return;
             case 'q':
                 return;
             default:
@@ -710,41 +687,41 @@ void showData()
 
 void management(bool isadmin)
 {
-        while (true)
+    while (true)
+    {
+        cls();
+        std::cout << (isadmin ? ADMIN_MANAGEMENT_ENTRIES : USER_MANAGEMENT_ENTRIES) << std::endl;
+        switch (getch())
         {
-            cls();
-            std::cout << (isadmin ? ADMIN_MANAGEMENT_ENTRIES : USER_MANAGEMENT_ENTRIES) << std::endl;
-            switch (getch())
-            {
-                case 'q':
-                    return;
-                case '1':
-                    searchUI();
-                    break;
-                case '2':
-                    showData();
-                    break;
-                case '3':
-                    if (isadmin) newBook();
-                    break;
-                case '4':
-                    if (isadmin) manageBook();
-                    break;
-                case '5':
-                    if (isadmin) newAuthor();
-                    break;
-                case '6':
-                    if (isadmin) manageAuthor();
-                    break;
-                case '7':
-                    if (isadmin) newGenre();
-                    break;
-                case '8':
-                    if (isadmin) manageGenre();
-                    break;
-                default:
-                    break;
-            }
+            case 'q':
+                return;
+            case '1':
+                searchUI();
+                break;
+            case '2':
+                showData();
+                break;
+            case '3':
+                if (isadmin) newBook();
+                break;
+            case '4':
+                if (isadmin) manageBook();
+                break;
+            case '5':
+                if (isadmin) newAuthor();
+                break;
+            case '6':
+                if (isadmin) manageAuthor();
+                break;
+            case '7':
+                if (isadmin) newGenre();
+                break;
+            case '8':
+                if (isadmin) manageGenre();
+                break;
+            default:
+                break;
+        }
     }
 }
 
@@ -776,7 +753,7 @@ bool passChange(const std::string& l, const bool& isadmin)
     if (!passConfirm(p)) return false;
     data.changePass(l, p, isadmin);
     std::cout << "Your password was changed successfully." << std::endl;
-    sleep(WAIT_TIME_NORMAL);
+    pause();
     return true;
 }
 
@@ -800,7 +777,7 @@ void manageUsr()
             if (data.enumAccounts(false) == 0)
             {
                 std::cout << "No accounts left. Exiting." << std::endl;
-                sleep(WAIT_TIME_NORMAL);
+                pause();
                 return;
             }
         }
@@ -820,10 +797,10 @@ void createAccPrompt(const bool& isadmin)
     std::cout << LOGINPROMPT << std::endl;
     while (!readString(std::cin, l, 'n'));
     if (l == "exit") return;
-    if (data.loginCheck(l, isadmin))
+    if (data.loginCheck(l, isadmin) || data.loginCheck(l, !isadmin))
     {
         std::cerr << "Such account already exists!" << std::endl;
-        sleep(WAIT_TIME_LONG);
+        pause();
         return;
     }
     if (!passConfirm(p)) return;
@@ -832,7 +809,7 @@ void createAccPrompt(const bool& isadmin)
 #ifndef NDEBUG
     data.printCredentials(isadmin);
 #endif
-    sleep(WAIT_TIME_LONG);
+    pause();
 }
 
 bool delDialog(const std::string& l, const bool& isadmin)
@@ -854,11 +831,11 @@ bool delDialog(const std::string& l, const bool& isadmin)
     if (!data.delAccount(l, isadmin))
     {
         std::cerr << "You can't delete the last account!" << std::endl;
-        sleep(WAIT_TIME_LONG);
+        pause();
         return false;
     }
     std::cout << "Deleted account  " << l << std::endl;
-    sleep(WAIT_TIME_LONG);
+    pause();
     return true; //Was deleted
 }
 
@@ -911,7 +888,7 @@ void login(const bool& isadmin)
             break;
         else
             std::cout << "User not found." << std::endl;
-        sleep(WAIT_TIME_SMALL);
+        pause();
     }
     while (true)
     {
@@ -923,10 +900,10 @@ void login(const bool& isadmin)
             break;
         else
             std::cout << "Wrong password." << std::endl;
-        sleep(WAIT_TIME_SMALL);
+        pause();
     }
     std::cout << "Success. Redirecting..." << std::endl;
-    sleep(WAIT_TIME_NORMAL);
+    pause();
     console(usr, isadmin);
 }
 
@@ -954,10 +931,7 @@ int main(int, char* argv[]) try
     while (workin)
     {
         cls();
-        std::cout << "Welcome. "
-                     "\n1 -> user sign in "
-                     "\n2 -> admin sign in "
-                     "\nq -> exit" << std::endl;
+        std::cout << WELCOME_MENU << std::endl;
         switch (tolower(getch()))
         {
             case 'q':
@@ -975,17 +949,17 @@ int main(int, char* argv[]) try
         }
     }
     data.save();
-    return 0;
+    return EXIT_SUCCESS;
 }
 catch (std::exception& e)
 {
     std::cerr << "Critical Error: " << e.what() << "\n The program cannot continue. Press any key to exit..." << std::endl;
     getch();
-    return (-2);
+    return (EXIT_FAILURE);
 }
 catch (...)
 {
     std::cerr << "Undefined Error. \n The program cannot continue. Press any key to exit..." << std::endl;
     getch();
-    return (-1);
+    return (EXIT_FAILURE);
 }

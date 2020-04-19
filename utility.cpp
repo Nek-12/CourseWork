@@ -1,11 +1,11 @@
 #include "header.h"
 #include "sha256.h"
-#include <thread>
 #include <regex>
 #include <random>
-void sleep(const unsigned& ms)
+void pause()
 {
-    std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+    std::cout << "Press any key to continue..." << std::endl;
+    getch();
 }
 
 ull genID()

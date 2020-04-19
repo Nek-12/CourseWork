@@ -1,4 +1,3 @@
-#define NDEBUG
 #pragma once
 #include <map>
 #include <utility>
@@ -6,7 +5,7 @@
 #include <iostream>
 #include <set>
 #include "fort.hpp"
-
+#define NDEBUG
 #ifndef __linux__
 #include <conio.h>
 #define CARRIAGE_RETURN_CHAR 13
@@ -23,15 +22,6 @@ int getch();
 #endif
 #define MAX_ID_LENGTH 19
 
-enum
-{
-    WAIT_TIME_SMALL = 750,
-    WAIT_TIME_NORMAL = 1000,
-    WAIT_TIME_LONG = 2000
-};
-
-//TODO: Update comments
-
 extern std::string path; //Path to the program folder, see main.cpp -> int main()
 
 class Data;
@@ -40,6 +30,7 @@ class Book;
 class Author;
 class Genre;
 
+void pause();
 ull stoid(const std::string& s);
 std::string getPassword();
 ull genID();
@@ -47,7 +38,6 @@ void cls();
 unsigned getCurYear();
 bool checkString(const std::string&, char);
 std::string lowercase(const std::string&);
-void sleep(const unsigned&); // milliseconds to sleep
 std::string hash(const std::string& s); //uses sha256.cpp and sha256.h for encrypting passwords, outputs hashed string
 bool readString(std::istream& is, std::string& s, char mode);
 //allows for reading a line from the iostream object with input check (foolproofing)
@@ -110,7 +100,7 @@ public:
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] size_t enumAuthors() const { return authors.size(); }
     [[nodiscard]] size_t enumGenres() const { return genres.size(); }
-
+    [[nodiscard]] unsigned getYear() const {return year;}
     void setYear(unsigned int y)
     { year = y; }
     void remAuthor(const size_t& pos);
@@ -164,7 +154,7 @@ private:
 
 class Data // SINGLETON for storing all the nested structures
 {
-    friend class Book; //TODO: Move all the definitions to the cpp to cleanup
+    friend class Book;
     friend class Genre;
     friend class Author;
 public:
@@ -210,8 +200,8 @@ public:
     { return ((isadmin ? admins.find(l) : users.find(l))->second == hash(p)); }
     bool loginCheck(const std::string& s, const bool& isadmin)
     { return (isadmin ? admins.find(s) != admins.end() : users.find(s) != users.end()); }
-    void addAccount(const std::string& l, const std::string& p, const bool& isadmin)
-    { (isadmin ? admins : users)[l] = hash(p); } //TODO: Not consistent with other. Add checks for duplicates and bool return
+    bool addAccount(const std::string& l, const std::string& p, const bool& isadmin)
+    { return (isadmin ? admins : users).try_emplace(l,p).second; }
     size_t enumAccounts(const bool& isadmin)
     { return (isadmin ? admins.size() : users.size()); }
     void changePass(const std::string& l, const std::string& p, const bool& isadmin)
@@ -230,39 +220,68 @@ private:
 #define LOGINPROMPT  "Enter the login or \"exit\" to exit: "
 #define PASSPROMPT  "Enter the password or \"exit\" to exit: "
 #define PASSCONFIRM  "Confirm the password or enter \"exit\" to exit: "
-#define ADMIN_CONSOLE_ENTRIES  "      :ADMIN:\n"\
-                                                 "Select an option: "\
-                                                 "\n1 -> Manage book data "\
-                                                 "\n2 -> Change your password"\
-                                                 "\n3 -> Register an administrator"\
-                                                 "\n4 -> Delete users "\
-                                                 "\n0 -> Delete your account (careful!)"\
-                                                 "\nq -> Sign off"
-#define USER_CONSOLE_ENTRIES  "      :USER:\n"\
-                                                "\nSelect an option: "\
-                                                "\n1 -> Manage book data "\
-                                                "\n2 -> Change your password"\
-                                                "\n0 -> Delete your account"\
-                                                "\nq -> Sign off"
-#define ADMIN_MANAGEMENT_ENTRIES  ":ADMIN:\n"\
-                                                    "Select an option: "\
-                                                    "\n1 -> Search anything "\
-                                                    "\n2 -> Show data "\
-                                                    "\n3 -> Add a new book"\
-                                                    "\n4 -> Manage a book"\
-                                                    "\n5 -> Add a new author"\
-                                                    "\n6 -> Manage an author "\
-                                                    "\n7 -> Add a new genre "\
-                                                    "\n8 -> Manage a genre "\
-                                                    "\nq -> Go back"
-#define USER_MANAGEMENT_ENTRIES  ":USER:\n"\
-                                                   "Select an option: "\
-                                                   "\n1 -> Search anything"\
-                                                   "\n2 -> Show data "\
-                                                   "\nq -> Go back"
-#define SHOW_DATA_MENU_ENTRIES  "Select an option: "\
-                                                  "\n1 -> Show all books "\
-                                                  "\n2 -> Show all authors "\
-                                                  "\n3 -> Show all genres for a given year "\
-                                                  "\nq -> Go back"
-#define ANY_KEY  "Press any key to continue..."
+#define ADMIN_CONSOLE_ENTRIES    ":ADMIN:\n"\
+                                 "Select an option: "\
+                                 "\n1 -> Manage book data "\
+                                 "\n2 -> Change your password"\
+                                 "\n3 -> Register an administrator"\
+                                 "\n4 -> Delete users "\
+                                 "\n0 -> Delete your account (careful!)"\
+                                 "\nq -> Sign off"
+#define USER_CONSOLE_ENTRIES    ":USER:\n"\
+                                "\nSelect an option: "\
+                                "\n1 -> Manage book data "\
+                                "\n2 -> Change your password"\
+                                "\n0 -> Delete your account"\
+                                "\nq -> Sign off"
+#define ADMIN_MANAGEMENT_ENTRIES    ":ADMIN:\n"\
+                                    "Select an option: "\
+                                    "\n1 -> Search anything "\
+                                    "\n2 -> Show data "\
+                                    "\n3 -> Add a new book"\
+                                    "\n4 -> Manage a book"\
+                                    "\n5 -> Add a new author"\
+                                    "\n6 -> Manage an author "\
+                                    "\n7 -> Add a new genre "\
+                                    "\n8 -> Manage a genre "\
+                                    "\nq -> Go back"
+#define USER_MANAGEMENT_ENTRIES    ":USER:\n"\
+                                   "Select an option: "\
+                                   "\n1 -> Search anything"\
+                                   "\n2 -> Show data "\
+                                   "\nq -> Go back"
+#define SHOW_DATA_MENU_ENTRIES    "Select an option: "\
+                                  "\n1 -> Show all books "\
+                                  "\n2 -> Show all authors "\
+                                  "\n3 -> Show all genres for a given year "\
+                                  "\nq -> Go back"
+#define WELCOME_MENU "Welcome. "\
+                     "\n1 -> User sign in "\
+                     "\n2 -> Admin sign in "\
+                     "\nq -> Save and exit"
+#define MANAGE_GENRE_OPTIONS "Select an option: "\
+                             "\n1 -> Delete this genre "\
+                             "\n2 -> Rename this genre "\
+                             "\n3 -> Add this genre to books "\
+                             "\nq -> Go back"
+#define EDIT_BOOK_OPTIONS   "What would you like to edit? "\
+                            "\n1 -> Title"\
+                            "\n2 -> Publishing year"\
+                            "\n3 -> Authors"\
+                            "\n4 -> Genres"\
+                            "\nq -> Nothing"
+#define RECORD_EDITING_OPTIONS  "What to do with this record? "\
+                                "\n1 -> Delete  "\
+                                "\n2 -> Edit "\
+                                "\nq -> Nothing "
+#define MANAGE_BOOK_OPTIONS "What would you like to edit? "\
+                            "\n1 -> Name"\
+                            "\n2 -> Birthdate"\
+                            "\n3 -> Country"\
+                            "\n4 -> Books"\
+                            "\nq -> Nothing"
+#define SEARCH_UI_OPTIONS  "Select an option: "\
+                            "\n1 -> Search for a book "\
+                            "\n2 -> Search for a genre"\
+                            "\n3 -> Search for an author "\
+                            "\nq -> Go back"

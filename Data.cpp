@@ -8,19 +8,20 @@ void Data::printBooks()
     t << fort::header << "Title" << "Genres" << "Authors" << "Year" << "ID" << fort::endr;
     for (const auto& book: mbooks)
     {
-        std::string authors, genres, delim;
-        for (auto g: book.second.genres)
+        std::stringstream authors, genres;
+        std::string delim;
+        for (const auto& g: book.second.genres)
         {
-            genres += delim + g->getName();
+            genres << delim << g->getName();
             delim = "\n";
         }
         delim.clear();
-        for (auto a: book.second.authors)
+        for (const auto& a: book.second.authors)
         {
-            authors += delim + a->getName();
+            authors << delim << a->getName();
             delim = "\n";
         }
-        t << book.second.getName() << genres << authors << book.second.year << book.second.id() << fort::endr;
+        t << book.second.getName() << genres.str() << authors.str() << book.second.year << book.second.id() << fort::endr;
     }
     t.set_cell_text_align(fort::text_align::center);
     t.set_border_style(FT_BASIC2_STYLE);
@@ -34,14 +35,15 @@ void Data::printAuthors()
     t << fort::header << "Name" << "Books" << "Birthdate" << "Country" << "ID" << fort::endr;
     for (const auto& author: mauthors)
     {
-        std::string books, delim;
+        std::stringstream books;
+        std::string delim;
         delim.clear();
-        for (auto a: author.second.books)
+        for (const auto& a: author.second.books)
         {
-            books += delim + a->getName();
+            books << delim << a->getName();
             delim = "\n";
         }
-        t << author.second.getName() << books << author.second.date << author.second.country << author.second.id() << fort::endr;
+        t << author.second.getName() << books.str() << author.second.date << author.second.country << author.second.id() << fort::endr;
     }
     t.set_cell_text_align(fort::text_align::center);
     t.set_border_style(FT_BASIC2_STYLE);
@@ -54,20 +56,21 @@ void Data::printGenres(unsigned years)
     unsigned diff = getCurYear() - years;
     fort::char_table t;
     std::cout << "Books grouped by genres for the past " << years << " years" << std::endl;
-    t << fort::header << "Name" << "Quantity" <<"Books" << "ID" << fort::endr;
+    t << fort::header << "Name" << "Quantity" << "Books" << "Years" << "ID" << fort::endr;
     for (const auto& genre: mgenres)
     {
         unsigned long cnt = 0;
-        std::string books, delim;
-        for (auto b: genre.second.books)
+        std::stringstream books, syear;
+        std::string delim;
+        for (const auto& b: genre.second.books)
         {
             if (b->year != 0 && b->year <= diff) continue;
-            books += delim + b->getName();
+            books << delim << b->getName();
+            syear << delim << b->getYear();
             delim = "\n";
             ++cnt;
         }
-        delim.clear();
-        t << genre.second.getName() << cnt << books << genre.second.id() << fort::endr;
+        t << genre.second.getName() << cnt << books.str() << syear.str() << genre.second.id() << fort::endr;
     }
     t.set_cell_text_align(fort::text_align::center);
     t.set_border_style(FT_BASIC2_STYLE);
@@ -139,7 +142,8 @@ void Data::load() try
     std::string tempA, tempB, tempC, tempD, name = "user.txt";
     ensureFileExists(name);
     std::ifstream f(path + name);
-    auto empty = [&f ]() { return f.peek() == std::ifstream::traits_type::eof(); };
+    auto empty = [&f]()
+    { return f.peek() == std::ifstream::traits_type::eof(); };
     while (f) //Starts parsing the file. Paragraphs are divided by a blank line
     {
         if (empty()) break;
@@ -162,7 +166,7 @@ void Data::load() try
         if (f.eof()) break;
         if (!readString(f, tempA, 'n')) throw std::invalid_argument("File: " + name + " couldn't read login");
         if (!readString(f, tempB, 'n')) throw std::invalid_argument("File: " + name + " couldn't read password");
-        addAccount(tempA,tempB,true);
+        addAccount(tempA, tempB, true);
         if (!std::getline(f, tempC)) break;
         if (!tempC.empty() && tempC != " ")
             throw std::invalid_argument("File " + name + " read error, check delimiters.");
@@ -173,7 +177,7 @@ void Data::load() try
     {
         std::cerr << "Warning! We  couldn't find any valid administrator accounts. \n"
                      "Created a new one: admin | admin" << std::endl;
-        addAccount("admin","admin",true);
+        addAccount("admin", "admin", true);
     }
     name = "genres.txt";
     f.close();
@@ -221,7 +225,9 @@ void Data::load() try
     while (f)
     { //id, title, year, temp, entry
         if (empty()) break;
+#ifndef NDEBUG
         std::cout << "Starting to parse a new book " << std::endl;
+#endif
         if (!readString(f, tempA, 'i')) throw std::invalid_argument("File: " + name + " couldn't read id");
         if (!readString(f, tempB, 's')) throw std::invalid_argument("File: " + name + " couldn't read title");
         if (!readString(f, tempC, 'y')) throw std::invalid_argument("File: " + name + " couldn't read year");
@@ -268,7 +274,9 @@ void Data::load() try
         {
             if (!checkString(tempD, 'i')) throw std::invalid_argument("File: " + name + " couldn't read book's author ID ");
             auto author = mauthors.find(stoid(tempD));
+#ifndef NDEBUG
             std::cout << "sought.first is: " << (author != mauthors.end() ? std::to_string(author->first) : "NULL") << std::endl;
+#endif
             if (author == mauthors.end())
             {
 #ifndef NDEBUG
@@ -330,7 +338,8 @@ void Data::save()
     f.open(path + "authors.txt");
     f << std::setfill('0');
     for (auto& el: mauthors)
-        f << std::setw(MAX_ID_LENGTH) << el.first << '\n' << el.second.getName() << '\n' << el.second.date << '\n' << el.second.country << '\n'
+        f << std::setw(MAX_ID_LENGTH) << el.first << '\n' << el.second.getName() << '\n' << el.second.date << '\n' << el.second.country
+          << '\n'
           << std::endl;
     f.close();
     f.open(path + "books.txt");
@@ -365,7 +374,8 @@ void Data::save()
         }
         else
         {
-            std::cerr << "Warning! The book \n" << b.second << "\n Has zero authors! The data will be generated automatically!" << std::endl;
+            std::cerr << "Warning! The book \n" << b.second << "\n Has zero authors! The data will be generated automatically!"
+                      << std::endl;
             f << genID();
         }
         f << "\n" << std::endl;
