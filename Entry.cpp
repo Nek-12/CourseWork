@@ -68,10 +68,7 @@ std::string Book::to_string() const
         delim = "\n";
     }
     t << getName() << g.str() << a.str() << year << id() << fort::endr;
-    t.set_cell_text_align(fort::text_align::center);
-    t.set_border_style(FT_BASIC2_STYLE);
-    t.column(0).set_cell_content_fg_color(fort::color::green);
-    t.column(4).set_cell_content_fg_color(fort::color::red);
+    setTableProperties(t,0,4);
     return t.to_string();
 }
 bool Book::check(const std::string& s) const
@@ -156,10 +153,7 @@ std::string Author::to_string() const
         delim = "\n";
     }
     t << getName() << b.str() << date << country << id() << fort::endr;
-    t.set_cell_text_align(fort::text_align::center);
-    t.set_border_style(FT_BASIC2_STYLE);
-    t.column(0).set_cell_content_fg_color(fort::color::green);
-    t.column(4).set_cell_content_fg_color(fort::color::red);
+    setTableProperties(t,0,4);
     return t.to_string();
 }
 Author::Author(Author&& a) noexcept: Entry(std::move(a)), country(std::move(a.country)), date(std::move(a.date)), books(std::move(a.books))
@@ -210,10 +204,7 @@ std::string Genre::to_string() const
     fort::char_table t;
     t << fort::header << "Name" << "Book quantity" << "ID" << fort::endr;
         t << getName() << books.size() << id() << fort::endr;
-    t.set_cell_text_align(fort::text_align::center);
-    t.set_border_style(FT_BASIC2_STYLE);
-    t.column(0).set_cell_content_fg_color(fort::color::green);
-    t.column(2).set_cell_content_fg_color(fort::color::red);
+    setTableProperties(t,0,2);
     return t.to_string();
 }
 Genre::Genre(Genre&& g) noexcept: Entry(std::move(g)), books(std::move(g.books))

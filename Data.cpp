@@ -2,6 +2,14 @@
 #include <fstream>
 #include <filesystem>
 
+void setTableProperties(fort::char_table& t, unsigned firstColored, unsigned secondColored)
+{
+    t.set_cell_text_align(fort::text_align::center);
+    t.set_border_style(FT_BASIC2_STYLE);
+    t.column(firstColored).set_cell_content_fg_color(fort::color::green);
+    t.column(secondColored).set_cell_content_fg_color(fort::color::red);
+}
+
 void Data::printBooks()
 {
     fort::char_table t;
@@ -23,10 +31,7 @@ void Data::printBooks()
         }
         t << book.second.getName() << genres.str() << authors.str() << book.second.year << book.second.id() << fort::endr;
     }
-    t.set_cell_text_align(fort::text_align::center);
-    t.set_border_style(FT_BASIC2_STYLE);
-    t.column(0).set_cell_content_fg_color(fort::color::green);
-    t.column(4).set_cell_content_fg_color(fort::color::red);
+
     std::cout << t.to_string() << std::endl;
 }
 void Data::printAuthors()
@@ -45,10 +50,7 @@ void Data::printAuthors()
         }
         t << author.second.getName() << books.str() << author.second.date << author.second.country << author.second.id() << fort::endr;
     }
-    t.set_cell_text_align(fort::text_align::center);
-    t.set_border_style(FT_BASIC2_STYLE);
-    t.column(0).set_cell_content_fg_color(fort::color::green);
-    t.column(4).set_cell_content_fg_color(fort::color::red);
+    setTableProperties(t,0,4);
     std::cout << t.to_string() << std::endl;
 }
 void Data::printGenres(unsigned years)
@@ -64,7 +66,7 @@ void Data::printGenres(unsigned years)
         std::string delim;
         for (const auto& b: genre.second.books)
         {
-            if (b->year != 0 && b->year <= diff) continue;
+            if (b->year != 0 && b->year < diff) continue; //TODO: Test for 0 and 2020
             books << delim << b->getName();
             syear << delim << b->getYear();
             delim = "\n";
@@ -72,10 +74,7 @@ void Data::printGenres(unsigned years)
         }
         t << genre.second.getName() << cnt << books.str() << syear.str() << genre.second.id() << fort::endr;
     }
-    t.set_cell_text_align(fort::text_align::center);
-    t.set_border_style(FT_BASIC2_STYLE);
-    t.column(0).set_cell_content_fg_color(fort::color::green);
-    t.column(3).set_cell_content_fg_color(fort::color::red);
+    setTableProperties(t,0,4);
     std::cout << t.to_string() << std::endl;
 }
 bool Data::delAccount(const std::string& l, const bool& isadmin)
@@ -83,7 +82,7 @@ bool Data::delAccount(const std::string& l, const bool& isadmin)
     if (isadmin)
     {
         auto sought = admins.find(l);
-        if (sought == admins.end() || users.size() < 2) return false;
+        if (sought == admins.end() || admins.size() < 2) return false;
         admins.erase(sought);
     }
     else

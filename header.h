@@ -30,6 +30,7 @@ class Book;
 class Author;
 class Genre;
 
+void setTableProperties(fort::char_table&,unsigned,unsigned);
 void pause();
 ull stoid(const std::string& s);
 std::string getPassword();
@@ -221,22 +222,22 @@ private:
 #define LOGINPROMPT  "Enter the login or \"exit\" to exit: "
 #define PASSPROMPT  "Enter the password or \"exit\" to exit: "
 #define PASSCONFIRM  "Confirm the password or enter \"exit\" to exit: "
-#define ADMIN_CONSOLE_ENTRIES    ":ADMIN:\n"\
-                                 "Select an option: "\
+#define ADMIN_CONSOLE_ENTRIES    ":ADMIN:"\
+                                 "\nSelect an option: "\
                                  "\n1 -> Manage book data "\
                                  "\n2 -> Change your password"\
                                  "\n3 -> Register an administrator"\
                                  "\n4 -> Delete users "\
                                  "\n0 -> Delete your account (careful!)"\
                                  "\nq -> Sign off"
-#define USER_CONSOLE_ENTRIES    ":USER:\n"\
+#define USER_CONSOLE_ENTRIES    ":USER:"\
                                 "\nSelect an option: "\
                                 "\n1 -> Manage book data "\
                                 "\n2 -> Change your password"\
                                 "\n0 -> Delete your account"\
                                 "\nq -> Sign off"
-#define ADMIN_MANAGEMENT_ENTRIES    ":ADMIN:\n"\
-                                    "Select an option: "\
+#define ADMIN_MANAGEMENT_ENTRIES    ":ADMIN:"\
+                                    "\nSelect an option: "\
                                     "\n1 -> Search anything "\
                                     "\n2 -> Show data "\
                                     "\n3 -> Add a new book"\
@@ -246,8 +247,8 @@ private:
                                     "\n7 -> Add a new genre "\
                                     "\n8 -> Manage a genre "\
                                     "\nq -> Go back"
-#define USER_MANAGEMENT_ENTRIES    ":USER:\n"\
-                                   "Select an option: "\
+#define USER_MANAGEMENT_ENTRIES    ":USER:"\
+                                   "\nSelect an option: "\
                                    "\n1 -> Search anything"\
                                    "\n2 -> Show data "\
                                    "\nq -> Go back"

@@ -175,7 +175,7 @@ bool readString(std::istream& is, std::string& ret, char mode = 'n')
 {
     std::string s;
     if (mode == 'p')
-        s = getPassword(); //Display start
+        s = getPassword(); //Display stars
     else if (!std::getline(is, s)) return false; //Display chars
 
     if (checkString(s, mode))
