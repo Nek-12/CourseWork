@@ -1,7 +1,8 @@
 #include "header.h"
 #include "sha256.h" //Encryption
-#include <regex>
-#include <random>
+#include <regex> //For checking date
+#include <random> //For genID()
+
 void pause()
 {
     std::cout << "Press any key to continue..." << std::endl;
