@@ -31,7 +31,7 @@ void Data::printBooks()
         }
         t << book.second.getName() << genres.str() << authors.str() << book.second.year << book.second.id() << fort::endr;
     }
-
+    setTableProperties(t, 0, 4);
     std::cout << t.to_string() << std::endl;
 }
 void Data::printAuthors()
@@ -66,9 +66,10 @@ void Data::printGenres(unsigned years)
         std::string delim;
         for (const auto& b: genre.second.books)
         {
-            if (b->year != 0 && b->year < diff) continue; //TODO: Test for 0 and 2020
-            books << delim << b->getName();
-            syear << delim << b->getYear();
+            auto pb = static_cast<Book*>(b);
+            if (pb->year != 0 && pb->year < diff) continue;
+            books << delim << pb->getName();
+            syear << delim << pb->getYear();
             delim = "\n";
             ++cnt;
         }
@@ -111,30 +112,17 @@ void Data::ensureFileExists(const std::string& f)
     }
 }
 
-std::vector<Book*> Data::searchBook(const std::string& s)
+std::vector<Entry*> Data::search(const std::string& s)
 {
-    std::vector<Book*> ret;
-    for (auto& book : mbooks)
-        if (book.second.check(s)) ret.push_back(&book.second);
-    return ret;
-}
-
-std::vector<Genre*> Data::searchGenre(const std::string& s)
-{
-    std::vector<Genre*> ret;
+    std::vector<Entry*> ret;
+    for (auto& b : mbooks)
+        if (b.second.check(s)) ret.push_back(&b.second);
+    for (auto& a : mauthors)
+        if (a.second.check(s)) ret.push_back(&a.second);
     for (auto& g : mgenres)
         if (g.second.check(s)) ret.push_back(&g.second);
     return ret;
 }
-
-std::vector<Author*> Data::searchAuthor(const std::string& s)
-{
-    std::vector<Author*> ret;
-    for (auto& a : mauthors)
-        if (a.second.check(s)) ret.push_back(&a.second);
-    return ret;
-}
-
 
 void Data::load() try
 {
@@ -253,14 +241,14 @@ void Data::load() try
 #ifndef NDEBUG
                 std::cout << "Executing new genre creation" << std::endl;
 #endif
-                addGenre(stoid(tempD), "Unknown genre", stoid(tempD))->addBook(*curbook);
+                addGenre(stoid(tempD), "Unknown genre", stoid(tempD))->link(curbook);
             }   //create a new genre and bind it to the book
             else
             {
 #ifndef NDEBUG
                 std::cout << "Executing adding pointer" << std::endl;
 #endif
-                sought->second.addBook(*curbook);
+                sought->second.link(curbook);
             }
             tempD.clear();
         }
@@ -283,14 +271,14 @@ void Data::load() try
 #ifndef NDEBUG
                 std::cout << "Executing new author creation" << std::endl;
 #endif
-                addAuthor(stoid(tempD), "Unknown author", "0.0.0000", "Unknown", stoid(tempD))->addBook(*curbook);
+                addAuthor(stoid(tempD), "Unknown author", "0.0.0000", "Unknown", stoid(tempD))->link(curbook);
             }
             else
             {
 #ifndef NDEBUG
                 std::cout << "Executing adding pointer" << std::endl;
 #endif
-                author->second.addBook(*curbook);
+                author->second.link(curbook);
             }
             tempD.clear();
         }

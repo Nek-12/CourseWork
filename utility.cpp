@@ -107,7 +107,7 @@ bool checkYear(const std::string& s)
     for (auto ch: s)
         if(!isdigit(ch) || s.size() > 4)
             return false;
-    return (std::stoul(s) < getCurYear() );
+    return (std::stoul(s) <= getCurYear());
 }
 
 bool checkString(const std::string& s, char mode) //The all-in-one input checker function. All rights reserved : )

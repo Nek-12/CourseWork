@@ -8,37 +8,46 @@ Book::~Book()
     std::cout << "Book " << getName() << " Destroyed" << std::endl;
 #endif
     for (const auto& g: genres)
-        g->remBook(*this);
+        g->unlink(this);
     for (const auto& a: authors)
-        a->remBook(*this);
+        a->unlink(this);
 }
 
-void Book::addAuthor(Author& a)
+bool Book::link(Entry* pe)
 {
-    authors.insert(&a);
-    a.books.insert(this);
+    if (typeid(*pe) == typeid(Genre))
+    {
+        genres.insert(pe);
+        return static_cast<Genre*>(pe)->books.insert(this).second;
+    }
+    else if (typeid(*pe) == typeid(Author))
+    {
+        authors.insert(pe);
+        return static_cast<Author*>(pe)->books.insert(this).second;
+    }
+    else return false;
 }
-void Book::addGenre(Genre& g)
+bool Book::unlink(Entry* pe)
 {
-    genres.insert(&g);
-    g.books.insert(this);
+    if (typeid(*pe) == typeid(Genre))
+    {
+        genres.erase(pe);
+        return static_cast<Genre*>(pe)->books.erase(this);
+    }
+    else if (typeid(*pe) == typeid(Author))
+    {
+        authors.erase(pe);
+        return static_cast<Author*>(pe)->books.erase(this);
+    }
+    else return false;
 }
-void Book::remAuthor(Author& a)
-{
-    authors.erase(&a);
-    a.books.erase(this);
-}
+
 void Book::remAuthor(const size_t& pos)
 {
     if (pos >= authors.size()) throw std::invalid_argument("Deleting genre past the end of book " + getName());
     auto it = authors.begin();
     std::advance(it, pos);
     authors.erase(it);
-}
-void Book::remGenre(Genre& g)
-{
-    genres.erase(&g);
-    g.books.erase(this);
 }
 void Book::remGenre(const size_t& pos)
 {
@@ -74,24 +83,19 @@ std::string Book::to_string() const
 bool Book::check(const std::string& s) const
 {
     std::string ls = lowercase(s);
-    if (lowercase(getName()).find(ls) != std::string::npos || s == std::to_string(year) || s == std::to_string(id())) return true;
-    for (const auto& el: genres)
-        if (lowercase(el->getName()).find(ls) != std::string::npos) return true;
-    for (const auto& el: authors)
-        if (lowercase(el->getName()).find(ls) != std::string::npos) return true;
-    return false;
+    return lowercase(getName()).find(ls) != std::string::npos || s == std::to_string(year) || s == std::to_string(id());
 }
 Book::Book(Book&& b) noexcept: Entry(std::move(b)), year(b.year), authors (std::move(b.authors)), genres(std::move(b.genres))
 {
     for (const auto& a: authors)
     {
-        a->addBook(*this);
-        a->remBook(b);
+        a->link(this);
+        a->unlink(&b);
     }
     for (const auto& g:genres)
     {
-        g->addBook(*this);
-        g->remBook(b);
+        g->link(this);
+        g->unlink(&b);
     }
 #ifndef NDEBUG
     std::cout << getName() << " was moved\n";
@@ -103,26 +107,33 @@ Book::Book(Book&& b) noexcept: Entry(std::move(b)), year(b.year), authors (std::
 Author::~Author()
 {
     for (const auto& b: books)
-        b->remAuthor(*this);
+        b->unlink(this);
 #ifndef NDEBUG
     std::cout << "Author " << this->getName() << " Destroyed" << std::endl;
 #endif
 }
-
-void Author::addBook(Book& b)
+bool Author::link(Entry* pe)
 {
-    books.insert(&b);
-    b.authors.insert(this);
+    if (typeid(*pe) == typeid(Book))
+    {
+        books.insert(pe);
+        return static_cast<Book*>(pe)->authors.insert(this).second;
+    }
+    else return false;
+}
+bool Author::unlink(Entry* pe)
+{
+    if (typeid(*pe) == typeid(Book))
+    {
+        books.erase(pe);
+        return static_cast<Book*>(pe)->authors.erase(this);
+    }
+    else return false;
 }
 
-void Author::remBook(Book& b)
-{
-    books.erase(&b);
-    b.authors.erase(this);
-}
 void Author::remBook(const size_t& pos)
 {
-    if (pos >= books.size()) throw std::invalid_argument("Deleting genre past the end of book " + getName());
+    if (pos >= books.size()) throw std::invalid_argument("Deleting book past the end of " + getName());
     auto it = books.begin();
     std::advance(it, pos);
     books.erase(it);
@@ -130,13 +141,9 @@ void Author::remBook(const size_t& pos)
 bool Author::check(const std::string& s) const
 {
     std::string ls = lowercase(s);
-    if (lowercase(getName()).find(ls) != std::string::npos
-        || s == std::to_string(id()) || lowercase(date).find(ls) != std::string::npos
-        || lowercase(country).find(ls) != std::string::npos)
-        return true;
-    for (const auto& el: books)
-        if (lowercase(el->getName()).find(ls) != std::string::npos) return true;
-    return false;
+    return lowercase(getName()).find(ls) != std::string::npos
+           || s == std::to_string(id()) || lowercase(date).find(ls) != std::string::npos
+           || lowercase(country).find(ls) != std::string::npos;
 }
 
 std::string Author::to_string() const
@@ -160,8 +167,8 @@ Author::Author(Author&& a) noexcept: Entry(std::move(a)), country(std::move(a.co
 {
     for (const auto& b:books)
     {
-        b->addAuthor(*this);
-        b->remAuthor(a);
+        b->link(this);
+        b->unlink(&a);
     }
 #ifndef NDEBUG
     std::cout << getName() << " was moved\n";
@@ -176,27 +183,30 @@ Genre::~Genre()
     std::cout << "Genre " << this->getName() << " Destroyed" << std::endl;
 #endif
     for (const auto& b: books)
-        b->remGenre(*this);
+        b->unlink(this);
 }
-void Genre::addBook(Book& b)
+bool Genre::link(Entry* pe)
 {
-    books.insert(&b);
-    b.genres.insert(this);
+    if (typeid(*pe) == typeid(Book))
+    {
+        books.insert(pe);
+        return static_cast<Book*>(pe)->genres.insert(this).second;
+    }
+    else return false;
 }
-
-void Genre::remBook(Book& b)
+bool Genre::unlink(Entry* pe)
 {
-    books.erase(&b);
-    b.genres.erase(this);
+    if (typeid(*pe) == typeid(Book))
+    {
+        books.erase(pe);
+        return static_cast<Book*>(pe)->genres.erase(this);
+    }
+    else return false;
 }
-
 bool Genre::check(const std::string& s) const
 {
     std::string ls = lowercase(s);
-    if (lowercase(getName()).find(ls) != std::string::npos || s == std::to_string(id())) return true;
-    for (auto el: books)
-        if (lowercase(el->getName()).find(ls) != std::string::npos) return true;
-    return false;
+    return lowercase(getName()).find(ls) != std::string::npos || s == std::to_string(id());
 }
 
 std::string Genre::to_string() const
@@ -211,8 +221,8 @@ Genre::Genre(Genre&& g) noexcept: Entry(std::move(g)), books(std::move(g.books))
 {
     for (const auto& b:books)
     {
-        b->addGenre(*this);
-        b->remGenre(g);
+        b->link(this);
+        b->unlink(&g);
     }
 #ifndef NDEBUG
     std::cout << getName() << " was moved\n";
