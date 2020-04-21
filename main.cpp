@@ -352,7 +352,7 @@ void manageGenre(Genre* pg) //Specialized actions for every entry
                 pe = selectEntry();
                 if (typeid(*pe) == typeid(Book)) //If we selected a book
                 {
-                    if (yesNo("Remove book " + pe->getName() + "from genre " + pg->getName() + "?"))
+                    if (yesNo("Remove book " + pe->getName() + " from genre " + pg->getName() + "?"))
                     {
                         if (pg->unlink(static_cast<Book*>(pe))) //Unlink If exists (just to be sure)
                             std::cout << "Removed successfully" << std::endl;
@@ -542,7 +542,7 @@ void createAccPrompt(const bool& isadmin)
     }
     if (!passConfirm(p)) return;
     data.addAccount(l, p, isadmin);
-    std::cout << "Successfully created account " << l << " ! Going back..." << std::endl;
+    std::cout << "Successfully created account " << l << " ! Logging you in..." << std::endl;
 #ifndef NDEBUG
     data.printCredentials(isadmin);
 #endif

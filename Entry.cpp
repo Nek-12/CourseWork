@@ -71,14 +71,14 @@ std::string Book::to_string() const //To overload the virtual one, allows us to 
     for (const auto& el: genres)
     {
         i++;
-        g << delim << i << ". " << el->getName(); //Add numbers to select something later
+        g << delim << i << "." << el->getName(); //Add numbers to select something later
         delim = "\n";
     }
     delim.clear(); i = 0;
     for (const auto& el: authors)
     {
         i++;
-        a << delim << i << ". " << el->getName();
+        a << delim << i << "." << el->getName();
         delim = "\n";
     }
     t << getName() << g.str() << a.str() << year << id() << fort::endr;
@@ -161,7 +161,7 @@ std::string Author::to_string() const
     for (const auto& el: books)
     {
         i++;
-        b << delim << i << ". " << el->getName();
+        b << delim << i << "." << el->getName();
         delim = "\n";
     }
     t << getName() << b.str() << date << country << id() << fort::endr;

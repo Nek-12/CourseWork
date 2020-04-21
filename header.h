@@ -7,7 +7,7 @@
 #include <set> //For storing pointers
 #include "fort.hpp" //For printing tables
 
-#define NDEBUG //Forbid debugging output in the release version (explicit, but can be defined by CMake automatically)
+//#define NDEBUG //Forbid debugging output in the release version (explicit, but can be defined by CMake automatically)
 #ifndef __linux__
 #include <conio.h>
 #define CARRIAGE_RETURN_CHAR 13 //getch() returns different keycodes for windows and linux
