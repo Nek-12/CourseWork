@@ -5,7 +5,7 @@
 #include <vector> //For search
 #include <iostream> //IO
 #include <set> //For storing pointers
-#include "fort.hpp" //For printing tables
+#include "lib/fort.hpp" //For printing tables
 
 //#define NDEBUG //Forbid debugging output in the release version (explicit, but can be defined by CMake automatically)
 #ifndef __linux__
@@ -66,7 +66,7 @@ class Entry //Base class
 public:
     Entry() = delete; //No blank entries
     Entry(const Entry& e) = delete; //No copies
-    Entry& operator=(const Entry&) = delete; //No assigning
+//    Entry& operator=(const Entry&) = delete; //No assigning
     virtual ~Entry() = default;
     [[nodiscard]] const ull& id() const //We shouldn't discard the returned value for the getter. Would make no sense. Just for safety
     { return no; }
@@ -80,8 +80,7 @@ public:
     [[nodiscard]] virtual bool check(const std::string& s) const = 0;
 protected: //Constructors are protected to disallow users creating entries in the journal. It's unsafe and makes no sense. Users will use the
     //Data class instead, and the safety is going to be much better
-    Entry(Entry&& e) noexcept: no(e.no), name(std::move(e.name))
-    {} //We can only move entries from one journal to another
+    Entry(Entry&& e) noexcept: no(e.no), name(std::move(e.name)) {} //We can only move entries from one journal to another
     explicit Entry(std::string n, const ull& id) : no(id), name(std::move(n)) //Create one
     {
 #ifndef NDEBUG
@@ -101,8 +100,7 @@ class Book : public Entry
 public:
     ~Book() override;
     Book(Book&& b) noexcept; //Exists
-    explicit Book(const std::string& t, const unsigned& y = 0, const ull& n = genID()) : Entry(t, n), year(y)
-    {}
+    explicit Book(const std::string& t, const unsigned& y = 0, const ull& n = genID()) : Entry(t, n), year(y) {}
     [[nodiscard]] bool check(const std::string& s) const override;
     [[nodiscard]] std::string to_string() const override;
     bool link(Entry* pe) override;

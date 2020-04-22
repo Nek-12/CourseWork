@@ -1,5 +1,5 @@
 #include "header.h"
-#include "sha256.h" //Encryption
+#include "lib/sha256.h" //Encryption
 #include <regex> //For checking date
 #include <random> //For genID()
 

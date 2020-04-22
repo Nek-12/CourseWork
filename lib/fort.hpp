@@ -36,9 +36,9 @@ SOFTWARE.
 #ifndef LIBFORT_HPP
 #define LIBFORT_HPP
 
-#include <string>
-#include <stdexcept>
-#include <sstream>
+#include <c++/9.3.0/string>
+#include <c++/9.3.0/stdexcept>
+#include <c++/9.3.0/sstream>
 #include "fort.h"
 
 namespace fort
