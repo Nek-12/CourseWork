@@ -33,7 +33,7 @@ class Entry;
 class Book;
 class Author;
 class Genre;
-
+extern Data* data;
 void setTableProperties(fort::char_table&, unsigned, unsigned); //Edit the table
 void pause(); //Wait for a keypress
 ull stoid(const std::string& s); //change string to an ID
@@ -176,10 +176,10 @@ public:
     Data(Data const&) = delete; //No copying, no moving!
     void operator=(Data const&) = delete; //No assigning!
     //Default destructor
-    static Data& getInstance() //Returns a reference to the single static instance of Data.
+    static Data* getInstance() //Returns a reference to the single static instance of Data.
     {
         static Data instance; //The instance is always one and lazy-evaluated on the first use
-        return instance; //Return a reference
+        return &instance; //Return a reference
     }
     void load(); //Loads all the data from several files
     void save(); //Writes the data to the files (books.txt etc.)
