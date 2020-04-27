@@ -14,17 +14,14 @@
 #define BACKSPACE_CHAR 8
 using ull = unsigned long long; //The size of unsigned long on my linux distro is around ~10^25, however on my windows the size of
 //unsigned long long (!) is just ~10^20
-#define MAX_ID ULONG_LONG_MAX
 #else
 using ull = unsigned long; //Depends on the platform
-#define MAX_ID ULONG_MAX
 #define CARRIAGE_RETURN_CHAR 10
 #define BACKSPACE_CHAR 127
-
 #include <termios.h>
-
 int getch();
 #endif
+#define MAX_ID 1000000000000000000u //19 digits
 #define MAX_ID_LENGTH 19 //I have settled on this maximum length of the id, but it can be increased and even made a string.
 extern std::string path; //Path to the program folder, see main.cpp -> int main()
 
