@@ -1,7 +1,7 @@
 #pragma once //Don't repeat the inclusion to avoid conflicts
 
 #include <map> //Main storage
-#include <utility> //For advance and other stuff
+//#include <utility> //For advance and other stuff
 #include <vector> //For search
 #include <iostream> //IO
 #include <set> //For storing pointers
@@ -47,7 +47,7 @@ bool readString(std::istream& is, std::string& s, char mode);
 //Not the best solution but convenient for me
 class Entry //Base class
 /*
- * Each journal _entry_ represents some kind of table row that contains different info for each entry, but the operations are same.
+ * Each journal entry represents some kind of table row that contains different info for each entry, but the operations are same.
  * This is some kind of merged interface and usual base class. Will be used with dynamic binding later extensively, so I tried to provide
  * A lot of virtual functions to minimize dynamic casts and RTTI which are slow
  * But the nature is such that sometimes we can't avoid casts in my project. At least I couldn't.
@@ -63,6 +63,7 @@ class Entry //Base class
 public:
     Entry() = delete; //No blank entries
     Entry(const Entry& e) = delete; //No copies
+//    Copying an entry doesn't make sense. Why would we need several identical lines in our journal?
 //    Entry& operator=(const Entry&) = delete; //No assigning
     virtual ~Entry() = default;
     [[nodiscard]] const ull& id() const //We shouldn't discard the returned value for the getter. Would make no sense. Just for safety
@@ -73,9 +74,9 @@ public:
     { name = s; }
     virtual bool link(Entry* e) = 0; //Pure virtuals for an abstract base class
     virtual bool unlink(Entry* e) = 0;
+protected: //Constructors are protected to disallow users creating entries in the journal. It's unsafe and makes no sense. Users will use the
     [[nodiscard]] virtual std::string to_string() const = 0;
     [[nodiscard]] virtual bool check(const std::string& s) const = 0;
-protected: //Constructors are protected to disallow users creating entries in the journal. It's unsafe and makes no sense. Users will use the
     //Data class instead, and the safety is going to be much better
     Entry(Entry&& e) noexcept: no(e.no), name(std::move(e.name)) {} //We can only move entries from one journal to another
     explicit Entry(std::string n, const ull& id) : no(id), name(std::move(n)) //Create one
@@ -150,8 +151,7 @@ class Genre : public Entry
     friend class Book;
     friend class Data;
 public:
-    explicit Genre(std::string n, ull id = genID()) : Entry(std::move(n), id)
-    {} //
+    explicit Genre(std::string n, ull id = genID()) : Entry(std::move(n), id) {}
     ~Genre() override;
     Genre(Genre&& g) noexcept;
     bool link(Entry* pe) override;
@@ -176,7 +176,7 @@ public:
     static Data* getInstance() //Returns a reference to the single static instance of Data.
     {
         static Data instance; //The instance is always one and lazy-evaluated on the first use
-        return &instance; //Return a reference
+        return &instance; //Return a pointer to self
     }
     void load(); //Loads all the data from several files
     void save(); //Writes the data to the files (books.txt etc.)

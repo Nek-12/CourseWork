@@ -1,5 +1,6 @@
 //NOTE: READ THIS FILE IN REVERSE DIRECTION (FROM THE END)
 #include "header.h"
+
 std::string path; //extern global string
 Data* data = nullptr;
 #ifndef __linux__
@@ -76,7 +77,6 @@ ull select(const ull& limit) //Select from some kind of range, used in search pr
 std::vector<Entry*> search()
 {
     std::vector<Entry*> sought; //There can be several results depending on our query.
-     
     while (true)
     {
         cls();
@@ -129,7 +129,6 @@ void addEntries(Entry* pe)
 
 Author* newAuthor() //Add a new author and, if needed, provide a recursion to add something else.
 {
-     
     cls();
     std::string n, d, c;
     ull id = inputID();
@@ -153,7 +152,6 @@ Author* newAuthor() //Add a new author and, if needed, provide a recursion to ad
 
 Book* newBook() //The same logic as in the newGenre() see below
 {
-     
     cls();
     std::string n, a, y;
     ull id = inputID();
@@ -175,7 +173,6 @@ Book* newBook() //The same logic as in the newGenre() see below
 
 Genre* newGenre()
 {
-     
     std::string temp;
     std::cout << "Enter the new genre's name" << std::endl;
     while (!readString(std::cin, temp, 's')); //Once we read the name
@@ -232,7 +229,6 @@ void editBookEntries(Book* pb)  //Books are more complicated, so special menu
 
 void manageBook(Book* pb)
 {
-     
     std::string temp;
     while (true)
     {
@@ -275,7 +271,6 @@ void manageBook(Book* pb)
 }
 void manageAuthor(Author* pa)
 {
-     
     std::string temp;
     while (true)
     {
@@ -330,7 +325,6 @@ void manageAuthor(Author* pa)
 
 void manageGenre(Genre* pg) //Specialized actions for every entry
 {
-     
     std::string temp;
     Entry* pe;
     while (true)
@@ -398,7 +392,6 @@ void manageEntry() //Uses RTTI to know which entry we are editing.
 
 void showData()
 {
-     
     std::string temp;
     unsigned y;
     cls();
@@ -487,7 +480,6 @@ bool passConfirm(std::string& p)
 
 bool passChange(const std::string& l, const bool& isadmin)
 {
-     
     std::string p;
     if (!passConfirm(p)) return false; //It changes the string it was given on success
     data->changePass(l, p, isadmin);
@@ -498,7 +490,6 @@ bool passChange(const std::string& l, const bool& isadmin)
 
 void manageUsr() //Admins can delete users, but not admins (except own)
 {
-     
     std::string l, p;
     while (true)
     {
@@ -527,7 +518,6 @@ void manageUsr() //Admins can delete users, but not admins (except own)
 
 void createAccPrompt(const bool& isadmin)
 {
-    
     std::string l, p, temp;
     cls();
 #ifndef NDEBUG
@@ -549,7 +539,7 @@ void createAccPrompt(const bool& isadmin)
     data->printCredentials(isadmin);
 #endif
     pause();
-    if (!isadmin) console(l,false); //If the acc was created for user we can log him in instantly
+    if (!isadmin) console(l, false); //If the acc was created for user we can log him in instantly
 }
 
 bool delDialog(const std::string& l, const bool& isadmin)
@@ -655,7 +645,7 @@ void login(const bool& isadmin)
 int main(int, char* argv[]) try
 //Try function block for convenience. Argc is unused, argv is an array of char arrays, each with an argument, first is path
 {
-    data = Data::getInstance(); //We always get the reference to the instance of the singleton if we need it. For exception safety
+    data = Data::getInstance(); //Assign to our global pointer. For exception safety
     path = argv[0];
     path.erase(path.find_last_of('\\') + 1); //Makes 'path' be the path to the app folder, removing program name
     data->load(); //Loads ALL the data
@@ -674,7 +664,7 @@ int main(int, char* argv[]) try
     bool workin = true, first = true; //The first time we don't clear the screen to show the user the info from data->load()
     while (workin) //While the user didn't quit
     {
-        if(!first) cls(); //clear the screen
+        if (!first) cls(); //clear the screen
         first = false; //not first anymore
         std::cout << WELCOME_MENU << std::endl; //Draw a menu
         switch (tolower(getch())) //Switch the input from a user
