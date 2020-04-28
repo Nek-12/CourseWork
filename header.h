@@ -12,12 +12,14 @@
 #include <conio.h>
 #define CARRIAGE_RETURN_CHAR 13 //getch() returns different keycodes for windows and linux
 #define BACKSPACE_CHAR 8
-using ull = unsigned long long; //The size of unsigned long on my linux distro is around ~10^25, however on my windows the size of
+#define CLS "cls"
+using ull = unsigned long long; //The size of unsigned long on my linux distro is around ~10^25, however on my Windows OS the size of
 //unsigned long long (!) is just ~10^20
 #else
 using ull = unsigned long; //Depends on the platform
 #define CARRIAGE_RETURN_CHAR 10
 #define BACKSPACE_CHAR 127
+#define CLS "clear"
 #include <termios.h>
 int getch();
 #endif
@@ -230,7 +232,7 @@ public:
         return true;
     } //Could create an account accidentally, so the user MUST not discard the result
 private:
-    Data() = default;
+    Data() = default; //Can't create data out of the blue.
     static void ensureFileExists(const std::string& f); //Users don't need that function
     std::map<ull, Genre> mgenres;
     std::map<ull, Author> mauthors;

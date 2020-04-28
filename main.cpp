@@ -3,10 +3,7 @@
 
 std::string path; //extern global string
 Data* data = nullptr;
-#ifndef __linux__
-inline void cls() //This function depends on platform
-{ system("cls"); }
-#else
+#ifdef __linux__
 int getch() //Getch for linux
 {
     struct termios oldattr, newattr;
@@ -19,14 +16,34 @@ int getch() //Getch for linux
     tcsetattr(0, TCSANOW, &oldattr);
     return (ch);
 }
-inline void cls() { system("clear"); } //cls for linux
 #endif
-
+inline void cls() //This function depends on platform
+{ system(CLS); }
 //TODO: Fix: When adding/editing books, there is no check that GENRE or AUTHOR with that ID is present and vice versa
+bool yesNo(const std::string& msg);
+ull inputID();
+ull select(const ull& limit);
+std::vector<Entry*> search();
+Entry* selectEntry();
+void addEntries(Entry* pe);
+Author* newAuthor();
 Book* newBook();
 Genre* newGenre();
-Author* newAuthor();
-void console(const std::string&, const bool&);
+void editBookEntries(Book* pb);
+void manageBook(Book* pb);
+void manageAuthor(Author* pa);
+void manageGenre(Genre* pg);
+void manageEntry();
+void showData();
+void management(bool isadmin);
+bool passConfirm(std::string& p);
+bool passChange(const std::string& l, bool isadmin);
+void manageUsr();
+void createAccPrompt(bool isadmin);
+bool delDialog(const std::string& l, bool isadmin);
+void console(const std::string& usr, bool);
+void login(bool isadmin);
+
 //Not all declarations are needed because I arranged the functions properly. However this is a bad practice
 bool yesNo(const std::string& msg)
 { //Asks for confirmation
@@ -478,7 +495,7 @@ bool passConfirm(std::string& p)
     return true;
 }
 
-bool passChange(const std::string& l, const bool& isadmin)
+bool passChange(const std::string& l, bool isadmin)
 {
     std::string p;
     if (!passConfirm(p)) return false; //It changes the string it was given on success
@@ -516,7 +533,7 @@ void manageUsr() //Admins can delete users, but not admins (except own)
     }
 }
 
-void createAccPrompt(const bool& isadmin)
+void createAccPrompt(bool isadmin)
 {
     std::string l, p, temp;
     cls();
@@ -542,7 +559,7 @@ void createAccPrompt(const bool& isadmin)
     if (!isadmin) console(l, false); //If the acc was created for user we can log him in instantly
 }
 
-bool delDialog(const std::string& l, const bool& isadmin)
+bool delDialog(const std::string& l, bool isadmin)
 {
     std::string p;
     while (true)
@@ -569,7 +586,7 @@ bool delDialog(const std::string& l, const bool& isadmin)
     return true; //Means was deleted
 }
 
-void console(const std::string& usr, const bool& isadmin)
+void console(const std::string& usr, bool isadmin)
 {
     while (true)
     {
@@ -602,7 +619,7 @@ void console(const std::string& usr, const bool& isadmin)
     }
 }
 
-void login(const bool& isadmin)
+void login(bool isadmin)
 {
     std::string usr, pass;
     while (true) //While the user did not enter his username
