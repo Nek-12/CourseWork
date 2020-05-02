@@ -45,13 +45,10 @@ void console(const std::string& usr, bool);
 void login(bool isadmin);
 
 //Not all declarations are needed because I arranged the functions properly. However this is a bad practice
-bool yesNo(const std::string& msg)
-{ //Asks for confirmation
+bool yesNo(const std::string& msg) { //Asks for confirmation
     std::cout << msg << " y/n" << std::endl;
-    while (true)
-    {
-        switch (tolower(getch()))
-        {
+    while (true) {
+        switch (tolower(getch())) {
             case 'y':
                 return true;
             case 'n':
@@ -62,11 +59,9 @@ bool yesNo(const std::string& msg)
     }
 }
 
-ull inputID() //You can choose if you want a new ID or you already know one
-{
+ull inputID() { //You can choose if you want a new ID or you already know one
     std::string id;
-    if (!yesNo("Generate an ID?"))
-    {
+    if (!yesNo("Generate an ID?")) {
         std::cout << "Enter the ID: ";
         while (!readString(std::cin, id, 'i'));
     }
@@ -75,15 +70,12 @@ ull inputID() //You can choose if you want a new ID or you already know one
     return stoid(id);
 }
 
-ull select(const ull& limit) //Select from some kind of range, used in search primarily
-{
-    while (true)
-    {
+ull select(const ull& limit) { //Select from some kind of range, used in search primarily
+    while (true) {
         std::string s;
         while (!readString(std::cin, s, 'i'));
         ull ret = stoid(s);
-        if (ret > limit || ret == 0)
-        {
+        if (ret > limit || ret == 0) {
             std::cerr << "You have selected a bad value. Try again: " << std::endl;
             continue;
         }
@@ -91,22 +83,18 @@ ull select(const ull& limit) //Select from some kind of range, used in search pr
     }
 }
 
-std::vector<Entry*> search()
-{
+std::vector<Entry*> search() {
     std::vector<Entry*> sought; //There can be several results depending on our query.
-    while (true)
-    {
+    while (true) {
         cls();
         std::string s;
         std::cout << "Enter any property of anything to search (case ignored): " << std::endl;
         while (!readString(std::cin, s, 's'));
         sought = data->search(s); //All kinds of entries there
-        if (sought.empty())
-        {
+        if (sought.empty()) {
             std::cerr << "Nothing found." << std::endl;
         }
-        else
-        {
+        else {
             std::cout << "Found: " << std::endl;
             for (auto el: sought)
                 std::cout << *el << std::endl; //Print
@@ -117,12 +105,11 @@ std::vector<Entry*> search()
     return sought;
 }
 
-Entry* selectEntry()
-{
+Entry* selectEntry() {
     auto sought = search(); //First search
     if (sought.empty()) return nullptr; //If nothing go back
     else if (sought.size() == 1) //If one entry select it immediately
-        return sought[0];
+        return sought[0]; //TODO: Maybe we should ask if we want to use the entry found?
     cls();
     for (auto it = sought.begin(); it != sought.end(); ++it) //If more print them and select just one
         std::cout << "#" << it + 1 - sought.begin() << ":\n" << **it; //There are genres, authors, books, up to user.
@@ -130,10 +117,8 @@ Entry* selectEntry()
     return sought[select(sought.size()) - 1]; //select one
 }
 
-void addEntries(Entry* pe)
-{
-    while (true)
-    {
+void addEntries(Entry* pe) {
+    while (true) {
         if (!yesNo("Add an entry to " + pe->getName() + " ?")) break;
         Entry* sought = selectEntry();
         if (!sought) break; //If we found nothing
@@ -144,8 +129,7 @@ void addEntries(Entry* pe)
     }
 }
 
-Author* newAuthor() //Add a new author and, if needed, provide a recursion to add something else.
-{
+Author* newAuthor() {//Add a new author and, if needed, provide a recursion to add something else.
     cls();
     std::string n, d, c;
     ull id = inputID();
@@ -156,8 +140,7 @@ Author* newAuthor() //Add a new author and, if needed, provide a recursion to ad
     std::cout << "Enter the author's country" << std::endl;
     while (!readString(std::cin, c, 's'));
     Author* added = data->addAuthor(id, n, d, c, id);
-    if (!added)
-    {
+    if (!added) {
         std::cout << "Such author already exists" << std::endl;
         return nullptr;
     }
@@ -167,8 +150,7 @@ Author* newAuthor() //Add a new author and, if needed, provide a recursion to ad
     return added;
 }
 
-Book* newBook() //The same logic as in the newGenre() see below
-{
+Book* newBook() {//The same logic as in the newGenre() see below
     cls();
     std::string n, a, y;
     ull id = inputID();
@@ -177,8 +159,7 @@ Book* newBook() //The same logic as in the newGenre() see below
     std::cout << "Enter the year the book was published" << std::endl;
     while (!readString(std::cin, y, 'y'));
     Book* added = data->addBook(id, n, stoid(y), id);
-    if (!added)
-    {
+    if (!added) {
         std::cerr << "Such book already exists." << std::endl;
         return nullptr;
     }
@@ -188,8 +169,7 @@ Book* newBook() //The same logic as in the newGenre() see below
     return added;
 }
 
-Genre* newGenre()
-{
+Genre* newGenre() {
     std::string temp;
     std::cout << "Enter the new genre's name" << std::endl;
     while (!readString(std::cin, temp, 's')); //Once we read the name
@@ -207,11 +187,9 @@ Genre* newGenre()
     return added;
 }
 
-void editBookEntries(Book* pb)  //Books are more complicated, so special menu
-{
+void editBookEntries(Book* pb)  {//Books are more complicated, so special menu
     if (pb == nullptr) return;
-    while (true)
-    {
+    while (true) {
         cls();
         std::cout << *pb << std::endl;
         std::cout << "Select an option for book " << pb->getName() <<
@@ -219,8 +197,7 @@ void editBookEntries(Book* pb)  //Books are more complicated, so special menu
                   "\n2 -> Remove authors from the book "
                   "\n3 -> Remove genres from the book "
                   "\nq -> Go back" << std::endl;
-        switch (getch())
-        {
+        switch (getch()) {
             case '1':
                 addEntries(pb); //Dynamic binding
                 break;
@@ -244,16 +221,13 @@ void editBookEntries(Book* pb)  //Books are more complicated, so special menu
     }
 }
 
-void manageBook(Book* pb)
-{
+void manageBook(Book* pb) {
     std::string temp;
-    while (true)
-    {
+    while (true) {
         cls();
         std::cout << *pb << std::endl;
         std::cout << EDIT_BOOK_OPTIONS << std::endl;
-        switch (getch())
-        {
+        switch (getch()) {
             case '1':
                 std::cout << "Enter the new title of the book: " << std::endl;
                 while (!readString(std::cin, temp, 's'));
@@ -270,8 +244,7 @@ void manageBook(Book* pb)
                 editBookEntries(pb); //To add and remove
                 return;
             case '4':
-                if (yesNo("Delete this record?"))
-                {
+                if (yesNo("Delete this record?")) {
                     if (data->erase(*pb))
                         std::cout << "Erased this book and removed all references." << std::endl;
                     else std::cout << "Couldn't erase this entry!" << std::endl;
@@ -286,16 +259,13 @@ void manageBook(Book* pb)
         }
     }
 }
-void manageAuthor(Author* pa)
-{
+void manageAuthor(Author* pa) {
     std::string temp;
-    while (true)
-    {
+    while (true) {
         cls();
         std::cout << *pa << std::endl;
         std::cout << EDIT_AUTHOR_OPTIONS << std::endl;
-        switch (getch())
-        {
+        switch (getch()) {
             case '1':
                 std::cout << "Enter the new name for the author: " << std::endl;
                 while (!readString(std::cin, temp, 's'));
@@ -305,7 +275,7 @@ void manageAuthor(Author* pa)
             case '2':
                 std::cout << "Enter the new birthdate: " << std::endl;
                 while (!readString(std::cin, temp, 'd'));
-                pa->setDate(temp); //We can accept the 0.0.0000 as unknown date.
+                pa->setDate(temp); //We can accept the 0.0.0000 as Tnown date.
                 std::cout << "Changed successfully." << std::endl;
                 break;
             case '3':
@@ -324,8 +294,7 @@ void manageAuthor(Author* pa)
                 pause();
                 break;
             case '6':
-                if (yesNo("Delete this record?"))
-                {
+                if (yesNo("Delete this record?")) {
                     data->erase(*pa);
                     std::cout << "Erased this author and removed all references." << std::endl;
                     pause();
@@ -340,17 +309,14 @@ void manageAuthor(Author* pa)
     }
 }
 
-void manageGenre(Genre* pg) //Specialized actions for every entry
-{
+void manageGenre(Genre* pg) {//Specialized actions for every entry
     std::string temp;
     Entry* pe;
-    while (true)
-    {
+    while (true) {
         cls();
         std::cout << *pg << std::endl; //Print what we are editing
         std::cout << EDIT_GENRE_OPTIONS << std::endl;
-        switch (getch())
-        {
+        switch (getch()) {
             case '1':
                 std::cout << "Enter the new genre's title" << std::endl;
                 while (!readString(std::cin, temp, 's'));
@@ -365,8 +331,7 @@ void manageGenre(Genre* pg) //Specialized actions for every entry
                 pe = selectEntry();
                 if (typeid(*pe) == typeid(Book)) //If we selected a book
                 {
-                    if (yesNo("Remove book " + pe->getName() + " from genre " + pg->getName() + "?"))
-                    {
+                    if (yesNo("Remove book " + pe->getName() + " from genre " + pg->getName() + "?")) {
                         if (pg->unlink(static_cast<Book*>(pe))) //Unlink If exists (just to be sure)
                             std::cout << "Removed successfully" << std::endl;
                         else std::cout << "Couldn't remove this entry!" << std::endl;
@@ -374,14 +339,12 @@ void manageGenre(Genre* pg) //Specialized actions for every entry
                     }
                     break;
                 }
-                else
-                {
+                else {
                     std::cout << "Please select a book! " << std::endl; //Else get outta here
                     break;
                 }
             case '4':
-                if (yesNo("Delete this record?"))
-                {
+                if (yesNo("Delete this record?")) {
                     std::cout << "Erased this genre and removed all references." << std::endl;
                     data->erase(*pg);
                     pause();
@@ -395,8 +358,7 @@ void manageGenre(Genre* pg) //Specialized actions for every entry
         }
     }
 }
-void manageEntry() //Uses RTTI to know which entry we are editing.
-{
+void manageEntry() {//Uses RTTI to know which entry we are editing.
     Entry* pe = selectEntry(); //Find an entry to edit and select it
     if (!pe) return;
     if (typeid(*pe) == typeid(Genre))
@@ -407,26 +369,26 @@ void manageEntry() //Uses RTTI to know which entry we are editing.
         manageBook(static_cast<Book*>(pe));
 }
 
-void showData()
-{
+void showData() {
     std::string temp;
     unsigned y;
     cls();
     std::cout << SHOW_DATA_MENU_ENTRIES << std::endl;
-    while (true)
-    {
-        switch (getch())
-        {
+    while (true) {
+        switch (getch()) {
             case '1':
+                cls();
                 data->printBooks(); //Print tables
                 pause();
                 return;
             case '2':
+                cls();
                 data->printAuthors();
                 pause();
                 return;
             case '3':
-                std::cout << "Enter the time period in years: " << std::endl; //Custom behaviour according to the supervisor's request
+                cls();
+                std::cout << "Enter the time period in years: " << std::endl; //Custom behavior according to the supervisor's request
                 while (!readString(std::cin, temp, 'y'));
                 y = stoid(temp);
                 data->printGenres(y);
@@ -440,14 +402,11 @@ void showData()
     }
 }
 
-void management(bool isadmin) //Differentiates between right levels
-{
-    while (true)
-    {
+void management(bool isadmin) {//Differentiates between right levels
+    while (true) {
         cls();
         std::cout << (isadmin ? ADMIN_MANAGEMENT_ENTRIES : USER_MANAGEMENT_ENTRIES) << std::endl;
-        switch (getch())
-        {
+        switch (getch()) {
             case 'q':
                 return;
             case '1':
@@ -474,11 +433,9 @@ void management(bool isadmin) //Differentiates between right levels
     }
 }
 
-bool passConfirm(std::string& p)
-{
+bool passConfirm(std::string& p) {
     std::string tempA, tempB;
-    while (true)
-    {
+    while (true) {
         cls();
         std::cout << PASSPROMPT << std::endl;
         while (!readString(std::cin, tempA, 'p'));
@@ -495,8 +452,7 @@ bool passConfirm(std::string& p)
     return true;
 }
 
-bool passChange(const std::string& l, bool isadmin)
-{
+bool passChange(const std::string& l, bool isadmin) {
     std::string p;
     if (!passConfirm(p)) return false; //It changes the string it was given on success
     data->changePass(l, p, isadmin);
@@ -508,8 +464,7 @@ bool passChange(const std::string& l, bool isadmin)
 void manageUsr() //Admins can delete users, but not admins (except own)
 {
     std::string l, p;
-    while (true)
-    {
+    while (true) {
         cls();
         data->printCredentials(false); //To see which users to delete
         std::cout << LOGINPROMPT << std::endl;
@@ -517,12 +472,10 @@ void manageUsr() //Admins can delete users, but not admins (except own)
         if (l == "exit") return;
         if (!data->loginCheck(l, false)) //Check if the user exists before deleting
             std::cout << "User not found." << std::endl;
-        else
-        {
+        else {
             data->delAccount(l, false);
             std::cout << "Deleted account " << l << std::endl;
-            if (data->enumAccounts(false) == 0)
-            {
+            if (data->enumAccounts(false) == 0) {
                 std::cout << "No accounts left. Exiting." << std::endl;
                 pause();
                 return;
@@ -533,8 +486,7 @@ void manageUsr() //Admins can delete users, but not admins (except own)
     }
 }
 
-void createAccPrompt(bool isadmin)
-{
+void createAccPrompt(bool isadmin) {
     std::string l, p, temp;
     cls();
 #ifndef NDEBUG
@@ -551,7 +503,7 @@ void createAccPrompt(bool isadmin)
     }
     if (!passConfirm(p)) return;
     data->addAccount(l, p, isadmin);
-    std::cout << "Successfully created account " << l << " ! Logging you in..." << std::endl;
+    std::cout << "Successfully created account " << l << " ! Forwarding..." << std::endl;
 #ifndef NDEBUG
     data->printCredentials(isadmin);
 #endif
@@ -559,11 +511,9 @@ void createAccPrompt(bool isadmin)
     if (!isadmin) console(l, false); //If the acc was created for user we can log him in instantly
 }
 
-bool delDialog(const std::string& l, bool isadmin)
-{
+bool delDialog(const std::string& l, bool isadmin) {
     std::string p;
-    while (true)
-    {
+    while (true) {
         cls();
         std::cout << "THIS WILL DELETE YOUR ACCOUNT AND YOU WILL BE LOGGED OFF."
                   << "\nTYPE YOUR PASSWORD, " << l << ", TO PROCEED OR \"exit\" TO CANCEL." << std::endl;
@@ -574,8 +524,7 @@ bool delDialog(const std::string& l, bool isadmin)
         else
             std::cerr << "Wrong password." << std::endl;
     }
-    if (!data->delAccount(l, isadmin))
-    {
+    if (!data->delAccount(l, isadmin)) {
         std::cerr << "You can't delete the last account!" << std::endl;
         //Only valid for admins, you have to remove the generated admin | admin acc. Feel free to remove all users.
         pause();
@@ -586,14 +535,11 @@ bool delDialog(const std::string& l, bool isadmin)
     return true; //Means was deleted
 }
 
-void console(const std::string& usr, bool isadmin)
-{
-    while (true)
-    {
+void console(const std::string& usr, bool isadmin) {
+    while (true) {
         cls();
         std::cout << (isadmin ? ADMIN_CONSOLE_ENTRIES : USER_CONSOLE_ENTRIES) << std::endl; //Different options for every1
-        switch (getch())
-        {
+        switch (getch()) {
             case '1':
                 management(isadmin);
                 break;
@@ -609,7 +555,7 @@ void console(const std::string& usr, bool isadmin)
                 else continue;
                 break;
             case '0':
-                if (delDialog(usr, isadmin)) return; //zero to add "S A F E T Y"
+                if (delDialog(usr, isadmin)) return;
                 else break;
             case 'q':
                 return;
@@ -619,8 +565,7 @@ void console(const std::string& usr, bool isadmin)
     }
 }
 
-void login(bool isadmin)
-{
+void login(bool isadmin) {
     std::string usr, pass;
     while (true) //While the user did not enter his username
     {
@@ -659,9 +604,8 @@ void login(bool isadmin)
     console(usr, isadmin);
 }
 
-int main(int, char* argv[]) try
+int main(int, char* argv[]) try {
 //Try function block for convenience. Argc is unused, argv is an array of char arrays, each with an argument, first is path
-{
     data = Data::getInstance(); //Assign to our global pointer. For exception safety
     path = argv[0];
     path.erase(path.find_last_of('\\') + 1); //Makes 'path' be the path to the app folder, removing program name
@@ -703,14 +647,12 @@ int main(int, char* argv[]) try
     data->save(); //Saving only before exiting only to avoid corrupting the database
     return EXIT_SUCCESS;
 }
-catch (std::exception& e) //If an exception is thrown, the program 100% can't continue. RIP.
-{
+catch (std::exception& e) {//If an exception is thrown, the program 100% can't continue. RIP.
     std::cerr << "Critical Error: " << e.what() << "\n The program cannot continue. Press any key to exit..." << std::endl;
     getch();
     return (EXIT_FAILURE);
 }
-catch (...) //Sometimes we can get something completely random. In this case we just exit
-{
+catch (...) { //Sometimes we can get something completely random. In this case we just exit
     std::cerr << "Undefined Error. \n The program cannot continue. Press any key to exit..." << std::endl;
     getch();
     return (EXIT_FAILURE);

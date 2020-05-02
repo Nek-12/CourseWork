@@ -10,8 +10,7 @@ void setTableProperties(fort::char_table& t, unsigned firstColored, unsigned sec
     t.column(secondColored).set_cell_content_fg_color(fort::color::red);
 }
 
-void Data::printBooks()
-{
+void Data::printBooks() {
     fort::char_table t; //Create a table
     t << fort::header << "Title" << "Genres" << "Authors" << "Year" << "ID" << fort::endr; //Add a header
     for (const auto& book: mbooks) //For every book in the DB
@@ -39,13 +38,11 @@ void Data::printAuthors() //Same logic, see above
 {
     fort::char_table t;
     t << fort::header << "Name" << "Books" << "Birthdate" << "Country" << "ID" << fort::endr;
-    for (const auto& author: mauthors)
-    {
+    for (const auto& author: mauthors) {
         std::stringstream books;
         std::string delim;
         delim.clear();
-        for (const auto& a: author.second.books)
-        {
+        for (const auto& a: author.second.books) {
             books << delim << a->getName();
             delim = "\n";
         }
@@ -60,13 +57,11 @@ void Data::printGenres(unsigned years) //See above, specialized per supervisor's
     fort::char_table t;
     std::cout << "Books grouped by genres for the past " << years << " years" << std::endl;
     t << fort::header << "Name" << "Quantity" << "Books" << "Years" << "ID" << fort::endr;
-    for (const auto& genre: mgenres)
-    {
+    for (const auto& genre: mgenres) {
         unsigned long cnt = 0; //For counting
         std::stringstream books, syear;
         std::string delim;
-        for (const auto& b: genre.second.books)
-        {
+        for (const auto& b: genre.second.books) {
             auto pb = static_cast<Book*>(b); //Safe since we know there are books
             if (pb->year != 0 && pb->year < diff) continue; //We print 0 years because those are "unknown"
             books << delim << pb->getName(); //Append the title
@@ -79,31 +74,27 @@ void Data::printGenres(unsigned years) //See above, specialized per supervisor's
     setTableProperties(t, 0, 4);
     std::cout << t.to_string() << std::endl;//Print
 }
-bool Data::delAccount(const std::string& l, const bool& isadmin)
-{
+bool Data::delAccount(const std::string& l, const bool& isadmin) {
     if (isadmin) //For admins and users
     {
         auto sought = admins.find(l);
         if (sought == admins.end() || admins.size() < 2) return false; //Can't delete the last account
         admins.erase(sought);
     }
-    else
-    {
+    else {
         auto sought = users.find(l);
         if (sought == users.end()) return false; //Can delete all
         users.erase(sought);
     }
     return true;
 }
-void Data::printCredentials(bool isAdmin)
-{
+void Data::printCredentials(bool isAdmin) {
     std::cout << (isAdmin ? "Admin" : "User") << " credentials: " << std::endl;
     for (const auto& el: (isAdmin ? admins : users))
         std::cout << el.first << "\n"; //Don't print the password
     std::cout << std::endl;
 }
-void Data::ensureFileExists(const std::string& f)
-{
+void Data::ensureFileExists(const std::string& f) {
     if (!std::filesystem::exists(path + f)) //Check if the file exists
     {//If not
         std::cerr << "Warning! The file " << path << f << " does not exist! Creating a blank one..." << std::endl;
@@ -116,7 +107,7 @@ std::vector<Entry*> Data::search(const std::string& s) //Search anything
 {
     std::vector<Entry*> ret; //Create the result
     for (auto& b : mbooks)
-        if (b.second.check(s)) ret.push_back(&b.second); //Check every entry (  3n complexity :(  )
+        if (b.second.check(s)) ret.push_back(&b.second); //Check every entry linearly
     for (auto& a : mauthors)
         if (a.second.check(s)) ret.push_back(&a.second); //Without the DB no better choice
     for (auto& g : mgenres)
@@ -170,8 +161,7 @@ void Data::load() try //Try-catch function block
     f.close(); //Same
     ensureFileExists(name);
     f.open(path + name);
-    while (f)
-    {
+    while (f) {
         if (eof()) break;
         if (!readString(f, tempA, 'i')) throw std::invalid_argument("File: " + name + " couldn't read ID");
         if (!readString(f, tempB, 's')) throw std::invalid_argument("File: " + name + " couldn't read name");
@@ -185,8 +175,7 @@ void Data::load() try //Try-catch function block
     f.close();
     ensureFileExists(name);
     f.open(path + name);
-    while (f)
-    { //id, name, date, country <- for variable names. Confusing but no copies
+    while (f) { //id, name, date, country <- for variable names. Confusing but no copies
         if (eof()) break;
         if (!readString(f, tempA, 'i')) throw std::invalid_argument("File: " + name + " couldn't read id");
         if (!readString(f, tempB, 's')) throw std::invalid_argument("File: " + name + " couldn't read name");
@@ -213,8 +202,7 @@ void Data::load() try //Try-catch function block
     for (auto& el: mauthors)
         std::cout << "key: " << el.first << "\n" << el.second << std::endl;
 #endif
-    while (f)
-    { //id, title, year, temp, entry
+    while (f) { //id, title, year, temp, entry
         if (eof()) break;
 #ifndef NDEBUG
         std::cout << "Starting to parse a new book " << std::endl;
@@ -247,8 +235,7 @@ void Data::load() try //Try-catch function block
 #endif
                 addGenre(stoid(tempD), "Unknown genre", stoid(tempD))->link(curbook); //Handle the error, create a blank entry
             }   //create a new genre and bind it to the book
-            else
-            {
+            else {
 #ifndef NDEBUG
                 std::cout << "Executing adding pointer" << std::endl;
 #endif
@@ -263,22 +250,19 @@ void Data::load() try //Try-catch function block
         if (!readString(f, tempA, 's')) throw std::invalid_argument("File: " + name + " couldn't read book's authors");
         ss.clear();
         ss.str(tempA); //author's line, tempD is author's ID;
-        while (getline(ss, tempD, ','))
-        {
+        while (getline(ss, tempD, ',')) {
             if (!checkString(tempD, 'i')) throw std::invalid_argument("File: " + name + " couldn't read book's author ID ");
             auto author = mauthors.find(stoid(tempD));
 #ifndef NDEBUG
             std::cout << "sought.first is: " << (author != mauthors.end() ? std::to_string(author->first) : "NULL") << std::endl;
 #endif
-            if (author == mauthors.end())
-            {
+            if (author == mauthors.end()) {
 #ifndef NDEBUG
                 std::cout << "Executing new author creation" << std::endl;
 #endif
                 addAuthor(stoid(tempD), "Unknown author", "0.0.0000", "Unknown", stoid(tempD))->link(curbook);
             }
-            else
-            {
+            else {
 #ifndef NDEBUG
                 std::cout << "Executing adding pointer" << std::endl;
 #endif
@@ -295,13 +279,11 @@ void Data::load() try //Try-catch function block
     } //If the book was read correctly, continue
     std::cout << "Successfully read books" << std::endl;
 } //Finished linking
-catch (...)
-{
+catch (...) {
     std::cerr << "Error while reading files. The program cannot continue." << std::endl;
     throw; //Rethrow, main() will deal
 }
-void Data::save()
-{
+void Data::save() {
     std::cout << "Saving..." << std::endl;
     std::ofstream f(path + "user.txt"); //Open a file
 #ifndef NDEBUG
@@ -329,8 +311,7 @@ void Data::save()
     f.close();
     f.open(path + "books.txt");
     f << std::setfill('0');
-    for (auto& b: mbooks)
-    {
+    for (auto& b: mbooks) {
         std::string delim;
         f << std::setw(MAX_ID_LENGTH) << b.first << "\n" << b.second.getName() << "\n" << std::setw(4) << b.second.year << "\n";
         //Place genres
@@ -351,14 +332,12 @@ void Data::save()
         delim.clear();
         if (!b.second.authors.empty()) //Same logic
         {
-            for (auto& a: b.second.authors)
-            {
+            for (auto& a: b.second.authors) {
                 f << delim << std::setw(MAX_ID_LENGTH) << a->id();
                 delim = ',';
             }
         }
-        else
-        {
+        else {
             std::cerr << "Warning! The book \n" << b.second << "\n Has zero authors! The data will be generated automatically!"
                       << std::endl;
             f << genID();

@@ -41,22 +41,22 @@ ull genID();
 void cls();
 unsigned getCurYear();
 bool checkString(const std::string&, char); //Input check
+bool checkDate(const std::string& s);
 std::string lowercase(const std::string&);
 std::string hash(const std::string& s); //uses sha256.cpp and sha256.h for encrypting passwords, outputs hashed string
 bool readString(std::istream& is, std::string& s, char mode);
 //allows for reading a line from the iostream object with input check (foolproofing)
 // 's' for strings with spaces, 'n' for normal, 'd' for date, 'p' for passwords, 'i' for numbers (IDs), 'y' for years
 //Not the best solution but convenient for me
-class Entry //Base class
+class Entry {
+//Base class
 /*
  * Each journal entry represents some kind of table row that contains different info for each entry, but the operations are same.
  * This is some kind of merged interface and usual base class. Will be used with dynamic binding later extensively, so I tried to provide
  * A lot of virtual functions to minimize dynamic casts and RTTI which are slow
  * But the nature is such that sometimes we can't avoid casts in my project. At least I couldn't.
 */
-{
-    friend std::ostream& operator<<(std::ostream& os, const Entry& e) //dynamic binding here
-    {
+    friend std::ostream& operator<<(std::ostream& os, const Entry& e) {//dynamic binding here
         os << e.to_string(); //each type prints its own info, virtual
         return os;
     }
@@ -70,10 +70,8 @@ public:
     virtual ~Entry() = default;
     [[nodiscard]] const ull& id() const //We shouldn't discard the returned value for the getter. Would make no sense. Just for safety
     { return no; }
-    [[nodiscard]] std::string getName() const
-    { return name; }
-    void rename(const std::string& s)
-    { name = s; }
+    [[nodiscard]] std::string getName() const { return name; }
+    void rename(const std::string& s) { name = s; }
     virtual bool link(Entry* e) = 0; //Pure virtuals for an abstract base class
     virtual bool unlink(Entry* e) = 0;
 protected: //Constructors are protected to disallow users creating entries in the journal. It's unsafe and makes no sense. Users will use the
@@ -81,8 +79,7 @@ protected: //Constructors are protected to disallow users creating entries in th
     [[nodiscard]] virtual bool check(const std::string& s) const = 0;
     //Data class instead, and the safety is going to be much better
     Entry(Entry&& e) noexcept: no(e.no), name(std::move(e.name)) {} //We can only move entries from one journal to another
-    explicit Entry(std::string n, const ull& id) : no(id), name(std::move(n)) //Create one
-    {
+    explicit Entry(std::string n, const ull& id) : no(id), name(std::move(n)) {
 #ifndef NDEBUG
         std::cout << getName() << " was created \n";
 #endif
@@ -92,8 +89,7 @@ private:
     std::string name;
 };
 
-class Book : public Entry
-{
+class Book : public Entry {
     friend class Genre;
     friend class Author;
     friend class Data;
@@ -109,37 +105,29 @@ public:
     void remAuthor(const size_t& pos);
     [[nodiscard]] size_t enumAuthors() const //Get the number of authors
     { return authors.size(); }
-    [[nodiscard]] size_t enumGenres() const
-    { return genres.size(); }
-    [[nodiscard]] unsigned getYear() const
-    { return year; }
-    void setYear(unsigned int y)
-    { year = y; }
+    [[nodiscard]] size_t enumGenres() const { return genres.size(); }
+    [[nodiscard]] unsigned getYear() const { return year; }
+    void setYear(unsigned int y) { year = y; }
 private:
     unsigned year = 0;
     std::set<Entry*> authors; //Holds pointers to objects of authors. Thought this is a set of entries, we KNOW there are authors only
     std::set<Entry*> genres; //To avoid downcasting as much as possible
 };
 
-class Author : public Entry //Same logic as above
-{
+class Author : public Entry {//Same logic as above
     friend class Book;
     friend class Data;
 public:
     ~Author() override;
     Author(Author&& a) noexcept;
     explicit Author(const std::string& n, std::string d, std::string c, const ull& id = genID()) :
-            Entry(n, id), country(std::move(c)), date(std::move(d))
-    {}
+            Entry(n, id), country(std::move(c)), date(std::move(d)) {}
     bool link(Entry* pe) override;
     bool unlink(Entry* pe) override;
     void remBook(const size_t& pos); //Custom
-    void setCountry(const std::string& c)
-    { country = c; }
-    void setDate(const std::string& c)
-    { date = c; }
-    [[nodiscard]] size_t enumBooks() const
-    { return books.size(); }
+    void setCountry(const std::string& c) { country = c; }
+    void setDate(const std::string& c) { date = c; }
+    [[nodiscard]] size_t enumBooks() const { return books.size(); }
     [[nodiscard]] std::string to_string() const override;
     [[nodiscard]] bool check(const std::string& s) const override;
 private:
@@ -148,8 +136,7 @@ private:
     std::set<Entry*> books;
 };
 
-class Genre : public Entry
-{
+class Genre : public Entry {
     friend class Book;
     friend class Data;
 public:
@@ -166,8 +153,7 @@ private:
     std::set<Entry*> books;
 };
 
-class Data // SINGLETON for storing all the nested structures
-{
+class Data {// SINGLETON for storing all the nested structures
     friend class Book;
     friend class Genre;
     friend class Author;
@@ -196,43 +182,40 @@ public:
     }
     template<typename ...Args>
     //3 templates because 3 containers
-    Author* addAuthor(const Args& ...args)
-    {
+    Author* addAuthor(const Args& ...args) {
         auto it = mauthors.try_emplace(args...);
         return (it.second ? &it.first->second : nullptr);
     }
     template<typename ...Args>
-    Genre* addGenre(const Args& ...args)
-    {
+    Genre* addGenre(const Args& ...args) {
         auto it = mgenres.try_emplace(args...);
         return (it.second ? &it.first->second : nullptr);
     }
     bool erase(Book& e) //For every different type
     { return mbooks.erase(e.id()); }
-    bool erase(Author& e)
-    { return mbooks.erase(e.id()); }
-    bool erase(Genre& e)
-    { return mbooks.erase(e.id()); }
+    bool erase(Author& e) { return mbooks.erase(e.id()); }
+    bool erase(Genre& e) { return mbooks.erase(e.id()); }
     //All functions operate in logariphmic time
     bool delAccount(const std::string& l, const bool& isadmin);
-    bool passCheck(const std::string& l, const std::string& p, const bool& isadmin)
-    { return ((isadmin ? admins.find(l) : users.find(l))->second == hash(p)); }
+    bool passCheck(const std::string& l, const std::string& p, const bool& isadmin) {
+        return ((isadmin ? admins.find(l) : users.find(l))->second == hash(p));
+    }
     bool loginCheck(const std::string& s, const bool& isadmin) //Ensure the user exists
     { return (isadmin ? admins.find(s) != admins.end() : users.find(s) != users.end()); }
-    bool addAccount(const std::string& l, const std::string& p, const bool& isadmin)
-    { return (isadmin ? admins : users).try_emplace(l, hash(p)).second; }
+    bool addAccount(const std::string& l, const std::string& p, const bool& isadmin) {
+        return (isadmin ? admins : users).try_emplace(l, hash(p)).second;
+    }
     size_t enumAccounts(const bool& isadmin) //Constant time ofc
     { return (isadmin ? admins.size() : users.size()); }
-    bool changePass(const std::string& l, const std::string& p, const bool& isadmin)
-    {
+    bool changePass(const std::string& l, const std::string& p, const bool& isadmin) {
         auto it = (isadmin ? admins : users).find(l);
         if (it == (isadmin ? admins : users).end())
             return false;
         it->second = hash(p);
         return true;
-    } //Could create an account accidentally, so the user MUST not discard the result
+    }
 private:
-    Data() = default; //Can't create data out of the blue.
+    Data() = default; //private to disallow creation
     static void ensureFileExists(const std::string& f); //Users don't need that function
     std::map<ull, Genre> mgenres;
     std::map<ull, Author> mauthors;

@@ -3,55 +3,45 @@
 #include <regex> //For checking date
 #include <random> //For genID()
 
-void pause()
-{
+void pause() {
     std::cout << "Press any key to continue..." << std::endl;
     getch();
 }
 
-ull genID()
-{
+ull genID() { //Static to not diminish randomness
     static std::default_random_engine e(std::random_device{}()); //Initialize a random engine from system random device
     static std::uniform_int_distribution<ull> rng(0, MAX_ID); //Generate numbers for IDs from 0 to a large system value
     return rng(e); //use random engine
 }
 
-std::string hash(const std::string& s)
-{
+std::string hash(const std::string& s) {
     SHA256 sha256;
     return sha256(s); //returns hashed string, you can now never decrypt the password back
 }
 
-unsigned getCurYear()
-{
+unsigned getCurYear() {
     time_t t = time(nullptr); //get system time
     tm* nowTm = localtime(&t); //format it according to the region
-    return (unsigned)nowTm->tm_year + 1900; //return the year. It works in any year, not just in 2020. Wait for 2075 to confirm.
+    return (unsigned) nowTm->tm_year + 1900; //return the year.
 }
 
-bool checkDate(const std::string& s)
-{
+bool checkDate(const std::string& s) {
     std::regex reg(R"((\d{1,2})([-. /])(\d{1,2})([-. /])(\d{4}))"); //Initialize the regular expression
     std::smatch res;
-    auto msgFalse = [& s](const std::string& what) //lambda
-    {
+    auto msgFalse = [& s](const std::string& what) { //lambda
         std::cerr << "The date " << s << " is invalid: " << what << std::endl;
         return false;
     };
-
-    if (std::regex_match(s, res, reg)) //If the format is right
-    {
+//If the format is right
+    if (std::regex_match(s, res, reg)) {
         time_t t = time(nullptr);
         tm* nowTm = localtime(&t);
         int day = std::stoi(res.str(1));
         int month = std::stoi(res.str(3));
         int year = std::stoi(res.str(5)); //Divide into values
-        if (res.str(2) != res.str(4)) return msgFalse("Divisors don't match:" + res.str(2) + " < =/= > " + res.str(4));
+        if (res.str(2) != res.str(4)) return msgFalse("Divisors don't match: " + res.str(2) + " < =/= > " + res.str(4));
         if (day == 0 && month == 0 && year == 0)
-        {
-            std::cerr << "The date is unknown." << std::endl;
             return true; //We are allowed to input 0.0.0000 and it's considered unknown date
-        }
         //Start checking year,month,day
         if (year > (nowTm->tm_year + 1900))
             return msgFalse("This year is in the future: " + std::to_string(year));
@@ -59,8 +49,7 @@ bool checkDate(const std::string& s)
             return msgFalse("This month is in the future: " + std::to_string(month));
         if (month > 12)
             return msgFalse("More than 12 months");
-        switch (month)
-        {
+        switch (month) {
             case 1:
             case 3:
             case 5:
@@ -70,58 +59,50 @@ bool checkDate(const std::string& s)
             case 12:
                 if (day > 31)
                     return msgFalse("More than 31 days");
-                else
-                    return true;
+                break;
             case 4:
             case 6:
             case 9:
             case 11:
                 if (day > 30)
                     return msgFalse("More than 30 days");
-                else
-                    return true;
+                break;
             case 2:
-                if (year % 400 == 0 || (year % 100 != 0 && year % 4 == 0))
-                {
+                if (year % 400 == 0 || (year % 100 != 0 && year % 4 == 0)) {
                     if (day > 29)
                         return msgFalse("More than 29 days");
-                    else
-                        return true;
                 }
-                else
-                {
-                    if (day > 28)
-                        return msgFalse("More than 28 days");
-                    else
-                        return true;
-                }
+                else if (day > 28)
+                    return msgFalse("More than 28 days");
+                break;
             default:
                 throw std::invalid_argument("Default case when parsing month");
         }
+        return true;
     }
     else
         return msgFalse("Wrong date formatting");
 }
 
-bool checkYear(const std::string& s)
-{
+bool checkYear(const std::string& s) {
+    if (s.size() > 4) return false;
     for (auto ch: s)
-        if(!isdigit(ch) || s.size() > 4)
+        if (!isdigit(ch))
             return false;
     return (std::stoul(s) <= getCurYear());
 }
 
-bool checkString(const std::string& s, char mode) //The all-in-one input checker function. All rights reserved : )
-{
-    auto msgFalse = [& s](const std::string& msg)
-            { std::cerr << "The value " << s << " is invalid: \n" << msg << std::endl; return false; };
+bool checkString(const std::string& s, char mode) {
+    auto msgFalse = [& s](const std::string& msg) {
+        std::cerr << "The value " << s << " is invalid: \n" << msg << std::endl;
+        return false;
+    };
     if (s.empty())
         return msgFalse("No data?");
-    switch (mode)
-    {
+    switch (mode) {
         case 'p': //Password contains the same chars as a normal string (word)
         case 'n': //No spaces allowed
-            if (s.size() < 3 || s.size() > 75 ) return msgFalse("too short/long for a word");
+            if (s.size() < 3 || s.size() > 75) return msgFalse("too short/long for a word");
             for (auto ch: s)
                 if (!(isalnum(ch) || ch == '.' || ch == '-' || ch == '_' || ch == '\''))
                     return msgFalse("invalid characters");
@@ -137,7 +118,7 @@ bool checkString(const std::string& s, char mode) //The all-in-one input checker
         case 'i': //I stands for integer, or ID only digits, no negatives.
             if (s.size() > MAX_ID_LENGTH) return msgFalse("too long for a number");
             for (auto ch: s)
-                if(!isdigit(ch))
+                if (!isdigit(ch))
                     return msgFalse("invalid characters in a number");
             break;
         case 'y': //Delegates
@@ -149,8 +130,7 @@ bool checkString(const std::string& s, char mode) //The all-in-one input checker
     return true;
 }
 
-std::string getPassword() //Input password, hide it with *'s
-{
+std::string getPassword() { //Input password, hide it with *'s
     std::string password;
     int a;
     while ((a = getch()) != CARRIAGE_RETURN_CHAR) //Differs on linux and windows
@@ -161,9 +141,8 @@ std::string getPassword() //Input password, hide it with *'s
             password.pop_back(); //remove char
             std::cout << '\b' << ' ' << '\b'; //replace a star with a space
         }
-        else
-        {
-            password += (char)a; //Add this char
+        else {
+            password += (char) a; //Add this char
             std::cout << '*'; //But output the star
         }
     }
@@ -171,32 +150,28 @@ std::string getPassword() //Input password, hide it with *'s
     return password; //Then we input check this string
 }
 
-bool readString(std::istream& is, std::string& ret, char mode = 'n')
- // 's' for strings with spaces, 'n' for normal, 'd' for date, 'p' for password
-{
+bool readString(std::istream& is, std::string& ret, char mode = 'n') {
+// 's' for strings with spaces, 'n' for normal, 'd' for date, 'p' for password
     std::string s;
     if (mode == 'p')
         s = getPassword(); //Display stars
     else if (!std::getline(is, s)) return false; //Display chars
 
-    if (checkString(s, mode))
-    {
+    if (checkString(s, mode)) {
         ret = s; //This guarantees that the string is NOT changed unless the input is good. I could just return bool.
         return true;
     }
     return false;
 }
 
-std::string lowercase(const std::string& s)
-{
+std::string lowercase(const std::string& s) {
     std::string ret = s;
     for (auto& ch: ret)
         ch = tolower(ch);
     return ret;
 }
 
-ull stoid(const std::string& s)
-{
+ull stoid(const std::string& s) {
 #ifndef __linux__
     return std::stoull(s);
 #else //This function depends on the platform. See header.h for details

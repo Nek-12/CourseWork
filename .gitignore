@@ -4,4 +4,4 @@
 **/CmakeCache.txt
 **/cmake_install.cmake
 **/CourseWork.cbp
-**/cmake-build-release/**
+**/cmake-build-*/**
