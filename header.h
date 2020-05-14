@@ -1,5 +1,4 @@
 #pragma once //Don't repeat the inclusion to avoid conflicts
-
 #include <map> //Main storage
 //#include <utility> //For advance and other stuff
 #include <vector> //For search

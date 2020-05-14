@@ -178,3 +178,11 @@ ull stoid(const std::string& s) {
     return std::stoul(s);
 #endif
 }
+
+void setTableProperties(fort::char_table& t, unsigned firstColored, unsigned secondColored) //Edit the given table (for uniform look)
+{
+    t.set_cell_text_align(fort::text_align::center);
+    t.set_border_style(FT_BASIC2_STYLE);
+    t.column(firstColored).set_cell_content_fg_color(fort::color::green);
+    t.column(secondColored).set_cell_content_fg_color(fort::color::red);
+}

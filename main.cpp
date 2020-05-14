@@ -647,7 +647,7 @@ int main(int, char* argv[]) try {
     data->save(); //Saving only before exiting only to avoid corrupting the database
     return EXIT_SUCCESS;
 }
-catch (std::exception& e) {//If an exception is thrown, the program 100% can't continue. RIP.
+catch (std::exception& e) {//If an exception is thrown, the program 100% can't continue.
     std::cerr << "Critical Error: " << e.what() << "\n The program cannot continue. Press any key to exit..." << std::endl;
     getch();
     return (EXIT_FAILURE);

@@ -2,14 +2,6 @@
 #include <fstream>
 #include <filesystem>
 
-void setTableProperties(fort::char_table& t, unsigned firstColored, unsigned secondColored) //Edit the given table (for uniform look)
-{
-    t.set_cell_text_align(fort::text_align::center);
-    t.set_border_style(FT_BASIC2_STYLE);
-    t.column(firstColored).set_cell_content_fg_color(fort::color::green);
-    t.column(secondColored).set_cell_content_fg_color(fort::color::red);
-}
-
 void Data::printBooks() {
     fort::char_table t; //Create a table
     t << fort::header << "Title" << "Genres" << "Authors" << "Year" << "ID" << fort::endr; //Add a header
@@ -122,16 +114,16 @@ void Data::load() try //Try-catch function block
     std::ifstream f(path + name); //Open using the path
     auto eof = [&f]() //Lambda to check for the end of file.
     { return f.peek() == std::ifstream::traits_type::eof(); };
+    auto fexc = [& name](const std::string& what) {throw std::invalid_argument("File: " + name + " couldn't read " + what);};
     while (f) //While file f is good (converted to bool)
     { //USER
         if (eof()) break; //If the file has ended break out
-        if (!readString(f, tempA, 'n')) throw std::invalid_argument("File: " + name + " couldn't read login"); //Must be right!
-        if (!readString(f, tempB, 'n')) throw std::invalid_argument("File: " + name + " couldn't read password");
+        if (!readString(f, tempA, 'n')) fexc("login");
+        if (!readString(f, tempB, 'n')) fexc("password");
         users.try_emplace(tempA, tempB); //Create a new entry
         //Notice that we read already hashed values, so we mustn't use our addAccount() function.
         if (!std::getline(f, tempC)) break; //Empty line (can be at the end of file)
-        if (!tempC.empty() && tempC != " ")
-            throw std::invalid_argument("File " + name + " read error, check delimiters."); //Separate by a blank line or a space
+        if (!tempC.empty() && tempC != " ") fexc("delimiters"); //Separate by a blank line or a space
         //continues to read if f is good;
     }
     std::cout << "Successfully read users" << std::endl; //Little debugging
@@ -143,12 +135,11 @@ void Data::load() try //Try-catch function block
     { //ADMIN
         if (eof()) break; //See above
         if (f.eof()) break;
-        if (!readString(f, tempA, 'n')) throw std::invalid_argument("File: " + name + " couldn't read login");
-        if (!readString(f, tempB, 'n')) throw std::invalid_argument("File: " + name + " couldn't read password");
+        if (!readString(f, tempA, 'n')) fexc("login");
+        if (!readString(f, tempB, 'n')) fexc("password");
         admins.try_emplace(tempA, tempB);
         if (!std::getline(f, tempC)) break;
-        if (!tempC.empty() && tempC != " ")
-            throw std::invalid_argument("File " + name + " read error, check delimiters.");
+        if (!tempC.empty() && tempC != " ") fexc("delimiters");
     }
     std::cout << "Successfully read admins" << std::endl;
     if (admins.empty()) //If there are no admins
@@ -163,12 +154,11 @@ void Data::load() try //Try-catch function block
     f.open(path + name);
     while (f) {
         if (eof()) break;
-        if (!readString(f, tempA, 'i')) throw std::invalid_argument("File: " + name + " couldn't read ID");
-        if (!readString(f, tempB, 's')) throw std::invalid_argument("File: " + name + " couldn't read name");
+        if (!readString(f, tempA, 'i')) fexc("id");
+        if (!readString(f, tempB, 's')) fexc("name");
         addGenre(stoid(tempA), tempB, stoid(tempA)); //Add genre in-place to get the performance boost and avoid copies
         if (!std::getline(f, tempC)) break;
-        if (!tempC.empty() && tempC != " ")
-            throw std::invalid_argument("File " + name + " read error, check delimiters.");
+        if (!tempC.empty() && tempC != " ") fexc("delimiters");
     }
     std::cout << "Successfully read genres" << std::endl;
     name = "authors.txt";
@@ -177,14 +167,13 @@ void Data::load() try //Try-catch function block
     f.open(path + name);
     while (f) { //id, name, date, country <- for variable names. Confusing but no copies
         if (eof()) break;
-        if (!readString(f, tempA, 'i')) throw std::invalid_argument("File: " + name + " couldn't read id");
-        if (!readString(f, tempB, 's')) throw std::invalid_argument("File: " + name + " couldn't read name");
-        if (!readString(f, tempC, 'd')) throw std::invalid_argument("File: " + name + " couldn't read date");
-        if (!readString(f, tempD, 's')) throw std::invalid_argument("File: " + name + " couldn't read country");
+        if (!readString(f, tempA, 'i')) fexc("ID");
+        if (!readString(f, tempB, 's')) fexc("name");
+        if (!readString(f, tempC, 'd')) fexc("date");
+        if (!readString(f, tempD, 's')) fexc("country");
         addAuthor(stoid(tempA), tempB, tempC, tempD, stoid(tempA));
         if (!std::getline(f, tempC)) break;
-        if (!tempC.empty() && tempC != " ")
-            throw std::invalid_argument("File " + name + " read error, check delimiters.");
+        if (!tempC.empty() && tempC != " ") fexc("delimiters");
     }
     std::cout << "Successfully read authors" << std::endl;
     f.close();
@@ -207,9 +196,9 @@ void Data::load() try //Try-catch function block
 #ifndef NDEBUG
         std::cout << "Starting to parse a new book " << std::endl;
 #endif
-        if (!readString(f, tempA, 'i')) throw std::invalid_argument("File: " + name + " couldn't read id");
-        if (!readString(f, tempB, 's')) throw std::invalid_argument("File: " + name + " couldn't read title");
-        if (!readString(f, tempC, 'y')) throw std::invalid_argument("File: " + name + " couldn't read year"); //Read basic info
+        if (!readString(f, tempA, 'i')) fexc("id");
+        if (!readString(f, tempB, 's')) fexc("title");
+        if (!readString(f, tempC, 'y')) fexc("year");
 #ifndef NDEBUG
         std::cout << "emplace_back " << tempA << ' ' << tempB << ' ' << tempC << std::endl;
 #endif
@@ -217,13 +206,13 @@ void Data::load() try //Try-catch function block
 #ifndef NDEBUG
         std::cout << "emplace_back finished\n";
 #endif
-        if (!curbook) throw std::runtime_error("Duplicate on emplace book"); //No duplicates!
+        if (!curbook) fexc("book: duplicate found");
         //Place genres
-        if (!readString(f, tempA, 's')) throw std::invalid_argument("File: " + name + " couldn't read book's genres");
+        if (!readString(f, tempA, 's')) fexc("book's genres");
         std::stringstream ss(tempA); //tempA - line with genres, tempD - genre;
         while (getline(ss, tempD, ',')) //For every word (separated by comma) in the genres list
         {
-            if (!checkString(tempD, 'i')) throw std::invalid_argument("File: " + name + " couldn't read book's genre ID"); //If ok
+            if (!checkString(tempD, 'i')) fexc("book's genre ID");
             auto sought = mgenres.find(stoid(tempD)); //Search for that ID and save
 #ifndef NDEBUG
             std::cout << "sought.first is: " << (sought != mgenres.end() ? std::to_string(sought->first) : "NULL") << std::endl;
@@ -247,11 +236,11 @@ void Data::load() try //Try-catch function block
         std::cout << "Successfully linked book with genres\n";
 #endif
         //Place authors, same logic as abve
-        if (!readString(f, tempA, 's')) throw std::invalid_argument("File: " + name + " couldn't read book's authors");
+        if (!readString(f, tempA, 's')) fexc("book's authors");
         ss.clear();
         ss.str(tempA); //author's line, tempD is author's ID;
         while (getline(ss, tempD, ',')) {
-            if (!checkString(tempD, 'i')) throw std::invalid_argument("File: " + name + " couldn't read book's author ID ");
+            if (!checkString(tempD, 'i')) fexc("book's author id");
             auto author = mauthors.find(stoid(tempD));
 #ifndef NDEBUG
             std::cout << "sought.first is: " << (author != mauthors.end() ? std::to_string(author->first) : "NULL") << std::endl;
@@ -271,8 +260,7 @@ void Data::load() try //Try-catch function block
             tempD.clear();
         }
         if (!std::getline(f, tempC)) break; //Ifnore one line
-        if (!tempC.empty() && tempC != " ")
-            throw std::invalid_argument("File " + name + " read error, check delimiters.");
+        if (!tempC.empty() && tempC != " ") fexc("delimiters");
 #ifndef NDEBUG
         std::cout << "Linked book " << tempB << std::endl;
 #endif
