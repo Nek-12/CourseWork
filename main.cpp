@@ -275,7 +275,7 @@ void manageAuthor(Author* pa) {
             case '2':
                 std::cout << "Enter the new birthdate: " << std::endl;
                 while (!readString(std::cin, temp, 'd'));
-                pa->setDate(temp); //We can accept the 0.0.0000 as Tnown date.
+                pa->setDate(temp); //We can accept the 0.0.0000 as unknown date.
                 std::cout << "Changed successfully." << std::endl;
                 break;
             case '3':
@@ -295,7 +295,7 @@ void manageAuthor(Author* pa) {
                 break;
             case '6':
                 if (yesNo("Delete this record?")) {
-                    data->erase(*pa);
+                    if (!data->erase(*pa)) throw std::runtime_error("Couldn't erase author");
                     std::cout << "Erased this author and removed all references." << std::endl;
                     pause();
                     return;

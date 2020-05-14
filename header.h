@@ -192,8 +192,8 @@ public:
     }
     bool erase(Book& e) //For every different type
     { return mbooks.erase(e.id()); }
-    bool erase(Author& e) { return mbooks.erase(e.id()); }
-    bool erase(Genre& e) { return mbooks.erase(e.id()); }
+    bool erase(Author& e) { return mauthors.erase(e.id()); }
+    bool erase(Genre& e) { return mgenres.erase(e.id()); }
     //All functions operate in logariphmic time
     bool delAccount(const std::string& l, const bool& isadmin);
     bool passCheck(const std::string& l, const std::string& p, const bool& isadmin) {
